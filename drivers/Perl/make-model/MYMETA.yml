@@ -1,0 +1,52 @@
+---
+abstract: 'Manipulate and display models in MDF'
+author:
+  - 'Mark A. Jensen'
+build_requires:
+  IPC::Run: '0'
+  JSON: '0'
+  List::MoreUtils: '0'
+  Log::Log4perl::Level: '0'
+  Set::Scalar: '0'
+  Test::Exception: '0'
+  Tie::IxHash: '0'
+configure_requires:
+  Module::Build: '0'
+dynamic_config: 0
+generated_by: 'Module::Build version 0.4229, CPAN::Meta::Converter version 2.150010'
+license: unknown
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: ICDC-MakeModel
+provides:
+  ICDC::MakeModel:
+    file: lib/ICDC/MakeModel.pm
+    version: '0.1'
+  ICDC::MakeModel::Config:
+    file: lib/ICDC/MakeModel/Config.pm
+  ICDC::MakeModel::Model:
+    file: lib/ICDC/MakeModel/Model.pm
+  ICDC::MakeModel::Model::Edge:
+    file: lib/ICDC/MakeModel/Model.pm
+  ICDC::MakeModel::Model::EdgeType:
+    file: lib/ICDC/MakeModel/Model.pm
+  ICDC::MakeModel::Model::Node:
+    file: lib/ICDC/MakeModel/Model.pm
+  ICDC::MakeModel::Model::Property:
+    file: lib/ICDC/MakeModel/Model.pm
+  ICDC::MakeModel::Schema:
+    file: lib/ICDC/MakeModel/Schema.pm
+recommends:
+  GraphViz2: '0'
+requires:
+  Clone: '0'
+  Hash::Merge: '0.300'
+  JSON: '0'
+  JSON::PP: '0'
+  Log::Log4perl: '0'
+  Tie::IxHash: '0'
+  Try::Tiny: '0'
+  YAML::PP: '0.018'
+version: '0.1'
+x_serialization_backend: 'CPAN::Meta::YAML version 0.018'
