@@ -102,4 +102,8 @@ class MDFValidator:
           print e;
         return ve
     return None
+  def test_yaml_valid(self):
+    assert self.yaml_validate() == None
+  def test_model_valid(self):
+    assert self.schema_validate() == None
 
