@@ -8,7 +8,7 @@ We recommend using the Docker image to run `model-tool`.
 
 To use model-tool without having to install Perl dependencies, you can
 use a pre-built Docker image. The script
-[`model-tool-d`](./make-model/bin/model-tool-d) should make this very
+[`model-tool-d`](./bin/model-tool-d) should make this very
 simple on Linux and MacOS:
 
 * Get [Docker](https://docker.com)
