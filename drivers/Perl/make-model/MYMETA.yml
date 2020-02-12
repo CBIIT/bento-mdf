@@ -18,25 +18,25 @@ license: unknown
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
-name: ICDC-MakeModel
+name: Bento-MakeModel
 provides:
-  ICDC::MakeModel:
-    file: lib/ICDC/MakeModel.pm
+  Bento::MakeModel:
+    file: lib/Bento/MakeModel.pm
     version: '0.1'
-  ICDC::MakeModel::Config:
-    file: lib/ICDC/MakeModel/Config.pm
-  ICDC::MakeModel::Model:
-    file: lib/ICDC/MakeModel/Model.pm
-  ICDC::MakeModel::Model::Edge:
-    file: lib/ICDC/MakeModel/Model.pm
-  ICDC::MakeModel::Model::EdgeType:
-    file: lib/ICDC/MakeModel/Model.pm
-  ICDC::MakeModel::Model::Node:
-    file: lib/ICDC/MakeModel/Model.pm
-  ICDC::MakeModel::Model::Property:
-    file: lib/ICDC/MakeModel/Model.pm
-  ICDC::MakeModel::Schema:
-    file: lib/ICDC/MakeModel/Schema.pm
+  Bento::MakeModel::Config:
+    file: lib/Bento/MakeModel/Config.pm
+  Bento::MakeModel::Model:
+    file: lib/Bento/MakeModel/Model.pm
+  Bento::MakeModel::Model::Edge:
+    file: lib/Bento/MakeModel/Model.pm
+  Bento::MakeModel::Model::EdgeType:
+    file: lib/Bento/MakeModel/Model.pm
+  Bento::MakeModel::Model::Node:
+    file: lib/Bento/MakeModel/Model.pm
+  Bento::MakeModel::Model::Property:
+    file: lib/Bento/MakeModel/Model.pm
+  Bento::MakeModel::Schema:
+    file: lib/Bento/MakeModel/Schema.pm
 recommends:
   GraphViz2: '0'
 requires:

@@ -103,7 +103,7 @@ sub read_input {
     }
   }
   $self->{_model} = Bento::MakeModel::Model->new($self);
-  1;
+  return $self;
 }
 
 sub table {

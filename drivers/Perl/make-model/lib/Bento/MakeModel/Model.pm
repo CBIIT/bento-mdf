@@ -252,6 +252,7 @@ sub props { values %{shift->{_props}} }
 sub prop { $_[0]->{_props}{$_[1]} }
 sub ends { @{shift->{_ends}} }
 sub multiplicity { shift->{_edgedef}->{Mul} }
+sub cardinality { shift->multiplicity }
 
 1;
 
@@ -321,10 +322,109 @@ Bento::MakeModel::Model - slurp MDF model into objects
 
 =head1 SYNOPSIS
 
-$model = Bento::MakeModel::Model->($mm);
+$model = Bento::MakeModel::Model->new($mm);
 
 =head1 DESCRIPTION
 
+=head1 METHODS
 
+=head2 $model object
+
+=over
+
+=item @nodes = $model->nodes()
+
+=item $node = $model->node($name)
+
+=item @props = $model->props()
+
+=item $prop = $model->prop($name)
+
+=item $edge_type = $model->edge_type($type)
+
+=item @edge_types = $model->edge_types()
+
+=item @edges = $model->edge_by_src()
+
+=item @edges = $model->edge_by_dst()
+
+=item @edges = $model->edge_by_type()
+
+=back
+
+=head2 $node object
+
+=over
+
+
+=item $node->name()
+
+=item $node->category()
+
+=item @props = $node->props()
+
+=item $prop = $node->prop($name)
+
+=item @tags = $node->tags()
+
+=back
+
+=head2 $prop object
+
+=over
+
+=item $prop->name()
+
+=item $prop->is_required()
+
+=item $value_type = $prop->type()
+
+=item @acceptable_values = $prop->values()
+
+=item @tags = $prop->tags()
+
+=back
+
+=head2 $edge_type object
+
+=over
+
+=item $edge_type->name()
+
+=item $edge_type->multiplicity(), $edge_type->cardinality()
+
+=item $prop = $edge_type->prop($name)
+
+=item @props = $edge_type->props()
+
+=item @allowed_ends = $edge_type->ends()
+
+=item @tags = $edge_type->tags()
+
+=back
+
+=head2 $edge object
+
+=over
+
+=item $edge->type()
+
+=item $edge->name()
+
+=item $edge->is_required()
+
+=item $node = $edge->src()
+
+=item $node = $edge->dst()
+
+=item @props = $edge->props()
+
+=item $prop = $edge->prop($name)
+
+=item @tags = $edge->tags()
+
+=back
+
+=cut
 
 1;

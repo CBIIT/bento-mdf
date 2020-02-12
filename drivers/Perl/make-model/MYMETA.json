@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "ICDC-MakeModel",
+   "name" : "Bento-MakeModel",
    "prereqs" : {
       "build" : {
          "requires" : {
@@ -47,30 +47,30 @@
       }
    },
    "provides" : {
-      "ICDC::MakeModel" : {
-         "file" : "lib/ICDC/MakeModel.pm",
+      "Bento::MakeModel" : {
+         "file" : "lib/Bento/MakeModel.pm",
          "version" : "0.1"
       },
-      "ICDC::MakeModel::Config" : {
-         "file" : "lib/ICDC/MakeModel/Config.pm"
+      "Bento::MakeModel::Config" : {
+         "file" : "lib/Bento/MakeModel/Config.pm"
       },
-      "ICDC::MakeModel::Model" : {
-         "file" : "lib/ICDC/MakeModel/Model.pm"
+      "Bento::MakeModel::Model" : {
+         "file" : "lib/Bento/MakeModel/Model.pm"
       },
-      "ICDC::MakeModel::Model::Edge" : {
-         "file" : "lib/ICDC/MakeModel/Model.pm"
+      "Bento::MakeModel::Model::Edge" : {
+         "file" : "lib/Bento/MakeModel/Model.pm"
       },
-      "ICDC::MakeModel::Model::EdgeType" : {
-         "file" : "lib/ICDC/MakeModel/Model.pm"
+      "Bento::MakeModel::Model::EdgeType" : {
+         "file" : "lib/Bento/MakeModel/Model.pm"
       },
-      "ICDC::MakeModel::Model::Node" : {
-         "file" : "lib/ICDC/MakeModel/Model.pm"
+      "Bento::MakeModel::Model::Node" : {
+         "file" : "lib/Bento/MakeModel/Model.pm"
       },
-      "ICDC::MakeModel::Model::Property" : {
-         "file" : "lib/ICDC/MakeModel/Model.pm"
+      "Bento::MakeModel::Model::Property" : {
+         "file" : "lib/Bento/MakeModel/Model.pm"
       },
-      "ICDC::MakeModel::Schema" : {
-         "file" : "lib/ICDC/MakeModel/Schema.pm"
+      "Bento::MakeModel::Schema" : {
+         "file" : "lib/Bento/MakeModel/Schema.pm"
       }
    },
    "release_status" : "stable",
