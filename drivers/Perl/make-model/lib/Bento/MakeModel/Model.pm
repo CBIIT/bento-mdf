@@ -82,7 +82,7 @@ sub edge_by {
     FATAL "Model::edge_by() - arg 1 must be one of src|dst|type";
     exit 1;
   }
-  if (ref $arg =~ /:Model:/) {
+  if (ref($arg) =~ /Model/) {
     $arg = $arg->name;
   }
   elsif (ref $arg) {
@@ -135,14 +135,16 @@ sub new {
    };
   bless $self, $class;
   ($self->{_name}) = $name;
-  if ($info->{Tags}) {
-    $self->{_tags} = $info->{Tags} 
-  }
-  if ($info->{Category}) {
-    $self->{_category} = $info->{Category};
-  }
-  for my $p (@{ $info->{Props} }) {
-    $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
+  if ($info) {
+    if ($info->{Tags}) {
+      $self->{_tags} = $info->{Tags} 
+    }
+    if ($info->{Category}) {
+      $self->{_category} = $info->{Category};
+    }
+    for my $p (@{ $info->{Props} }) {
+      $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
+    }
   }
   return $self;
 }
@@ -177,13 +179,15 @@ sub new {
     if ($propdef->{Tags}) {
       $self->{_tags} = $propdef->{Tags};
     }
-    $self->{_type} = $propdef->{Type} && (ref $propdef->{Type} ? ref $propdef->{Type} :
-                                            $propdef->{Type});
+    # just return whatever is there, rather than normalize to string
+    $self->{_type} = $propdef->{Type} ; # && (ref $propdef->{Type} ? ref $propdef->{Type} :
+    #                                            $propdef->{Type});
+    
     unless ( $self->{_type} ) {
       WARN "Property '$name' has no Type defined";
     }
     # below -- should call STS to get list if appropriate
-    $self->{_values} = ($self->{_type} eq 'ARRAY' ? [@{$propdef->{Type}}] : undef );
+    $self->{_values} = (ref $self->{_type} eq 'ARRAY' ? [@{$propdef->{Type}}] : undef );
   }
   else {
     WARN "Property '$name' does not have a PropDefinitions entry";
@@ -276,8 +280,8 @@ sub new {
   my ($src,$dst);
   bless $self, $class;
   $self->{_edgedef} = clone($info);
-
-  $self->{_name} = $self->{_type} = $model->edge_type($type);
+  $self->{_type} = $model->edge_type($type);
+  $self->{_name} = $self->{_type}->name;
   if ($info->{Tags}) {
     $self->{_tags} = $info->{Tags};
   }
@@ -307,7 +311,7 @@ sub type { shift->{_type} }
 sub name { shift->{_name} }
 sub src { shift->{_src} }
 sub dst { shift->{_dst} }
-sub props {shift->type->props}
+sub props {shift->type->props }
 sub prop { shift->type->prop(@_) }
 sub multiplicity { $_[0]->{_edgedef}->{Mul} || $_[0]->type->{_edgedef}->{Mul} }
 sub is_required { $_[0]->{_edgedef}->{Req} || $_[0]->type->{_edgedef}->{Req} }

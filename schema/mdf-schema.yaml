@@ -111,6 +111,7 @@ defs:
       - integer
       - string
       - datetime
+      - url
       - boolean
       - TBD
   enumType:
@@ -271,6 +272,8 @@ defs:
             $ref: "#/defs/numberWithUnits"
           -
             $ref: "#/defs/regex"
+          -
+            $ref: "#/defs/url"
           -
             $ref: "#/defs/enumType"
       Tags:

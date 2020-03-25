@@ -61,6 +61,7 @@ is (($model->prop('document_number')->tags)[0], 'at_property', "property tag");
 my ($e) = grep { $_->src->name eq 'prior_surgery' } $model->edges_by_type('next');
 ok $e, "found edge";
 is (($e->tags)[0], 'at_ends_level', "edge tag");
+is ($e->name, 'next', 'edge name');
 $DB::single=1;
 is_deeply [$model->prop('sex')->values], [qw/M F/], 'prop value array';
 ok $model->prop('patient_age_at_enrollment'), "property is required";
@@ -69,7 +70,8 @@ is $model->edge_type('of_case')->multiplicity, 'many_to_one', "edge_type mul";
 is $model->edge('of_case','diagnosis','case')->multiplicity, 'many_to_one', "edge mul default to edge_type mul";
 is $model->edge('of_case', 'enrollment', 'case')->multiplicity, 'one_to_one', "edge mul set locally";
 is $model->edge($model->edge_type('of_case'), $model->node('enrollment'), $model->node('case'))->multiplicity, 'one_to_one', "check objects as args to edge()";
-
+ok $model->edge_by_src( $model->node('enrollment') ), 'edge_by_src works';
+ok $model->edge_by_dst( $model->node('visit') ), 'edge_by_dst works';
 
 done_testing;
 
