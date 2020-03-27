@@ -13,9 +13,18 @@ my $NUMNUTS=0;
 my $NUMEDGES=36;
 my $NUMPROPS=186;
 my $NUMETYPES=15;
+my $TEST_FILES=1;
 
-$obj = Bento::MakeModel->new(LOG_LEVEL=>$FATAL);
-$obj->read_input( File::Spec->catdir($samplesd,"icdc-model.yml"), File::Spec->catdir($samplesd,"icdc-model-props.yml") );
+if ($TEST_FILES) {
+  $obj = Bento::MakeModel->new(
+    LOG_LEVEL=>$FATAL,
+    files => [ File::Spec->catdir($samplesd,"icdc-model.yml"), File::Spec->catdir($samplesd,"icdc-model-props.yml") ]
+   );
+}
+else {
+  $obj = Bento::MakeModel->new(LOG_LEVEL=>$FATAL);
+  $obj->read_input( File::Spec->catdir($samplesd,"icdc-model.yml"), File::Spec->catdir($samplesd,"icdc-model-props.yml") );
+}
 
 ok $model = Bento::MakeModel::Model->new($obj);
 isa_ok ($model, 'Bento::MakeModel::Model');

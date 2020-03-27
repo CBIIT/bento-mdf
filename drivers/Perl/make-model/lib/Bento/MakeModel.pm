@@ -39,8 +39,12 @@ sub new {
     _key_order => {}, # will hold the order of hash keys as "/add/ress/..." => [qw/order of keys]
     _native_yaml => [], # will hold file names of Gen3 native files that should be slurped as-is
     _nodes_with_relns => {}, # hold names of nodes having incoming and/or outgoing links
-   };
-  return bless $self, $class;
+  };
+  bless $self, $class;
+  if (@$files > 0) {
+    $self->read_input(@$files);
+  }
+  return $self; 
 }
 
 # $nr = $o->get_node(<nodename>);
@@ -236,6 +240,9 @@ Bento::MakeModel - Perform useful functions on an MDF-defined graph model
 
  $model = Bento::MakeModel->new;
  $model->read_input("icdc-model.yml","icdc-model-props.yml");
+
+ # or shortcut
+ $model->new(files => [qw/icdc-model.yml icdc-model-props.yml/]);
 
 =head1 DESCRIPTION
 

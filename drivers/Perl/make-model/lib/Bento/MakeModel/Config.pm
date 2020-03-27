@@ -9,7 +9,7 @@ our @EXPORT = qw/ @TOP_LEVEL_KEY_ORDER $GEN3_NS $DEFAULT_NODE_CATEGORY $MULT_DEF
 		  $STANDARD_SYSTEM_PROPERTIES $STANDARD_SYSTEM_PROPDEFS
 		  $PROP_REQ_DEFAULT $PROP_TYPE_DEFAULT $PROP_NULLABLE_DEFAULT
 		  $ADD_TERM_REF_BY_DEFAULT $LOG_LEVEL
-		  $OVERLAY_MERGE_BEH
+		  $OVERLAY_MERGE_BEH $files
 /;
 our $LOG_LEVEL = $INFO;
 
@@ -48,7 +48,7 @@ our $PROP_NULLABLE_DEFAULT = 0;
 our $GEN3_NS = 'https://icdc.nci.nih.gov';
 our $DEFAULT_NODE_CATEGORY = 'administrative';
 our $ADD_TERM_REF_BY_DEFAULT = 0;
-
+our $files = [];
 # custom behavior for Hash::Merge: act like Left Precedence, except allow
 # hash key conflicts to be resolved from the right ("overlay")
 our $OVERLAY_MERGE_BEH = {
