@@ -36,8 +36,8 @@ my $rel;
 for my $line (split /\n/,$tbl) {
   my @d = split /\t/, $line;
   next unless $d[0];
-  next if ($d[0] =~ /^node/);
-  if ($d[0] =~ /^relationship/) {
+  next if ($d[0] =~ /^node$/);
+  if ($d[0] =~ /^relationship$/) {
     $rel = 1;
     next;
   }
@@ -48,7 +48,7 @@ for my $line (split /\n/,$tbl) {
     push @nodes, \@d;
   }
 }
-$DB::single=1;
+
 is scalar (uniq map { $$_[0] } @nodes), $NUMNODES, "nodes correct";
 is scalar (uniq  map { $$_[1] } @nodes), $NUMPROPS, "props correct";
 is scalar @relns, $NUMEDGES, "edges correct";

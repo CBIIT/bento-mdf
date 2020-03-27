@@ -124,9 +124,9 @@ sub table {
     1;
   }
   my $model = $self->model;
-  say $fh join("\t",qw{node property value/TYPE});
+  say $fh join("\t",qw{node property value_or_TYPE});
   for my $n (sort {$a->name cmp $b->name} $model->nodes) {
-    for my $p (sort {$a->name cmp $b->name} $model->props($n)) {
+    for my $p (sort {$a->name cmp $b->name} $n->props) {
       if ($p->values) {
         for my $v (sort $p->values) {
           say $fh join("\t",$n->name,$p->name,
@@ -140,6 +140,10 @@ sub table {
             for my $u (@u) {
               say $fh join("\t",$n->name,$p->name,"NUMBER ($u)");              
             }
+          }
+          elsif (my $re = $p->type->{pattern}) {
+            chomp $re;
+            say $fh join("\t",$n->name,$p->name,"REGEXP /$re/");
           }
           else {
             WARN "Can't interpret data type for ".$n->name.".".$p->name;
@@ -313,15 +317,47 @@ Return list of relationship names.
 
 Create an SVG file of the model using GraphViz.
 
-=item table([$filename])
+=item table([$filename|$filehandle])
 
-Create a simple tab-delimited table of node and property names in this format:
+Create a flattened version of the model. Emits two (concatentated) TSV tables.
 
-  node1    prop1
-  node1    prop2
-  node2    prop3
-  node2    prop4
-  ...
+=over
+
+=item Table 1: Nodes, properties, and values/types
+
+Property value data types are ALL CAPS. Properties with acceptable value sets 
+are given in multiple lines, one line per acceptable value. 
+
+  node                  property                    value_or_TYPE
+  adverse_event         adverse_event_description   STRING
+  adverse_event         ae_dose                     NUMBER (mg/kg)
+  agent_administration  start_time                  DATETIME
+  cycle                 cycle_number                INTEGER
+  demographic           breed                       EXTERNAL
+  diagnosis             pathology_report            BOOLEAN
+  off_treatment         document_number             REGEXP /^R[0-9]+$/
+  physical_exam         body_system                 Attitude
+  physical_exam         body_system                 Cardiovascular
+  physical_exam         body_system                 Endocrine
+
+Notes:
+NUMBER (E<lt>unitsE<gt>) - a property value may accept other units, these
+are given in multiple lines.
+EXTERNAL - a property may employ an externally defined acceptable value list
+(e.g., ICD-10). Currently, this is just a flag.
+
+=item Table 2: Relationships
+
+Relationships are represented by their tag (a.k.a., name or type) and their 
+source and destination node types.
+
+  relationship          source_node                 destination_node
+  at_enrollment         prior_therapy               enrollment
+  at_enrollment         prior_surgery               enrollment
+  next                  visit                       visit
+  of_assay              file                        assay
+
+=back
 
 =back
 
