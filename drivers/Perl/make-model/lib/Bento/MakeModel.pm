@@ -114,14 +114,56 @@ sub table {
   my $self = shift;
   my ($fn) = @_;
   my $fh = \*STDOUT;
-  if ($fn) {
+  if (ref $fn eq 'GLOB') {
+    $fh = $fn;
+  }
+  elsif ($fn) {
     open $fh, ">", $fn or die "Problem opening file '$fn': $!";
   }
-  for my $n (sort $self->nodes) {
-    for my $p (sort $self->props($n)) {
-      say $fh join("\t",$n,$p);
+  else {
+    1;
+  }
+  my $model = $self->model;
+  say $fh join("\t",qw{node property value/TYPE});
+  for my $n (sort {$a->name cmp $b->name} $model->nodes) {
+    for my $p (sort {$a->name cmp $b->name} $model->props($n)) {
+      if ($p->values) {
+        for my $v (sort $p->values) {
+          say $fh join("\t",$n->name,$p->name,
+                       ($v =~ /^http/ ? "EXTERNAL" : $v));
+        }
+      }
+      else {
+        if (ref $p->type eq 'HASH') {
+          if ($p->type->{units}) {
+            my @u = (ref $p->type->{units} ? @{$p->type->{units}} : ($p->type->{units}));
+            for my $u (@u) {
+              say $fh join("\t",$n->name,$p->name,"NUMBER ($u)");              
+            }
+          }
+          else {
+            WARN "Can't interpret data type for ".$n->name.".".$p->name;
+          }
+        }
+        elsif (ref $p->type eq 'ARRAY') {
+            WARN "Can't interpret data type for ".$n->name.".".$p->name;
+        }
+        else {
+          {
+            no warnings;
+            say $fh join("\t",$n->name,$p->name,
+                         ($p->type =~ /^http/ ? "EXTERNAL" : uc $p->type));
+          };
+        }
+      }
     }
   }
+  say $fh "";
+  say $fh join("\t",qw{relationship source_node destination_node});
+  for my $r (sort { $a->type->name cmp $b->type->name } $model->edges) {
+    say $fh join("\t",$r->type->name, $r->src->name, $r->dst->name);
+  }
+  1;
 }
 
 sub viz {

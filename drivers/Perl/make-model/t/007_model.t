@@ -1,3 +1,4 @@
+# set env BENTO_LONG_TEST to review accessors for every element in test MDF.
 use Test::More;
 use Test::Exception;
 use Try::Tiny;
@@ -33,7 +34,7 @@ is scalar ($model->nodes), $NUMNODES, "count nodes";
 is scalar ($model->props), $NUMPROPS, "count all props";
 is scalar ($model->edge_types), $NUMETYPES, "count all edge types";
 is scalar ($model->edges), $NUMEDGES, "count all edges";
-if (0) {
+if ($ENV{BENTO_LONG_TEST}) {
 my $ct=0;
 for my $n ($model->nodes) {
   next unless $n;
