@@ -146,6 +146,7 @@ sub new {
       $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
     }
   }
+  WARN "Node '$name' has no properties defined" unless keys %{$self->{_props}};
   return $self;
 }
 

@@ -126,48 +126,63 @@ sub table {
   my $model = $self->model;
   say $fh join("\t",qw{node property value_or_TYPE});
   for my $n (sort {$a->name cmp $b->name} $model->nodes) {
+    unless ($n->props) { # no properties defined
+      say $fh join("\t", $n->name, "NA","NA");
+    }
     for my $p (sort {$a->name cmp $b->name} $n->props) {
-      if ($p->values) {
-        for my $v (sort $p->values) {
-          say $fh join("\t",$n->name,$p->name,
-                       ($v =~ /^http/ ? "EXTERNAL" : $v));
-        }
-      }
-      else {
-        if (ref $p->type eq 'HASH') {
-          if ($p->type->{units}) {
-            my @u = (ref $p->type->{units} ? @{$p->type->{units}} : ($p->type->{units}));
-            for my $u (@u) {
-              say $fh join("\t",$n->name,$p->name,"NUMBER ($u)");              
-            }
-          }
-          elsif (my $re = $p->type->{pattern}) {
-            chomp $re;
-            say $fh join("\t",$n->name,$p->name,"REGEXP /$re/");
-          }
-          else {
-            WARN "Can't interpret data type for ".$n->name.".".$p->name;
-          }
-        }
-        elsif (ref $p->type eq 'ARRAY') {
-            WARN "Can't interpret data type for ".$n->name.".".$p->name;
-        }
-        else {
-          {
-            no warnings;
-            say $fh join("\t",$n->name,$p->name,
-                         ($p->type =~ /^http/ ? "EXTERNAL" : uc $p->type));
-          };
-        }
+      for my $t (value_tokens($p)) {
+        say $fh join("\t", $n->name, $p->name, $t);
       }
     }
   }
   say $fh "";
-  say $fh join("\t",qw{relationship source_node destination_node});
+  say $fh join("\t",qw{relationship source_node destination_node property value_or_TYPE});
   for my $r (sort { $a->type->name cmp $b->type->name } $model->edges) {
-    say $fh join("\t",$r->type->name, $r->src->name, $r->dst->name);
+    unless ($r->props) { # no properties defined
+      say $fh join("\t",$r->type->name, $r->src->name, $r->dst->name, "NA", "NA");
+    }
+    for my $p (sort {$a->name cmp $b->name} $r->props) {
+      for my $t (value_tokens($p)) {
+        say $fh join("\t",$r->type->name, $r->src->name, $r->dst->name, $p->name,$t);
+      }
+    }
   }
   1;
+}
+
+sub value_tokens {
+  my ($p) = @_;
+  my @tok;
+  if ($p->values) {
+    for my $v (sort $p->values) {
+      push @tok, ($v =~ /^http/ ? "EXTERNAL" : $v);
+    }
+  }
+  else {
+    if (ref $p->type eq 'HASH') {
+      if ($p->type->{units}) {
+        my @u = (ref $p->type->{units} ? @{$p->type->{units}} : ($p->type->{units}));
+        for my $u (@u) {
+          push @tok, "NUMBER ($u)";
+        }
+      } elsif (my $re = $p->type->{pattern}) {
+        chomp $re;
+        push @tok, "REGEXP /$re/";
+      } else {
+        WARN "Can't interpret data type for ".$p->name;
+      }
+    } elsif (ref $p->type eq 'ARRAY') {
+      WARN "Can't interpret data type for ".$p->name;
+    } elsif (!$p->type) {
+      push @tok, "NA";
+    } else {
+      {
+        no warnings;
+        push @tok, ($p->type =~ /^http/ ? "EXTERNAL" : uc $p->type);
+      }
+    }
+  }
+  return @tok;
 }
 
 sub viz {
@@ -351,11 +366,11 @@ EXTERNAL - a property may employ an externally defined acceptable value list
 Relationships are represented by their tag (a.k.a., name or type) and their 
 source and destination node types.
 
-  relationship          source_node                 destination_node
-  at_enrollment         prior_therapy               enrollment
-  at_enrollment         prior_surgery               enrollment
-  next                  visit                       visit
-  of_assay              file                        assay
+  relationship      source_node      destination_node  property  value_or_TYPE
+  at_enrollment     prior_therapy    enrollment        NA        NA
+  at_enrollment     prior_surgery    enrollment        NA        NA
+  next              visit            visit             NA        NA
+  of_assay          file             assay             NA        NA
 
 =back
 
