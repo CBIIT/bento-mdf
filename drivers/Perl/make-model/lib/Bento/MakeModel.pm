@@ -91,9 +91,11 @@ sub read_input {
   }
   $self->{_native_yaml} = $self->input->{NativeSchemaIncludes};
   unless ($self->input->{Nodes}) {
+    FATAL "No nodes defined";
     die "No nodes defined";
   }
   unless ($self->input->{Relationships}) {
+    FATAL "No relationships defined";
     die "No relationships defined";
   }
   $self->{_nodes} = $self->input->{Nodes};
