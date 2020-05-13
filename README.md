@@ -9,6 +9,7 @@ The Bento graph model description framework allows a user to provide a very simp
 The Bento framework is currently used in the following projects;
 
 * The [Integrated Canine Data Commons](https://caninecommons.cancer.gov)
+* The [Clinical Trials Data Commons](https://github.com/CBIIT/ctdc-model)
 
 ## Drivers and Tools
 

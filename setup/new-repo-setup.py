@@ -72,7 +72,11 @@ if not has_docs:
 jenv = Environment(
   loader=FileSystemLoader('bento-mdf/setup')
   )
+print("Create test_val.py");
+test_val=open('./model-desc/test_val.py', 'w')
+print(jenv.get_template('test_val.py.jinja').render(mdfs=mdfs)
 
+  
 print("Populating ./docs")
 try:
   copy('./bento-mdf/setup/_config.yml','./docs/_config.yml')
