@@ -91,17 +91,19 @@ jenv = Environment(
   
 print("Populating ./docs")
 try:
-  if not os.path.exists('./docs/_config.yml') or args.force:
+  if not os.path.exists('./docs/_config.yml'):
     copy('./bento-mdf/setup/_config.yml','./docs/_config.yml')
   else:
     raise FileExistsError;
-  if not os.path.exists('./docs/assets') or args.force:
-    copytree('./bento-mdf/setup/assets', './docs/assets')
-  else:
-    raise FileExistsError;
+  copytree('./bento-mdf/setup/assets', './docs/assets')
 except FileExistsError:
-  print("- Not overwriting existing files.")
-  print("- Remove ./docs subdir and re-run script to refresh.")
+  if args.force:
+    copy('./bento-mdf/setup/_config.yml','./docs/_config.yml')
+    copy('./bento-mdf/setup/assets/actions.js','./docs/assets/actions.js')
+    copy('./bento-mdf/setup/assets/style.css','./docs/assets/style.css')    
+  else:
+    print("- Not overwriting existing files.")
+    print("- Remove ./docs subdir and re-run script to refresh.")
 
 readme_content = open('./docs/README.md.content','w')
 print(jenv.get_template('README.md.content.jinja').render(base=base,readme=readme),
