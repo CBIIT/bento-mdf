@@ -16,7 +16,7 @@
 # readme: README text - for README.md.content
 from jinja2 import Environment, FileSystemLoader
 from shutil import copytree, copy
-from argparse import AgumentParser
+from argparse import ArgumentParser
 
 import os
 import re
