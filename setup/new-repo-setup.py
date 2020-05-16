@@ -95,8 +95,10 @@ try:
     copy('./bento-mdf/setup/_config.yml','./docs/_config.yml')
   else:
     raise FileExistsError;
-  copytree('./bento-mdf/setup/assets', './docs/assets',
-             dirs_exist_ok=(True if args.force else False))
+  if not os.path.exists('./docs/assets') or args.force:
+    copytree('./bento-mdf/setup/assets', './docs/assets')
+  else:
+    raise FileExistsError;
 except FileExistsError:
   print("- Not overwriting existing files.")
   print("- Remove ./docs subdir and re-run script to refresh.")
