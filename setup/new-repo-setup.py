@@ -16,13 +16,22 @@
 # readme: README text - for README.md.content
 from jinja2 import Environment, FileSystemLoader
 from shutil import copytree, copy
+from argparse import AgumentParser
+
 import os
 import re
 import sys
 
-force = '';
-if len(sys.argv) > 1:
-  force = sys.argv[1]
+ap = ArgumentParser(description="Set up a new model repo with validation and docs")
+ap.add_argument('--force',
+                  help="force setup despite warnings",
+                  action='store_true')
+ap.add_argument('mdf_files',nargs='+',
+                  type=str,
+                  metavar='mdf-file',
+                  help='MDF files in desired merge order')
+
+args = ap.parse_args()
 
 # basename of repo
 base = os.path.basename(os.getcwd())
@@ -31,17 +40,17 @@ has_readme = os.path.exists('README.md');
 has_model_desc = os.path.isdir('./model-desc');
 has_docs = os.path.isdir('./docs');
 
-if not re.match('.*-model$',base) and not len(force):
+if not re.match('.*model$',base) and not args.force:
   print("The base name is '{base}', which doesn't look like a model repo.".format(base=base))
-  print("Be sure you're in the top-level directory")
-  print("(Run script with argument 'force' to force continuation)")
-  if (not re.match('force',force)):
+  print("Be sure you're in the top-level model repo directory")
+  print("(Run script with option '--force' to force continuation)")
+  if not args.force:
     sys.exit(1)
 
-if not has_readme and not len(force):
+if not has_readme and not args.force:
   print("The top-level directory should contain a simple README.md.")
   print("(Run script with argument 'force' to force continuation)")
-  if (not re.match('force',force)):
+  if not args.force:
     sys.exit(1)
 
 if not has_model_desc:
@@ -50,9 +59,18 @@ if not has_model_desc:
   sys.exit(1)
 
 # list of MDFs
-mdfs = [x for x in os.listdir('model-desc') if re.match('.*.ya?ml$',x)]
-# heuristic - merge into the yaml with the shortest name
-mdfs.sort(key=len)
+if not args.mdf_files:
+  mdfs = [x for x in os.listdir('model-desc') if re.match('.*.ya?ml$',x)]
+  # heuristic - merge into the yaml with the shortest name
+  mdfs.sort(key=len)
+else:
+  mdfs = args.mdf_files
+  mdfs = [os.path.basename(x) for x in mdfs]
+  for f in mdfs:
+    if not os.path.exists(os.path.join('model-desc',f)):
+      print("The mdf file '{file}' is not present in the model-desc directory".format(file=f))
+      print("Make sure all MDFs are present there and re-run.")
+      sys.exit(1)
 
 if not len(mdfs):
   print ("There are no YAML formatted files in ./model-desc.")
@@ -60,11 +78,7 @@ if not len(mdfs):
   sys.exit(1)
 
 # README text
-readme = ''
-
-with open("README.md") as f:
-  readme = f.read()
-
+readme = open("README.md").read()
 print( "Setting up bento-mdf in"+os.getcwd() )
 
 if not has_docs:
@@ -72,7 +86,7 @@ if not has_docs:
   os.mkdir('./docs')
 
 jenv = Environment(
-  loader=FileSystemLoader('bento-mdf/setup')
+  loader=FileSystemLoader('bento-mdf/setup/templates')
   )
   
 print("Populating ./docs")
