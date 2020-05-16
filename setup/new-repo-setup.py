@@ -96,7 +96,7 @@ try:
   else:
     raise FileExistsError;
   copytree('./bento-mdf/setup/assets', './docs/assets',
-             dir_exist_ok=(True if args.force else False))
+             dirs_exist_ok=(True if args.force else False))
 except FileExistsError:
   print("- Not overwriting existing files.")
   print("- Remove ./docs subdir and re-run script to refresh.")
