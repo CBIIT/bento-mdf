@@ -110,8 +110,12 @@ print(jenv.get_template('README.md.content.jinja').render(base=base,readme=readm
         file=readme_content)
 
 print("Creating .travis.yml")
-travis = open('./.travis.yml','w')
-print(jenv.get_template('.travis.yml.jinja').render(base=base,mdfs=mdfs),
-        file=travis)
+if not os.path.exists('./.travis.yml') or args.force:
+    travis = open('./.travis.yml','w')
+    print(jenv.get_template('.travis.yml.jinja').render(base=base,mdfs=mdfs),
+            file=travis)
+else:
+  print("- Not overwriting existing .travis.yml file")
+  print("- Rerun with --force to overwrite")
 
 print("Complete.")
