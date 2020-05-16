@@ -51,6 +51,8 @@ if not has_model_desc:
 
 # list of MDFs
 mdfs = [x for x in os.listdir('model-desc') if re.match('.*.ya?ml$',x)]
+# heuristic - merge into the yaml with the shortest name
+mdfs.sort(key=len)
 
 if not len(mdfs):
   print ("There are no YAML formatted files in ./model-desc.")
@@ -72,10 +74,6 @@ if not has_docs:
 jenv = Environment(
   loader=FileSystemLoader('bento-mdf/setup')
   )
-print("Create test_val.py");
-test_val=open('./model-desc/test_val.py', 'w')
-print(jenv.get_template('test_val.py.jinja').render(mdfs=mdfs)
-
   
 print("Populating ./docs")
 try:

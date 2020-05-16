@@ -15,12 +15,12 @@ branches:
 before_install:
   - docker pull maj1/icdc:model-tool-perl
   - sudo apt-get install sed
-  #
 install:
-  - pip install -r bento-mdf/validators/mdf-validate/reqs.txt
-script:
+  - pip install bento-mdf/validators/mdf-validate
+before_script:
   - pushd model-desc
-  - pytest
+  - test-mdf.py {{ mdfs|join(' ') }}
+script:
   - cp -aR ../bento-mdf/drivers/Perl/make-model/lib lib
   - cp -aR ../bento-mdf/drivers/Perl/make-model/bin bin
   # run model-tool with pre-built perl - fast
