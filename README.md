@@ -13,9 +13,17 @@ The Bento framework is currently used in the following projects;
 
 ## Drivers and Tools
 
-Language drivers and other tools that want to comply with the Bento framework should observe the latest [specification](./spec).
+Language drivers and other tools that want to comply with the Bento
+framework should observe the latest [specification](./spec).
 
-[make-model](./drivers/Perl/make-model/README.md) is a reference driver and tool written in [Perl](https://www.perl.org/).
+[make-model](./drivers/Perl/make-model/README.md) is a reference
+driver and tool written in [Perl](https://www.perl.org/).
+
+### Validator
+
+A simple command line validator is included in the repo at
+[mdf-validate](./validators/mdf-validate). See that page for install
+and usage information.
 
 ## Model Description Files (MDF)
 
