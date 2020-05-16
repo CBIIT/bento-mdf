@@ -24,18 +24,19 @@ Briefly, to use the script:
 
         pip install -r ./bento-mdf/setup/requirements.txt
 
-* Insure the model defintion files (YAMLs) are present in a subdirectory called ``model-desc``
+* Insure the model definition files (YAMLs) are present in a subdirectory called ``model-desc``
 
 * Run the ``new-repo-setup.py`` script as follows:
 
         python bento-mdf/setup/new-repo-setup <my_new_model>.yaml <my_new_model>-properties.yaml
 
-* READ the output to make sure everything worked.
+* READ the output to make sure everything worked. If not, follow the script's instructions.
 
-* Commit all the changes made by the script.
+* Commit and push all the changes made by the script.
 
         git add .
         git commit -m 'bento-mdf setup for model'
+        git push
 
 Other steps are required to get Travis working. See the work process document.
 
