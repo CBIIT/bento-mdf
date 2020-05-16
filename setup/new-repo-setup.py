@@ -91,8 +91,12 @@ jenv = Environment(
   
 print("Populating ./docs")
 try:
-  copy('./bento-mdf/setup/_config.yml','./docs/_config.yml')
-  copytree('./bento-mdf/setup/assets', './docs/assets')
+  if not os.path.exists('./docs/_config.yml') or args.force:
+    copy('./bento-mdf/setup/_config.yml','./docs/_config.yml')
+  else:
+    raise FileExistsError;
+  copytree('./bento-mdf/setup/assets', './docs/assets',
+             dir_exist_ok=(True if args.force else False))
 except FileExistsError:
   print("- Not overwriting existing files.")
   print("- Remove ./docs subdir and re-run script to refresh.")
