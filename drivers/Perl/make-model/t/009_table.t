@@ -32,28 +32,31 @@ my $tbl;
 open my $fh, ">", \$tbl;
 ok $obj->table($fh), 'make table';
 
-my (@nodes,@relns);
-my $rel;
+my (@nodes,@relns,@propdescs);
+my $a;
 for my $line (split /\n/,$tbl) {
   my @d = split /\t/, $line;
-  next unless $d[0];
-  next if ($d[0] =~ /^node$/);
-  if ($d[0] =~ /^relationship$/) {
-    $rel = 1;
+  next unless ($d[0] && length($d[0]));
+  if ($d[0] =~ /^node$/) {
+    $a = \@nodes;
     next;
   }
-  if ($rel) {
-    push @relns, \@d;
+  elsif ($d[0] =~ /^relationship$/) {
+    $a = \@relns;
+    next;
   }
-  else {
-    push @nodes, \@d;
+  elsif ($d[0] =~ /^property$/) {
+    $a = \@propdescs;
+    next;
   }
+  push @$a, \@d;
 }
 
 my $got_nodes = Set::Scalar->new(map { $$_[0] } @nodes);
 my $got_props = Set::Scalar->new((map { $$_[1] } @nodes), (map {$$_[3]} @relns));
 $got_props->delete('NA');
 my $got_etypes = Set::Scalar->new(map { $$_[0] } @relns);
+my $got_propdescs = Set::Scalar->new(map {$$_[0]} @propdescs);
 my $exp_nodes = Set::Scalar->new(map {$_->name} $model->nodes);
 my $exp_props = Set::Scalar->new(map {$_->name} $model->props);
 my $exp_etypes = Set::Scalar->new(map {$_->name} $model->edge_types);
@@ -91,6 +94,16 @@ else {
   diag "got ".$got_etypes->size.", expected ".$exp_etypes->size;
   diag "symmetric difference";
   diag join("\n", $got_etypes->symmetric_difference($exp_etypes)->members);
+}
+
+if ($got_propdescs->is_equal($got_props)) {
+  pass "got all prop descriptions";
+}
+else {
+  fail "prop descs incorrect";
+  diag "got ".$got_propdescs->size.", expected ".$got_props->size;
+  diag "symmetric difference";
+  diag join("\n", $got_propdescs->symmetric_difference($got_props)->members);
 }
 
 done_testing;

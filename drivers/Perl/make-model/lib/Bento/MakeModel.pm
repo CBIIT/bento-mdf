@@ -149,6 +149,11 @@ sub table {
       }
     }
   }
+  say $fh "";
+  say $fh join("\t", qw{ property description });
+  for my $p (sort {$a->name cmp $b->name } $model->props) {
+    say $fh join("\t", $p->name, $p->desc || "NA")
+  }
   1;
 }
 
