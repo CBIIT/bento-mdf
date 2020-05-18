@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use v5.10;
 use Excel::Writer::XLSX;
 use File::Spec;
