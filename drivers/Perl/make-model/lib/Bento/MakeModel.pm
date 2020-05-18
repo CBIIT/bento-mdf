@@ -341,7 +341,7 @@ Create an SVG file of the model using GraphViz.
 
 =item table([$filename|$filehandle])
 
-Create a flattened version of the model. Emits two (concatentated) TSV tables.
+Create a flattened version of the model. Emits three (concatentated) TSV tables.
 
 =over
 
@@ -378,6 +378,17 @@ source and destination node types.
   at_enrollment     prior_surgery    enrollment        NA        NA
   next              visit            visit             NA        NA
   of_assay          file             assay             NA        NA
+
+=item Table 3: Property Descriptions
+
+Properties may have free text descriptions in the MDF. Each property is listed
+along with this description, if available.
+
+  property                      description
+  cohort_dose                   intended or protocol dose
+  comment                       generic comment
+  concurrent_disease            Boolean indicator as to whether the patient is has any significant secondary disease condition(s)
+  concurrent_disease_type       specifics of any notable secondary disease condition(s) within the patient
 
 =back
 
