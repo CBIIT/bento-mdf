@@ -183,7 +183,8 @@ sub new {
     # just return whatever is there, rather than normalize to string
     $self->{_type} = $propdef->{Type} ; # && (ref $propdef->{Type} ? ref $propdef->{Type} :
     #                                            $propdef->{Type});
-    
+    $self->{_propdef}{Desc} &&
+      $self->{_propdef}{Desc} =~ s/\n/ /g;      
     unless ( $self->{_type} ) {
       WARN "Property '$name' has no Type defined";
     }
@@ -192,6 +193,7 @@ sub new {
   }
   else {
     WARN "Property '$name' does not have a PropDefinitions entry";
+    $self->{_propdef} = {};
     $model->{_props}{$name} = $self;
   }
   return $self
@@ -201,6 +203,7 @@ sub tags { @{shift->{_tags}} }
 sub type { shift->{_type} }
 sub values { $_[0]->{_values} && (ref $_[0]->{_values} eq 'ARRAY' ? @{$_[0]->{_values}} : ($_[0]->{_values})) }
 sub name { shift->{_name} }
+sub desc { shift->{_propdef}{Desc} }
 sub is_required { shift->{_propdef}{Req} }
 1;
 

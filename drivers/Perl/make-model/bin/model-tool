@@ -85,7 +85,7 @@ model-tool - Perform useful functions with MDF models
              [-T <table-out-file>] <input.yaml> [<input2.yaml> ...]
      [-d dir_to_search [-d another_dir...]]
   -g : create an SVG of model defined in input.yamls
-  -T : output a table of nodes and properties
+  -T : output a TSV table of nodes, relationships, properties
   -a : output all nodes, including unlinked nodes
   -v : verbosity (-v little ... -vvvv lots)
   -W : show all warnings ( = -vvv )
