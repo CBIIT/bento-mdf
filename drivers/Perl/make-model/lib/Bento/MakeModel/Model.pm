@@ -183,7 +183,8 @@ sub new {
     # just return whatever is there, rather than normalize to string
     $self->{_type} = $propdef->{Type} ; # && (ref $propdef->{Type} ? ref $propdef->{Type} :
     #                                            $propdef->{Type});
-    
+    $self->{_propdef}{Desc} &&
+      $self->{_propdef}{Desc} =~ s/\n/ /g;      
     unless ( $self->{_type} ) {
       WARN "Property '$name' has no Type defined";
     }

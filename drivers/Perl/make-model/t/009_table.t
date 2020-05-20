@@ -23,6 +23,8 @@ my $obj = Bento::MakeModel->new(
 
 my $model = $obj->model;
 
+my $NUMDESCS = scalar grep { length $_->desc && $_->desc !~ /\?/ } $model->props;
+
 is scalar ($model->nodes), $NUMNODES, "count nodes";
 is scalar ($model->props), $NUMPROPS, "count all props";
 is scalar ($model->edge_types), $NUMETYPES, "count all edge types";
@@ -96,14 +98,12 @@ else {
   diag join("\n", $got_etypes->symmetric_difference($exp_etypes)->members);
 }
 
-if ($got_propdescs->is_equal($got_props)) {
+if ($got_propdescs->size == $NUMDESCS) {
   pass "got all prop descriptions";
 }
 else {
   fail "prop descs incorrect";
-  diag "got ".$got_propdescs->size.", expected ".$got_props->size;
-  diag "symmetric difference";
-  diag join("\n", $got_propdescs->symmetric_difference($got_props)->members);
+  diag "got ".$got_propdescs->size.", expected $NUMDESCS";
 }
 
 done_testing;
