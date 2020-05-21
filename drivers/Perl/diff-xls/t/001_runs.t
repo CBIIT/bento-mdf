@@ -22,7 +22,7 @@ SKIP : {
     diag "cloned ctdc-model";
     chdir 'ctdc-model';
     ok( (! -e 'diff.xlsx'), 'diff.xlsx not present');
-    ok run[@cmd], 'run script';
+    ok run[@cmd, '--outfile','diff.xlsx'], 'run script';
     ok( (-e 'diff.xlsx'), 'diff.xlsx created');
     ok run[@cmd,'--outfile','diff2.xlsx','--skip=1'], 'run with some options';
     ok( (-e 'diff2.xlsx'), 'diff2.xlsx created');

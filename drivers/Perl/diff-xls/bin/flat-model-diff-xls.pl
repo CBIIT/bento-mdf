@@ -14,7 +14,7 @@ use warnings;
 
 
 my ($last_change,$commits,$skip,$outf);
-$outf = "diff.xlsx";
+
 GetOptions( "commits:s" => \$commits,
             "skip:i" => \$skip,
             "outfile:s" => \$outf,
@@ -39,35 +39,28 @@ unless ($flatfile) {
 open my $ct, File::Spec->catfile($mddir,$flatfile) or die "$flatfile: $!";
 my $lines=0;
 while (<$ct>) { $lines++; }
-
+$lines *= 2;
 my $gitlog = ['git', 'log', '-1',
               "-U$lines",
+              '--pretty=format:Date:%aI',
               ($commits ? $commits : ()),
               ($skip ? ('--skip',$skip) : ()),
               File::Spec->catfile($mddir,$flatfile)];
-my ($in, $out, $err);
-my $rc = run $gitlog, \$in, \$out, \$err;
+my ($in, $gitlog_out, $err);
+my $rc = run $gitlog, \$in, \$gitlog_out, \$err;
 unless ($rc) {
   say "git log returned error:";
   say $err;
   exit(1);
 }
 
-my $wb = Excel::Writer::XLSX->new($outf);
-my $ws = $wb->add_worksheet;
-my $norm_fmt = $wb->add_format();
-my $del_fmt = $wb->add_format(
-  font_strikeout => 1
- );
-my $add_fmt = $wb->add_format(
-  bg_color => 'yellow'
- );
-my $r=1;
-my @inf = split /\n/, $out;
+my @inf = split /\n/, $gitlog_out;
 my %moved;
 my $past_hdr;
+my $date;
 my @lines;
 for (@inf) {
+  /^Date/ && ( ($date) = /Date:(.*)\+/ );
   /repo/ && ($past_hdr = 1);
   next unless $past_hdr;
   chomp;
@@ -91,6 +84,22 @@ for (keys %moved) {
 undef $past_hdr;
 my @maxlen = (0,0,0);
 
+$flatfile =~ /^(.*)\./;
+$outf //= "diff-$1-$date.xlsx";
+$outf =~ s/:/_/g;
+
+my $wb = Excel::Writer::XLSX->new($outf);
+my $ws = $wb->add_worksheet;
+my $norm_fmt = $wb->add_format();
+my $del_fmt = $wb->add_format(
+  font_strikeout => 1
+ );
+my $add_fmt = $wb->add_format(
+  bg_color => 'yellow'
+ );
+
+  
+my $r=1;
 for (@lines) {
   /^.node/ && ($past_hdr=1);
   my $fmt =  $norm_fmt;
