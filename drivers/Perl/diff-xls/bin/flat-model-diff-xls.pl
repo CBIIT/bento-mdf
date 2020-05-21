@@ -132,7 +132,7 @@ $wb->close;
 sub get_git_dir {
   my $dir = '.';
   while ( ! -d File::Spec->catdir($dir,'.git') &&
-            (File::Spec->canonpath($dir) ne File::Spec->rootdir) ) {
+            (realpath($dir) ne File::Spec->rootdir) ) {
     $dir = File::Spec->catdir($dir,'..')
   }
   return if (realpath($dir) eq File::Spec->rootdir);
