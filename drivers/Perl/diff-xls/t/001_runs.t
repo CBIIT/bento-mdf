@@ -24,7 +24,7 @@ SKIP : {
     ok( (! -e 'diff.xlsx'), 'diff.xlsx not present');
     ok run[@cmd, '--outfile','diff.xlsx'], 'run script';
     ok( (-e 'diff.xlsx'), 'diff.xlsx created');
-    ok run[@cmd,'--outfile','diff2.xlsx','--skip=1'], 'run with some options';
+    ok run[@cmd,'--outfile','diff2.xlsx','--skip=1','--working'], 'run with some options';
     ok( (-e 'diff2.xlsx'), 'diff2.xlsx created');
   }
   else {

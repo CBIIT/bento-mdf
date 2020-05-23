@@ -13,11 +13,12 @@ use strict;
 use warnings;
 
 
-my ($last_change,$commits,$skip,$outf);
+my ($last_change,$commits,$skip,$outf,$working);
 
 GetOptions( "commits:s" => \$commits,
             "skip:i" => \$skip,
             "outfile:s" => \$outf,
+            "working" => \$working,
            ) or pod2usage(1);
 
 
@@ -36,16 +37,19 @@ unless ($flatfile) {
   exit(1);
 }
 
-open my $ct, File::Spec->catfile($mddir,$flatfile) or die "$flatfile: $!";
+my $flatpath = File::Spec->catfile($mddir,$flatfile);
+
+open my $ct, $flatpath  or die "$flatfile: $!";
 my $lines=0;
 while (<$ct>) { $lines++; }
 $lines *= 2;
+
 my $gitlog = ['git', 'log', '-1',
               "-U$lines",
-              '--pretty=format:Date:%aI',
+              '--pretty=format:Date:%aI\|Commit:%h',
               ($commits ? $commits : ()),
               ($skip ? ('--skip',$skip) : ()),
-              File::Spec->catfile($mddir,$flatfile)];
+              $flatpath];
 my ($in, $gitlog_out, $err);
 my $rc = run $gitlog, \$in, \$gitlog_out, \$err;
 unless ($rc) {
@@ -55,9 +59,32 @@ unless ($rc) {
 }
 
 my @inf = split /\n/, $gitlog_out;
+my ($commit, $date);
+if ($working) {
+  # create diff between working file and desired commit
+  # this is mainly for Travis build and commit to ghpages
+  my $commit;
+  for (@inf) {
+    /Commit/ && do {
+      ($commit) = /\|Commit:([0-9a-f]+)/;
+      last;
+    };
+  }
+  die "Couldn't find commit in git log output" unless $commit;
+  run ['date','+%Y-%m-%dT%H_%M_%S'],'>',\$date;
+  chomp $date;
+  $gitlog_out = $err = '';
+  $rc = run [split(/ /,"git diff -U$lines $commit $flatpath")], \$in, \$gitlog_out, \$err;
+  unless ($rc) {
+    say "git diff returned error:";
+    say $err;
+    exit(1);
+  }
+  @inf = split /\n/,$gitlog_out;
+}
+
 my %moved;
 my $past_hdr;
-my $date;
 my @lines;
 for (@inf) {
   /^Date/ && ( ($date) = /Date:(.*)\+/ );
@@ -146,7 +173,7 @@ flat-model-diff-xls.pl - Make a nice Excel showing model flatfile differences
 =head1 SYNOPSIS
 
  Usage: perl flat-model-diff-xls.pl [--commits <commit range>]
-                  [--outfile <output.xls>] [--skip <n>]
+                  [--working] [--outfile <output.xls>] [--skip <n>]
 
  # in a model repo directory:
  # create a diff excel file with the latest changes
@@ -155,6 +182,8 @@ flat-model-diff-xls.pl - Make a nice Excel showing model flatfile differences
  $ perl flat-model-diff-xls.pl --skip 1 # creates diff.xlsx
  # create a diff excel from the commit range in new-diff.xlsx
  $ perl flat-model-diff-xls.pl --commits 51918c8..77bd441 --outfile new-diff.xlsx
+ # create a diff excel against the working copy of <model>.txt
+ $ perl flat-model-diff-xls.pl --working 
 
 =head1 DESCRIPTION
 
