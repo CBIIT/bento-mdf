@@ -109,10 +109,29 @@ readme_content = open('./docs/README.md.content','w')
 print(jenv.get_template('README.md.content.jinja').render(base=base,readme=readme),
         file=readme_content)
 
+try:
+  print("Creating docs/model-desc")
+  os.mkdir('./docs/model-desc');
+  os.mkdir('./docs/model-desc/diff-xls');
+  os.open('./docs/model-desc/diff-xls/HERE','w').close()
+except FileExistsError:
+  pass # ignore
+except Exception as e:
+  raise e
+
+if not os.path.exists('./docs/model-desc/index.html') or args.force:
+  mdindex = open('./docs/model-desc/index.html','w')
+  print(jenv.get_template('model-desc-index.html.jinja').render(base=base,mdfs=mdfs),
+            file=mdindex)
+else:
+  print("- Not overwriting existing model-desc/index.html file")
+  print("- Rerun with --force to overwrite")
+  
+
 print("Creating .travis.yml")
 if not os.path.exists('./.travis.yml') or args.force:
     travis = open('./.travis.yml','w')
-    print(jenv.get_template('.travis.yml.jinja').render(base=base,mdfs=mdfs),
+    print(jenv.get_template('travis.yml.jinja').render(base=base,mdfs=mdfs),
             file=travis)
 else:
   print("- Not overwriting existing .travis.yml file")
