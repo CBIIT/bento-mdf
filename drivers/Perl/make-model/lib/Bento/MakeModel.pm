@@ -211,7 +211,7 @@ sub viz {
     label_scheme => 3,
    );
   for ($self->nodes) {
-    my @lbl = map { $_->name } $self->model->node($_)->props;
+    my @lbl = sort map { $_->name } $self->model->node($_)->props;
     unshift @lbl, $_;
     if (@lbl>1) {
       $lbl[1] = "|{$lbl[1]";
