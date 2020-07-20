@@ -10,4 +10,13 @@ Relationships:
         Dst: boog
         Mul: one_to_one
         Req: false
-      
+UniversalNodeProperties:
+  mustHave:
+    - id
+  mayHave:
+    - desc
+UniversalRelationshipProperties:
+  mustHave:
+    - id
+  mayHave:
+    - desc

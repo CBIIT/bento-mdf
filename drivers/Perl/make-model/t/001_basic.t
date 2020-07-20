@@ -11,6 +11,10 @@ isa_ok( $obj = Bento::MakeModel->new(), "Bento::MakeModel");
 lives_ok { $obj->read_input( File::Spec->catdir($samplesd,"try.yml") ) } "read yaml";
 is_deeply [sort $obj->nodes], [qw/boog goob/], "nodes";
 is_deeply [sort $obj->relationships], [qw/goob_of/], "relationships";
+is_deeply $obj->input->{UniversalNodeProperties}{mustHave}, ['id'], "UNP";
+is_deeply $obj->input->{UniversalNodeProperties}{mayHave}, ['desc'], "UNP";
+is_deeply $obj->input->{UniversalRelationshipProperties}{mustHave}, ['id'], "URP";
+is_deeply $obj->input->{UniversalRelationshipProperties}{mayHave}, ['desc'], "URP";
 
 undef $obj;
 $obj = Bento::MakeModel->new(LOG_LEVEL=>$FATAL);

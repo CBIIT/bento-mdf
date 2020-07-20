@@ -11,7 +11,7 @@ use Hash::Merge;
 use strict;
 use warnings;
 
-our $VERSION="0.1";
+our $VERSION="0.15";
 our $MERGER = Hash::Merge->new();
 if (defined $OVERLAY_MERGE_BEH) {
   $MERGER->add_behavior_spec($OVERLAY_MERGE_BEH, 'R_OVERLAY');
@@ -98,6 +98,8 @@ sub read_input {
     FATAL "No relationships defined";
     die "No relationships defined";
   }
+  $self->{_univ_node_props} = $self->input->{UniversalNodeProperties};
+  $self->{_univ_rel_props} = $self->input->{UniversalRelationshipProperties};  
   $self->{_nodes} = $self->input->{Nodes};
   $self->{_relns} = $self->input->{Relationships};
   # record nodes participating in relationships

@@ -17,6 +17,8 @@ sub new {
     _edge_table => {},
    };
   bless $self, $class;
+  $self->{_univ_node_props} = $mm->{_univ_node_props};
+  $self->{_univ_rel_props} = $mm->{_univ_rel_props};  
   my $ns = $mm->{_nodes};
   my $rs = $mm->{_relns};
   my $pds = $mm->input->{PropDefinitions};
@@ -142,8 +144,15 @@ sub new {
     if ($info->{Category}) {
       $self->{_category} = $info->{Category};
     }
-    for my $p (@{ $info->{Props} }) {
-      $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
+    if ($info->{Props} || $model->{_univ_node_props}) {
+      my @props = $info->{Props} ? @{$info->{Props}} : ();
+      if (my $up = $model->{_univ_node_props}) {
+        push @props, $up->{mustHave} ? @{$up->{mustHave}} : ();
+        push @props, $up->{mayHave} ? @{$up->{mayHave}} : ();
+      }
+      for my $p (@props) {
+        $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
+      }
     }
   }
   WARN "Node '$name' has no properties defined" unless keys %{$self->{_props}};
@@ -227,8 +236,15 @@ sub new {
   if ($info->{Tags}) {
     $self->{_tags} = $info->{Tags};
   }
-  for my $p (@{ $info->{Props} }) {
-    $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
+  if ($info->{Props} || $model->{_univ_rel_props}) {
+    my @props = $info->{Props} ? @{$info->{Props}} : ();
+    if (my $up = $model->{_univ_rel_props}) {
+      push @props, $up->{mustHave} ? @{$up->{mustHave}} : ();
+      push @props, $up->{mayHave} ? @{$up->{mayHave}} : ();
+    }
+    for my $p (@props) {
+      $self->{_props}{$p} = $model->prop($p) || Bento::MakeModel::Model::Property->new($p,undef,$model);
+    }
   }
   $self->{_edgedef} = clone( $info );
   for (@{$info->{Ends}}) {
