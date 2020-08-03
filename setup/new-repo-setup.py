@@ -113,7 +113,7 @@ try:
   print("Creating docs/model-desc")
   os.mkdir('./docs/model-desc');
   os.mkdir('./docs/model-desc/diff-xls');
-  os.open('./docs/model-desc/diff-xls/HERE','w').close()
+  open('./docs/model-desc/diff-xls/HERE','w').close()
 except FileExistsError:
   pass # ignore
 except Exception as e:
