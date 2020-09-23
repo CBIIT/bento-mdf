@@ -63,6 +63,26 @@ properties:
           $ref: "#/defs/snake_case_id"
   Tags:
     $ref: "#/defs/tagsSpec"
+  Handle:
+    type: string
+    desc: |
+      This is a human-readable short name for the model described in the MDF, that
+      should also be understood as a token that can be used to extract the model
+      from a Metamodel Database
+  URL:
+    type:
+      $ref: "#/defs/url"
+    desc: |
+      If present, this should be a resolving URL that can provide further detailed information
+      about the model described in the MDF instance. Ideally, it should be the base URL for a
+      terminology server (like the Simple Terminology Server), that can be concatenated with
+      path information in the MDF to return details. Currently, an enumerated value set can
+      be included "by reference" in the MDF, using a path. Joining the URL value and the
+      path value with a backslash should create a url that resolves to a REST GET access of
+      an STS that can return the actual list of enumerated values.
+    
+      
+    
 required:
   - Nodes
   - Relationships
@@ -90,6 +110,11 @@ defs:
     type: string
     pattern: |
       ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
+  path:
+    $id: "#path"
+    type: string
+    pattern: |
+      /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
   regex:
     $id: "#regex"
     type: object
@@ -128,6 +153,9 @@ defs:
         -
           $ref:
             "#/defs/url"
+        -
+          $ref:
+            "#/defs/path"
     uniqueItems: true
   numberWithUnits:
     $id: "#numberWithUnits"
@@ -263,7 +291,7 @@ defs:
           datetime, or --if necessary-- "TBD"; (2) a number_with_units type
           (e.g., { "value_type":"integer", "units":"mm" }); (3) a regular
           expression that a (string) value must match; (4) an enumeration
-          of acceptable values, or a url to an api that will validate against
+          of acceptable values, or a url or path fragment to an api that will validate against
           such a list
         oneOf:
           -
