@@ -158,6 +158,19 @@ defs:
     required:
       - value_type
       - units
+  unionType:
+    $id: "#unionType"
+    description: |
+      A unionType is an array of other types, at least one of which the
+      associated value must comply with. Analogous to the Union in Avro
+      (https://avro.apache.org/docs/current/spec.html#Unions)
+    type: array
+    items:
+      anyOf:
+        - $ref: "#/defs/simpleType"
+        - $ref: "#/defs/enumType"
+        - $ref: "#/defs/numberWithUnits"
+
   tagsSpec:
     $id: "#tagsSpec"
     type: array
@@ -276,6 +289,8 @@ defs:
             $ref: "#/defs/url"
           -
             $ref: "#/defs/enumType"
+          -
+            $ref: "#/defs/unionType"
       Tags:
         $ref: "#/defs/tagsSpec"
     required:
