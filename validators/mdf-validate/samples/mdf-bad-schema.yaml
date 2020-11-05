@@ -28,7 +28,7 @@ properties:
     additionalProperties:
       $ref: "#/defs/propSpec"
   UniversalNodeProperties:
-    type: object
+    type: crobject
     properties:
       mustHave:
         desc: |

@@ -186,6 +186,44 @@ defs:
     required:
       - value_type
       - units
+  unionType:
+    $id: "#unionType"
+    description: |
+      A unionType is an array of other types, at least one of which the
+      associated value must comply with. Analogous to the Union in Avro
+      (https://avro.apache.org/docs/current/spec.html#Unions)
+    type: array
+    items:
+      anyOf:
+        - $ref: "#/defs/simpleType"
+        - $ref: "#/defs/enumType"
+        - $ref: "#/defs/numberWithUnits"
+  listType:
+    $id: "#listType"
+    type: object
+    description: |
+      listType indicates that such a value should be instantiated as a list or array of
+      scalar values. The type each of the scalar values should take is provided by the
+      "item_type" property defined here. The item_type can be any of the scalar types
+      defined in this schema. A listType of { "value_type":"list", "items": <an enumType> }
+      would indicate that the data value should consist of an array of strings, each
+      string coming from the specified enum of acceptable values.
+    properties:
+      value_type:
+        const: list
+      item_type:
+        oneOf:
+          -
+            $ref: "#/defs/simpleType"
+          -
+            $ref: "#/defs/enumType"
+          -
+            $ref: "#/defs/numberWithUnits"
+      Tags:
+        $ref: "#/defs/tagsSpec"
+    required:
+      - value_type
+      - item_type
   tagsSpec:
     $id: "#tagsSpec"
     type: array
@@ -304,6 +342,10 @@ defs:
             $ref: "#/defs/url"
           -
             $ref: "#/defs/enumType"
+          -
+             $ref: "#/defs/listType"
+          -
+            $ref: "#/defs/unionType"
       Tags:
         $ref: "#/defs/tagsSpec"
     required:
