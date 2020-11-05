@@ -315,6 +315,8 @@ defs:
           -
             $ref: "#/defs/enumType"
           -
+             $ref: "#/defs/listType"
+          -
             $ref: "#/defs/unionType"
       Tags:
         $ref: "#/defs/tagsSpec"

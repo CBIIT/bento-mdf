@@ -10,6 +10,10 @@ ap = ArgumentParser(description="Validate MDF against JSONSchema")
 ap.add_argument('--schema',
                   help="MDF JSONschema file", type=FileType('r'),
                   dest="schema")
+ap.add_argument('--quiet',
+                  help="Suppress output; return only exit value",
+                  action="store_true",
+                  dest="quiet")
 ap.add_argument('mdf_files',nargs='+',
                   metavar='mdf-file',
                   type=FileType('r'),
@@ -37,6 +41,6 @@ def test(v):
 
 if __name__ == '__main__':
   args = ap.parse_args()
-  v = MDFValidator( args.schema,*args.mdf_files )
+  v = MDFValidator( args.schema,verbose=(not args.quiet),*args.mdf_files)
   exit(test(v)) # emit return val (0 = good) to os
 
