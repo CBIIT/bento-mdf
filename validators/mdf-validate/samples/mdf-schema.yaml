@@ -39,7 +39,7 @@ properties:
           $ref: "#/defs/snake_case_id"
       mayHave:
         desc: |
-          items are names of properties that every node *must* have;
+          items are names of properties that every node *may* have;
           properties are defined in PropDefinitions
         type: array
         items:
@@ -63,6 +63,25 @@ properties:
           $ref: "#/defs/snake_case_id"
   Tags:
     $ref: "#/defs/tagsSpec"
+  Handle:
+    type: string
+    desc: |
+      This is a human-readable short name for the model described in the MDF, that
+      should also be understood as a token that can be used to extract the model
+      from a Metamodel Database
+  URL:
+    $ref: "#/defs/url"
+    desc: |
+      If present, this should be a resolving URL that can provide further detailed information
+      about the model described in the MDF instance. Ideally, it should be the base URL for a
+      terminology server (like the Simple Terminology Server), that can be concatenated with
+      path information in the MDF to return details. Currently, an enumerated value set can
+      be included "by reference" in the MDF, using a path. Joining the URL value and the
+      path value with a backslash should create a url that resolves to a REST GET access of
+      an STS that can return the actual list of enumerated values.
+    
+      
+    
 required:
   - Nodes
   - Relationships
@@ -90,6 +109,11 @@ defs:
     type: string
     pattern: |
       ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
+  path:
+    $id: "#path"
+    type: string
+    pattern: |
+      /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
   regex:
     $id: "#regex"
     type: object
@@ -128,6 +152,9 @@ defs:
         -
           $ref:
             "#/defs/url"
+        -
+          $ref:
+            "#/defs/path"
     uniqueItems: true
   numberWithUnits:
     $id: "#numberWithUnits"
@@ -158,11 +185,58 @@ defs:
     required:
       - value_type
       - units
+  unionType:
+    $id: "#unionType"
+    description: |
+      A unionType is an array of other types, at least one of which the
+      associated value must comply with. Analogous to the Union in Avro
+      (https://avro.apache.org/docs/current/spec.html#Unions)
+    type: array
+    items:
+      anyOf:
+        - $ref: "#/defs/simpleType"
+        - $ref: "#/defs/enumType"
+        - $ref: "#/defs/numberWithUnits"
+  listType:
+    $id: "#listType"
+    type: object
+    description: |
+      listType indicates that such a value should be instantiated as a list or array of
+      scalar values. The type each of the scalar values should take is provided by the
+      "item_type" property defined here. The item_type can be any of the scalar types
+      defined in this schema. A listType of { "value_type":"list", "items": <an enumType> }
+      would indicate that the data value should consist of an array of strings, each
+      string coming from the specified enum of acceptable values.
+    properties:
+      value_type:
+        const: list
+      item_type:
+        oneOf:
+          -
+            $ref: "#/defs/simpleType"
+          -
+            $ref: "#/defs/enumType"
+          -
+            $ref: "#/defs/numberWithUnits"
+      Tags:
+        $ref: "#/defs/tagsSpec"
+    required:
+      - value_type
+      - item_type
+  kvType:
+    type: object
+    properties:
+      key:
+        type: string
+        value:
+          type: string
   tagsSpec:
     $id: "#tagsSpec"
     type: array
     items:
-      type: string
+      anyOf:
+        - type: string
+        - $ref: "#/defs/kvType"
     uniqueItems: true
 
   nodeSpec:
@@ -263,7 +337,7 @@ defs:
           datetime, or --if necessary-- "TBD"; (2) a number_with_units type
           (e.g., { "value_type":"integer", "units":"mm" }); (3) a regular
           expression that a (string) value must match; (4) an enumeration
-          of acceptable values, or a url to an api that will validate against
+          of acceptable values, or a url or path fragment to an api that will validate against
           such a list
         oneOf:
           -
@@ -276,6 +350,10 @@ defs:
             $ref: "#/defs/url"
           -
             $ref: "#/defs/enumType"
+          -
+             $ref: "#/defs/listType"
+          -
+            $ref: "#/defs/unionType"
       Tags:
         $ref: "#/defs/tagsSpec"
     required:

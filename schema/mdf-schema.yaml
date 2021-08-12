@@ -39,7 +39,7 @@ properties:
           $ref: "#/defs/snake_case_id"
       mayHave:
         desc: |
-          items are names of properties that every node *must* have;
+          items are names of properties that every node *may* have;
           properties are defined in PropDefinitions
         type: array
         items:
@@ -69,9 +69,8 @@ properties:
       This is a human-readable short name for the model described in the MDF, that
       should also be understood as a token that can be used to extract the model
       from a Metamodel Database
-  URL:
-    type:
-      $ref: "#/defs/url"
+  URI:
+    $ref: "#/defs/url"
     desc: |
       If present, this should be a resolving URL that can provide further detailed information
       about the model described in the MDF instance. Ideally, it should be the base URL for a
@@ -224,11 +223,20 @@ defs:
     required:
       - value_type
       - item_type
+  kvType:
+    type: object
+    properties:
+      key:
+        type: string
+        value:
+          type: string
   tagsSpec:
     $id: "#tagsSpec"
     type: array
     items:
-      type: string
+      anyOf:
+        - type: string
+        - $ref: "#/defs/kvType"
     uniqueItems: true
 
   nodeSpec:
