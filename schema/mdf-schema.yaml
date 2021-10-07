@@ -223,22 +223,26 @@ defs:
     required:
       - value_type
       - item_type
-  kvType:
-    type: object
-    properties:
-      key:
-        type: string
-        value:
-          type: string
+  # kvType:
+  #   type: object
+  #   properties:
+  #     key:
+  #       type: string
+  #       value:
+  #         type: string
   tagsSpec:
     $id: "#tagsSpec"
-    type: array
-    items:
-      anyOf:
-        - type: string
-        - $ref: "#/defs/kvType"
-    uniqueItems: true
-
+    oneOf:
+        - type: array
+          items: string
+          uniqueItems: true
+        - type: object
+          additionalProperties:
+            oneOf:
+              - type: string
+              - type: number
+              - type: boolean
+              
   nodeSpec:
     $id: "#nodeSpec"
     type: object
