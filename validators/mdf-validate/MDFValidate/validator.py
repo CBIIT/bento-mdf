@@ -1,6 +1,6 @@
 import sys
 import os
-import option_merge as om
+import delfick_project.option_merge as om
 import yaml
 import requests
 from jsonschema import validate, ValidationError, SchemaError, RefResolutionError

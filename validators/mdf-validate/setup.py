@@ -7,7 +7,7 @@ setup(
   install_requires=[
     'jsonschema>=3.0.1',
     'PyYAML>=5.1.1',
-    'option-merge>=1.6',
+    'delfick-project',
     'requests'
     ],
   tests_require=[
