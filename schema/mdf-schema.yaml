@@ -338,7 +338,15 @@ defs:
       Nul:
         type: boolean
       Req:
-        type: boolean
+        oneOf:
+          -
+            type: boolean
+          -
+            type: string
+            enum:
+              - "Yes"
+              - "No"
+              - "Preferred"
       Deprecated:
         type: boolean
       oneOf:
