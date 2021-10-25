@@ -1,0 +1,23 @@
+name: Who Validates the Validator?
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test-validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Test Validator
+        run: |
+          pushd validators/mdf-validate
+          tox
+          popd
+          
