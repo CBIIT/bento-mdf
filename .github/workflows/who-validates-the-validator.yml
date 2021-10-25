@@ -2,7 +2,7 @@ name: Who Validates the Validator?
 on:
   push:
     branches:
-      - fix-actions
+      - master
   pull_request:
     branches:
       - master
