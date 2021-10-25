@@ -1,13 +1,19 @@
 [![Build Status](https://travis-ci.org/CBIIT/bento-mdf.svg?branch=master)](https://travis-ci.org/CBIIT/bento-mdf)
 
-# Bento Graph Model Description Framework
+# Bento Graph Model Description Format
 
 ## Overview
 
-The Bento graph model description framework allows a user to provide a very simple, human-readable description of an overall [property graph](https://en.wikipedia.org/wiki/Graph_(abstract_data_type)) model. The layout of nodes, relationships, node properties, and relationship properties are specified in data structures expressed in YAML-formatted _model description files_ (MDFs).
+The Bento graph model description format allows a user to provide a
+very simple, human-readable description of an overall [property
+graph](https://en.wikipedia.org/wiki/Graph_(abstract_data_type))
+model. The layout of nodes, relationships, node properties, and
+relationship properties are specified in data structures expressed in
+YAML-formatted _model description files_.
 
 The Bento framework is currently used in the following projects;
 
+* The [Bento standard model](https://github.com/CBIIT/bento-model)
 * The [Integrated Canine Data Commons](https://caninecommons.cancer.gov)
 * The [Clinical Trials Data Commons](https://github.com/CBIIT/ctdc-model)
 
@@ -27,22 +33,32 @@ and usage information.
 
 ## Model Description Files (MDF)
 
-The layout of nodes, relationships, node properties, and relationship properties are specified in data structures expressed in YAML-formatted _model description files_ (MDFs).
+The layout of nodes, relationships, node properties, and relationship
+properties are specified in data structures expressed in
+YAML-formatted _model description files_.
 
-The input format follows these general conventions, which are enforced by a [JSONSchema](https://json-schema.org/understanding-json-schema/) [schema](./schema/mdf-schema.yaml):
+The input format follows these general conventions, which are enforced
+by a [JSONSchema](https://json-schema.org/understanding-json-schema/)
+[schema](./schema/mdf-schema.yaml):
 
 * Special key names are capitalized; these are essentially MDF directives.
 
-* Custom names, such as names of nodes and properties, are all lower case, with underscores replacing any spaces ("snakecase");
+* Custom names, such as names of nodes and properties, are all lower
+  case, with underscores replacing any spaces ("snakecase");
 
-A graph model can be expressed in a single YAML file, or multiple YAML files. [Compliant](./spec) drivers will merge the data structures are merged, so that, for example, nodes and relationships can be described in one file, and property definitions can be provided in a separate file.
+A graph model can be expressed in a single YAML file, or multiple YAML
+files. [Compliant](./spec) drivers will merge the data structures are
+merged, so that, for example, nodes and relationships can be described
+in one file, and property definitions can be provided in a separate file.
 
 ### Nodes
 
-The `Nodes` top-level key points to an object containing descriptions of each node type in the model. Node descriptions look like:
+The `Nodes` top-level key points to an object containing descriptions
+of each node type in the model. Node descriptions look like:
 
     <nodename> :
-        Category: <categoryname>
+		Handle: MyModel
+		URI: "https://sts.ctos-data-team.org/model/MyModel"
         UniqueKeys:
             - [ 'propnameA', 'propnameB', ... ]
             - [ ... ]
@@ -52,15 +68,41 @@ The `Nodes` top-level key points to an object containing descriptions of each no
            - <propname2>
            - ...
 
-A node type can have a defined category, or a default (which can be configured) will be used in the final output.
+The `Handle` value is intended to be a short, human-readable moniker
+for the model described in the document. It should be easy to compute
+with, e.g., contain no spaces and not start with a numeral.
 
-The `UniqueKeys` key points to an array of arrays. Each bottom-level array is a list (which can be of length 1) of node property names. This specifies that nodes of this type that are created in the system must be unique with respect to the set of values for the properties indicated. For example, `['id']` here indicates that the value for the property `id` must be unique for all nodes of the type. `['project_id', 'submitter_id']` indicates that the submitter id must be unique among all nodes having a given project_id value.
+The `URI` value If present, this should be a resolving URL that can
+provide further detailed information about the model described in the
+MDF instance. Ideally, it should be the base URL for a terminology
+server (like the Simple Terminology Server), that can be concatenated
+with path information in the MDF to return relevant details.
 
-The `Props` key points to a simple array of property names given as strings. The detailed definition of each property (e.g., value type or enumeration, required status) are provided once, in a separate top-level section, `PropDefinitions` ([see below](#Property Definitions)).
+In particular, an enumerated value set can be included "by reference"
+in the MDF, using a path.  Joining the URL value and the path value
+with a backslash should create a url that can return the actual list
+of enumerated values.
+
+
+The `UniqueKeys` key points to an array of arrays. Each bottom-level
+array is a list (which can be of length 1) of node property
+names. This specifies that nodes of this type that are created in the
+system must be unique with respect to the set of values for the
+properties indicated. For example, `['id']` here indicates that the
+value for the property `id` must be unique for all nodes of the
+type. `['project_id', 'submitter_id']` indicates that the submitter id
+must be unique among all nodes having a given project_id value.
+
+The `Props` key points to a simple array of property names given as
+strings. The detailed definition of each property (e.g., value type or
+enumeration, required status) are provided once, in a separate
+top-level section, `PropDefinitions` ([see below](#Property
+Definitions)).
 
 ### Relationships
 
-The `Relationships` top-level key points to an object of descriptions of each relationship type. Relationship descriptions look like:
+The `Relationships` top-level key points to an object of descriptions
+of each relationship type. Relationship descriptions look like:
 
     <relname>:
          Props:
@@ -75,19 +117,22 @@ The `Relationships` top-level key points to an object of descriptions of each re
 
 A named relationship can have properties defined, analogous to nodes.
 
-A named relationship can be specified as required with the `Req` key, and its multiplicity (from source node type to destination node type) with the `Mul` key.
+A named relationship can be specified as required with the `Req` key,
+and its multiplicity (from source node type to destination node type)
+with the `Mul` key.
 
-A given named relationship can be formed between different source and destination node type pairs. The `Ends` key points to an array of `{ Src, Dst }` objects that describe the allowed pairs.
+A given named relationship can be formed between different source and
+destination node type pairs. The `Ends` key points to an array of
+`{Src:<nodename>, Dst:<nodename>}` objects that describe the allowed
+pairs.
 
 ### Property Definitions
 
-The `PropDefinitions` top-level key points to an object of descriptions of each property. Property descriptions look like:
+The `PropDefinitions` top-level key points to an object of
+descriptions of each property. Property descriptions look like:
 
     <propname1>:
-        Term: <term reference token>
-        # e.g., for $ref: "_terms.yaml#/ajcc_clinical_m", 
-        # use 'ajcc_clinical_m'
-        Desc: "a description of the property"
+        Desc: "A description of the property"
         Type: <string|number> # or the following:
         Enum:
             - acceptable
@@ -98,21 +143,26 @@ The `PropDefinitions` top-level key points to an object of descriptions of each 
             - here
         Nul: <true|false> # is property nullable?
         Req: <true|false> # is property required?
-        Src: <a string describing where the property came from - e.g.
-                 a CRF.>
 
+Either the `Type` or the `Enum` key should be present. If Enum key is
+present, the `Type` key will be ignored.
 
-Either the `Type` or the `Enum` key should be present. If Enum key is present, the `Type` key will be ignored.
-
-`Src` is a note regarding the data source of the property. The value is not used in any output; it is essentially a comment.
-
-Where properties need to be applied to Nodes and Relationships, use a list of propnames from those defined in PropDefinitions.
+Where properties need to be applied to Nodes and Relationships, use a
+list of propnames from those defined in PropDefinitions.
 
 ### Universal Properties
 
-In some use cases, it is desirable for every node (or relationship) to possess a certain property or set of properties. For example, every node may be expected to have a unique ID, regardless of its type.
+In some use cases, it is desirable for every node (or relationship) to
+possess a certain property or set of properties. For example, every
+node may be expected to have a unique ID, regardless of its type.
 
-The `UniversalNodeProperties` and `UniversalRelationshipProperties` top-level keys provide a means to specify these properties. The subkey `mustHave` should contain an array of property names for required universal properties. The subkey `mayHave` can contain an array of property names that are univerally allowable for all nodes or relationships.
+The `UniversalNodeProperties` and 
+`UniversalRelationshipProperties`
+top-level keys provide a means to specify these properties. The subkey
+`mustHave` should contain an array of property names for required
+universal properties. The subkey `mayHave` can contain an array of
+property names that are univerally allowable for all nodes or
+relationships.
 
     UniversalNodeProperties:
       mustHave:
@@ -200,7 +250,11 @@ yields
 
 #### Tagging Entities
 
-A `Tags` entry can be added to any object (thing that accepts key:value pairs) in the MDF. This is a way to associate metainformation with an entity that can be read later by a custom parser. A `Tags` entry value is an array of strings, the tags.
+A `Tags` entry can be added to any object (thing that accepts
+key:value pairs), except a `Tags` entry, in the MDF. This is a way to associate
+metainformation with an entity that can be read later by a downstream
+custom processor. A `Tags` entry value is a json object (dictionary, hash)
+containing a set of keys with _scalar_ values.
 
 For example, one may markup a set of nodes to be rendered in a certain color:
 
@@ -208,9 +262,9 @@ For example, one may markup a set of nodes to be rendered in a certain color:
       Props:
         - breed
       Tags:
-        - "color: red;"
+        color: red
     cat:
       Props:
         - breed
       Tags:
-        - "color: blue;"
+        color: blue
