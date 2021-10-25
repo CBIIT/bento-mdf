@@ -18,6 +18,7 @@ jobs:
       - name: Test Validator
         run: |
           pushd validators/mdf-validate
+          pip install tox
           tox
           popd
           
