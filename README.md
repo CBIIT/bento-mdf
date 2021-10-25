@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/CBIIT/bento-mdf.svg?branch=master)](https://travis-ci.org/CBIIT/bento-mdf)
+![Build Status](https://github.com/CBIIT/bento-mdf/actions/workflows/who-validates-the-validator.yml/badge.svg)
 
 # Bento Graph Model Description Format
 
