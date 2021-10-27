@@ -112,6 +112,11 @@ defs:
   path:
     $id: "#path"
     type: string
+    description: |
+      The 'path' is intended to describe a string that can be appended to the
+      base url of a terminology service endpoint. The expected response from
+      the server is a simple array of acceptable values as strings (possibly
+      embedded somewhere in a response structure).
     pattern: |
       /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
   regex:
@@ -327,7 +332,8 @@ defs:
         type: string
       Src:
         description: |
-          Original data source of this property (e.g., the clinical report form)
+          Source of data values: external submitter, internal curation, or
+          automatically computed.
         type: string
       Nul:
         type: boolean
@@ -335,31 +341,48 @@ defs:
         type: boolean
       Deprecated:
         type: boolean
-      Type:
-        description: |
-          Property values can have (1) simple types (number, integer, string
-          datetime, or --if necessary-- "TBD"; (2) a number_with_units type
-          (e.g., { "value_type":"integer", "units":"mm" }); (3) a regular
-          expression that a (string) value must match; (4) an enumeration
-          of acceptable values, or a url or path fragment to an api that will validate against
-          such a list
-        oneOf:
-          -
-            $ref: "#/defs/simpleType"
-          -
-            $ref: "#/defs/numberWithUnits"
-          -
-            $ref: "#/defs/regex"
-          -
-            $ref: "#/defs/url"
-          -
+      oneOf:
+        -
+          Type:
+            description: |
+              Property values can have (1) simple types (number, integer, string
+              datetime, or --if necessary-- "TBD"; (2) a number_with_units type
+              (e.g., { "value_type":"integer", "units":"mm" }); (3) a regular
+              expression that a (string) value must match; (4) an enumeration
+              of acceptable values, or a url or path fragment to an api that will validate against
+              such a list
+            oneOf:
+              -
+                $ref: "#/defs/simpleType"
+              -
+                $ref: "#/defs/numberWithUnits"
+              -
+                $ref: "#/defs/regex"
+              -
+                $ref: "#/defs/url"
+              -
+                $ref: "#/defs/enumType"
+              -
+                $ref: "#/defs/listType"
+              -
+                $ref: "#/defs/unionType"
+        -
+          Enum:
+            description: |
+              Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
+              readability. Either one of Type or Enum may be present in a property definition,
+              but not both.
             $ref: "#/defs/enumType"
-          -
-             $ref: "#/defs/listType"
-          -
-            $ref: "#/defs/unionType"
+
       Tags:
         $ref: "#/defs/tagsSpec"
-    required:
-      - Type
+    
+    oneOf:
+      -
+        required:
+          - Type
+      -
+        required:
+          - Enum
+        
       
