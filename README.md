@@ -51,14 +51,34 @@ files. [Compliant](./spec) drivers will merge the data structures are
 merged, so that, for example, nodes and relationships can be described
 in one file, and property definitions can be provided in a separate file.
 
+### Model Descriptors
+
+Top level keys that describe the model itself include:
+
+	Handle: MyModel 
+	URI: "https://sts.ctos-data-team.org/model/MyModel"
+
+The `Handle` value is intended to be a short, human-readable moniker 
+for the model described in the document. It should be easy to compute 
+with, e.g., contain no spaces and not start with a numeral. 
+
+The `URI` value If present, this should be a resolving URL that can 
+provide further detailed information about the model described in the 
+MDF instance. Ideally, it should be the base URL for a terminology 
+server (like the Simple Terminology Server), that can be concatenated 
+with path information in the MDF to return relevant details. 
+
+In particular, an enumerated value set can be included "by reference"
+in the MDF, using a path.  Joining the URL value and the path value 
+with a backslash should create a url that can return the actual list 
+of enumerated values. 
+
 ### Nodes
 
 The `Nodes` top-level key points to an object containing descriptions
 of each node type in the model. Node descriptions look like:
 
     <nodename> :
-		Handle: MyModel
-		URI: "https://sts.ctos-data-team.org/model/MyModel"
         UniqueKeys:
             - [ 'propnameA', 'propnameB', ... ]
             - [ ... ]
@@ -67,22 +87,6 @@ of each node type in the model. Node descriptions look like:
            - <propname1>
            - <propname2>
            - ...
-
-The `Handle` value is intended to be a short, human-readable moniker
-for the model described in the document. It should be easy to compute
-with, e.g., contain no spaces and not start with a numeral.
-
-The `URI` value If present, this should be a resolving URL that can
-provide further detailed information about the model described in the
-MDF instance. Ideally, it should be the base URL for a terminology
-server (like the Simple Terminology Server), that can be concatenated
-with path information in the MDF to return relevant details.
-
-In particular, an enumerated value set can be included "by reference"
-in the MDF, using a path.  Joining the URL value and the path value
-with a backslash should create a url that can return the actual list
-of enumerated values.
-
 
 The `UniqueKeys` key points to an array of arrays. Each bottom-level
 array is a list (which can be of length 1) of node property
@@ -133,14 +137,15 @@ descriptions of each property. Property descriptions look like:
 
     <propname1>:
         Desc: "A description of the property"
-        Type: <string|number> # or the following:
-        Enum:
-            - acceptable
-            - values
-            - for
-            - property
-            - go
-            - here
+        Type: <string|number>
+        # or the following:
+        # Enum:
+        #    - acceptable
+        #    - values
+        #    - for
+        #    - property
+        #    - go
+        #    - here
         Nul: <true|false> # is property nullable?
         Req: <true|false> # is property required?
 
@@ -149,6 +154,19 @@ present, the `Type` key will be ignored.
 
 Where properties need to be applied to Nodes and Relationships, use a
 list of propnames from those defined in PropDefinitions.
+
+#### Acceptable Value Lists
+
+The `Enum` key in a property definition may be followed by a list of
+acceptible values, or a single list value containing a fully qualified
+URI, or a URI path that can be concatenated to the model URI. In
+either case, the resulting URI should resolve and should return a list
+of acceptable values for the property:
+
+	<propname2>:
+	    ...
+		Enum:
+		    - https://sts.ctos-data-team.org/model/MyModel/property/<propname2>/list
 
 ### Universal Properties
 
