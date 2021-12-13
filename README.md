@@ -50,7 +50,6 @@ A graph model can be expressed in a single YAML file, or multiple YAML
 files. [Compliant](./spec) drivers will merge the data structures are
 merged, so that, for example, nodes and relationships can be described
 in one file, and property definitions can be provided in a separate file.
-
 ### Model Descriptors
 
 Top level keys that describe the model itself include:
@@ -167,6 +166,12 @@ of acceptable values for the property:
 	    ...
 		Enum:
 		    - https://sts.ctos-data-team.org/model/MyModel/property/<propname2>/list
+
+Either the `Type` or the `Enum` key should be present. If Enum key is
+present, the `Type` key will be ignored.
+
+Where properties need to be applied to Nodes and Relationships, use a
+list of propnames from those defined in PropDefinitions.
 
 ### Universal Properties
 
