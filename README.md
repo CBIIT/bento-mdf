@@ -167,12 +167,6 @@ of acceptable values for the property:
 		Enum:
 		    - https://sts.ctos-data-team.org/model/MyModel/property/<propname2>/list
 
-Either the `Type` or the `Enum` key should be present. If Enum key is
-present, the `Type` key will be ignored.
-
-Where properties need to be applied to Nodes and Relationships, use a
-list of propnames from those defined in PropDefinitions.
-
 ### Universal Properties
 
 In some use cases, it is desirable for every node (or relationship) to
