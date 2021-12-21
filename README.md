@@ -167,6 +167,30 @@ of acceptable values for the property:
 		Enum:
 		    - https://sts.ctos-data-team.org/model/MyModel/property/<propname2>/list
 
+### Terms
+
+The `Terms` top-level key, if present, should contain descriptions of
+terms used in the model. Terms relate string descriptors in the model
+(such as the handles of nodes and relationships, or values within
+enumerated acceptable value lists) to semantic concepts indexed in
+formal or informal terminologies. The keys in the Terms object refer
+to the term description, but they themselves need not be the string
+representation of the term in data. The primary "code", or string
+representation, is the term's "value" in the MDF. The term
+specification can include an origin or terminology authority, that
+authority's code or identifier for the term or concept, and a
+definition that describes what the term signifies.
+
+    Terms:
+		...
+		<term_handle>:
+			Value: <term_instance_string|"code">
+			Origin: <authority name|abbrev|identifier>
+			Code: <authority term id>
+			Version: <authority term version>
+			Defintion: |
+				(authority's) text definition of term's concept 
+
 ### Universal Properties
 
 In some use cases, it is desirable for every node (or relationship) to

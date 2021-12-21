@@ -27,6 +27,11 @@ properties:
       $ref: "#/defs/snake_case_id"
     additionalProperties:
       $ref: "#/defs/propSpec"
+  Terms:
+    propertyNames:
+      $ref: "#/defs/snake_case_id"
+    additionalProperties:
+      $ref: "#/defs/termSpec"
   UniversalNodeProperties:
     type: object
     properties:
@@ -262,8 +267,10 @@ defs:
           -
             type:
               "null"
-      Category:
-        $ref: "#/defs/snake_case_id"
+      Desc:
+        description: |
+          Human-readable description of the node.
+        type: string
       Tags:
         $ref: "#/defs/tagsSpec"
     required:
@@ -272,6 +279,11 @@ defs:
     $id: "#relnSpec"
     type: object
     properties:
+      Desc:
+        description: |
+          Human-readable description of the relationship.
+        type: string
+        
       Mul:
         # here, the "default" multiplicity for all Src->Dst pairs
         type: string
@@ -328,7 +340,7 @@ defs:
     properties:
       Desc:
         description: |
-          Property description, free text
+          Human-readable description of the property.
         type: string
       Src:
         description: |
@@ -348,6 +360,9 @@ defs:
               - "No"
               - "Preferred"
       Deprecated:
+        description: |
+          True if this property is being retained for backward compatibility,
+          but should not be used in new models.
         type: boolean
       oneOf:
         -
@@ -392,5 +407,44 @@ defs:
       -
         required:
           - Enum
+  termSpec:
+    $id: "#termSpec"
+    type: object
+    properties:
+      Desc:
+        description: |
+          Human-readable, non-normative description of this term.
+        type: string
+      Value:
+        description: |
+          The string value used in data representations of the term. Can be, but is not
+          necessarily, the term "handle", i.e. the key for the term in the Terms object.
+        type: string
+      Origin:
+        description: |
+          A (standardized) abbreviation desiginating the authority, source, or "coiner"
+          of the term, reponsible for maintaining its definition and value representation.
+          Example: NCIt for the NCI Thesaurus.
+        type: string
+      Code:
+        description: |
+          An identifier assigned to the term by the authority given in the Origin field.
+          Examples: NCIt concept code, ontology CURIE, caDSR CDE ID.
+        type: string
+      Version:
+        description: |
+          Version of this term according to the authority given in the Origin field.
+        type: string
+      Definition: |
+        description: |
+          Text definition for the term, ideally as provided by the authority
+          given in the Origin field.
+        type: string
+    required:
+      - Value
+      - Origin
+      
+      
         
+          
       

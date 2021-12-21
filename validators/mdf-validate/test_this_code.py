@@ -75,7 +75,6 @@ def test_enum_and_type_kw():
   assert v.load_and_validate_yaml()
   with pytest.raises(ValidationError):
     v.validate_instance_with_schema()
-  
 
 
 
