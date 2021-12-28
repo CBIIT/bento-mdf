@@ -111,8 +111,8 @@ print(jenv.get_template('README.md.content.jinja').render(base=base,readme=readm
 
 try:
   print("Creating docs/model-desc")
-  os.mkdir('./docs/model-desc');
-  os.mkdir('./docs/model-desc/diff-xls');
+  os.mkdir('./docs/model-desc')
+  os.mkdir('./docs/model-desc/diff-xls')
   open('./docs/model-desc/diff-xls/HERE','w').close()
 except FileExistsError:
   pass # ignore
@@ -127,14 +127,20 @@ else:
   print("- Not overwriting existing model-desc/index.html file")
   print("- Rerun with --force to overwrite")
   
-
-print("Creating .travis.yml")
-if not os.path.exists('./.travis.yml') or args.force:
-    travis = open('./.travis.yml','w')
-    print(jenv.get_template('travis.yml.jinja').render(base=base,mdfs=mdfs),
-            file=travis)
+print("Set up GitHub actions")
+if not os.path.exists('./.github/workflows/model-test-and-deploy.yml') or args.force:
+  try:
+    os.mkdir('./.github/workflows')
+  except FileExistsError as e:
+    pass
+  except Exception as e:
+    raise e
+  
+  wkfl = open('./.github/workflows/model-test-and-deploy.yml','w')
+  print(jenv.get_template('model-test-and-deploy.yml.jinja').render(base=base,mdfs=mdfs),
+        file=wkfl)
 else:
-  print("- Not overwriting existing .travis.yml file")
+  print("- Not overwriting existing GitHub Actions yml file")
   print("- Rerun with --force to overwrite")
 
 print("Complete.")
