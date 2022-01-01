@@ -460,7 +460,7 @@ PropDefinitions:
   body_system:
     Desc: Body system examined; up to 12 in a visit
     Src: PHYSICAL_EXAM/PE/1
-    Type:
+    Enum:
     - Attitude
     - Eyes/Ears/Nose/Throat
     - Respiratory

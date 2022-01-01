@@ -11,7 +11,7 @@ use Hash::Merge;
 use strict;
 use warnings;
 
-our $VERSION="0.15";
+our $VERSION="0.2";
 our $MERGER = Hash::Merge->new();
 if (defined $OVERLAY_MERGE_BEH) {
   $MERGER->add_behavior_spec($OVERLAY_MERGE_BEH, 'R_OVERLAY');

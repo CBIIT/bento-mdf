@@ -190,15 +190,15 @@ sub new {
       $self->{_tags} = $propdef->{Tags};
     }
     # just return whatever is there, rather than normalize to string
-    $self->{_type} = $propdef->{Type} ; # && (ref $propdef->{Type} ? ref $propdef->{Type} :
-    #                                            $propdef->{Type});
+    $self->{_type} = $propdef->{Type} || $propdef->{Enum};
+
     $self->{_propdef}{Desc} &&
       $self->{_propdef}{Desc} =~ s/\n/ /g;      
     unless ( $self->{_type} ) {
       WARN "Property '$name' has no Type defined";
     }
     # below -- should call STS to get list if appropriate
-    $self->{_values} = (ref $self->{_type} eq 'ARRAY' ? [@{$propdef->{Type}}] : undef );
+    $self->{_values} = (ref $self->{_type} eq 'ARRAY' ? [@{$propdef->{Type} || $propdef->{Enum}}] : undef );
   }
   else {
     WARN "Property '$name' does not have a PropDefinitions entry";
