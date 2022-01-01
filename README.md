@@ -136,7 +136,7 @@ descriptions of each property. Property descriptions look like:
 
     <propname1>:
         Desc: "A description of the property"
-        Type: <string|number>
+        Type: <string|number|...>
         # or the following:
         # Enum:
         #    - acceptable
@@ -153,6 +153,21 @@ present, the `Type` key will be ignored.
 
 Where properties need to be applied to Nodes and Relationships, use a
 list of propnames from those defined in PropDefinitions.
+
+#### Property Data Types
+
+Properties are "slots" which can contain data. A property definition
+requires a Type specification for that data. MDF recognizes the following types:
+
+| Data Type | value of Type: key | Description |
+|---|---|---|
+| Simple scalar   | `number`, `integer`, `string`, `datetime`, `url`, `boolean`, `TBD` | Single value data. `TBD` is a placeholder |
+| Number with units | `{ "value_type":<integer|number>, "units": [ <string>, ... ]` | Units is an array of acceptable unit abbreviations (e.g. `["ul","nl"]` |
+| Pattern match | `{ "pattern":<regexp> }` | Acceptable data is a string matching the `pattern` regular expression |
+| Acceptable value list | `[ <string>, ... ]` | List of acceptable string values (see below) |
+| Union | `[ <typespec>, ... ]` | List of type specs; data should match at least one |
+| List | `{ "value_type":"list", "item_type":<typespec> }` | Acceptable data is an array or list of items of specified type |
+
 
 #### Acceptable Value Lists
 

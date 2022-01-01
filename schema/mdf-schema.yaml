@@ -233,13 +233,6 @@ defs:
     required:
       - value_type
       - item_type
-  # kvType:
-  #   type: object
-  #   properties:
-  #     key:
-  #       type: string
-  #       value:
-  #         type: string
   tagsSpec:
     $id: "#tagsSpec"
     oneOf:
