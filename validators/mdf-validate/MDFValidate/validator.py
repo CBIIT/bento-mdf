@@ -5,7 +5,7 @@ import yaml
 import requests
 from jsonschema import validate, ValidationError, SchemaError, RefResolutionError
 from jsonschema import Draft6Validator as d6
-from yaml.parser import ParserError
+from yaml.parser import ParserError, ScannerError
 from yaml.constructor import ConstructorError
 from yaml.nodes import MappingNode
 from pdb import set_trace
