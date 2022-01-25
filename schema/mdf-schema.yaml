@@ -340,6 +340,12 @@ defs:
           Source of data values: external submitter, internal curation, or
           automatically computed.
         type: string
+      Key:
+        description: |
+          A boolean value. True indicates that the containing property is
+          or can be used as a unique identifier for the containing node
+          instances. Useful for downstream data applications (database
+          loading, e.g.).
       Nul:
         type: boolean
       Req:
