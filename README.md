@@ -41,7 +41,7 @@ The input format follows these general conventions, which are enforced
 by a [JSONSchema](https://json-schema.org/understanding-json-schema/)
 [schema](./schema/mdf-schema.yaml):
 
-* Special key names are capitalized; these are essentially MDF directives.
+* Special key names are capitalized; these are essentially MDF directives;
 
 * Custom names, such as names of nodes and properties, are all lower
   case, with underscores replacing any spaces ("snakecase");
@@ -49,7 +49,9 @@ by a [JSONSchema](https://json-schema.org/understanding-json-schema/)
 A graph model can be expressed in a single YAML file, or multiple YAML
 files. [Compliant](./spec) drivers will merge the data structures are
 merged, so that, for example, nodes and relationships can be described
-in one file, and property definitions can be provided in a separate file.
+in one file, and property definitions can be provided in a separate
+file.
+
 ### Model Descriptors
 
 Top level keys that describe the model itself include:
@@ -154,6 +156,26 @@ present, the `Type` key will be ignored.
 Where properties need to be applied to Nodes and Relationships, use a
 list of propnames from those defined in PropDefinitions.
 
+PropDefinitions are frequently kept in a separate file, like `<model>-model-props.yml`.
+
+#### Name Collisions in Property Definitions
+
+The definitions of property values are separated from the list of
+properties provided in Node and Relationship specs. This is in order
+to make the model easier to read by humans. However, since there is
+nothing to prevent two different nodes from having properties with the
+same name or handle (nor should there be), the PropDefintions section
+needs to be able to disambiguate this situation.
+
+To refer to a property in a specific node in a PropDefinitions key,
+use a dotted notation for the key `<node_name>.<property_name>`:
+
+    PropDefinitions:
+		diagnosis.best_response:
+			...
+		enrollment.best_response:
+			...
+
 #### Property Data Types
 
 Properties are "slots" which can contain data. A property definition
@@ -195,6 +217,9 @@ representation, is the term's "value" in the MDF. The term
 specification can include an origin or terminology authority, that
 authority's code or identifier for the term or concept, and a
 definition that describes what the term signifies.
+
+It is probably most convenient to keep the Terms key/value in a
+separate file, like PropDefinitions, e.g. `<model>-model-terms.yml`.
 
     Terms:
 		...
@@ -306,7 +331,7 @@ yields
 
 #### Tagging Entities
 
-A `Tags` entry can be added to any object (thing that accepts
+A `Tags` entry can be added to any object (i.e., thing that accepts
 key:value pairs), except a `Tags` entry, in the MDF. This is a way to associate
 metainformation with an entity that can be read later by a downstream
 custom processor. A `Tags` entry value is a json object (dictionary, hash)

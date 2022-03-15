@@ -34,7 +34,7 @@ def construct_mapping(self, node, deep=False):
   return mapping
 
 class MDFValidator:
-  def __init__(self, sch_file, *inst_files,verbose=True):
+  def __init__(self, sch_file, *inst_files, verbose=True):
     self.schema = None
     self.verbose = verbose
     self.instance = om.MergedOptions()
@@ -45,7 +45,6 @@ class MDFValidator:
     self.yloader.construct_mapping = construct_mapping # monkey patch to detect dup keys
 
   def load_and_validate_schema(self):
-    verbose = self.verbose
     if self.schema:
       return self.schema
     if not self.sch_file:
@@ -65,63 +64,61 @@ class MDFValidator:
     else:
       pass
     try:
-      print("Checking schema YAML =====")
+      if self.verbose:
+        print("Checking schema YAML =====")
       self.schema = yaml.load(self.sch_file, Loader=self.yloader)
     except ConstructorError as ce:
-      if verbose:
+      if self.verbose:
         print("YAML error in MDF Schema '{fn}':\n{e}".format(fn=self.sch_file.name,e=ce))
       return ce
     except ParserError as e:
-      if verbose:
+      if self.verbose:
         print("YAML error in MDF Schema '{fn}':\n{e}".format(fn=self.sch_file.name,e=e))
       return e
     except Exception as e:
-      if verbose:
+      if self.verbose:
         print("Exception in loading MDF Schema yaml: {}".format(e))
       return e
-    print("Checking as a JSON schema =====")
+    if self.verbose:
+      print("Checking as a JSON schema =====")
     try:
       d6.check_schema(self.schema)
     except SchemaError as se:
-      if verbose:
+      if self.verbose:
         print("MDF Schema error: {}".format(se))
       raise se
     except Exception as e:
-      if verbose:
+      if self.verbose:
         print("Exception in checking MDF Schema: {}".format(e))
       raise e
     return self.schema
   
   def load_and_validate_yaml(self):
-    verbose = self.verbose
     if self.instance:
       return self.instance
     if (self.inst_files):
-      print("Checking instance YAML =====")
+      if self.verbose:
+        print("Checking instance YAML =====")
       for inst_file in self.inst_files:
           if isinstance(inst_file,str):
-              try:
-                  inst_file = open(inst_file,"r")
-              except IOError as e:
-                  print("Can't open '{fn}' ({e}), skipping".format(fn=inst_file.name,e=e))
-                  continue
+            inst_file = open(inst_file,"r")
           try:
             inst_yaml=yaml.load(inst_file, Loader=self.yloader)
             self.instance.update(inst_yaml)
           except ConstructorError as ce:
-            if verbose:
+            if self.verbose:
               print("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=ce))
             raise ce
           except ParserError as e:
-            if verbose:
+            if self.verbose:
               print("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
             raise e
           except ScannerError as e:
-            if verbose:
+            if self.verbose:
               print("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
             raise e
           except Exception as e:
-            if verbose:
+            if self.verbose:
               print("Exception in loading yaml (instance): {}".format(e))
             raise e
       return self.instance
@@ -129,28 +126,28 @@ class MDFValidator:
     return None
     
   def validate_instance_with_schema(self):
-    verbose = self.verbose
     if not self.schema or not self.instance:
       raise RuntimeError("Object missing schema and/or instance data")
     if (self.instance):
-      print("Checking instance against schema =====")
+      if self.verbose:
+        print("Checking instance against schema =====")
       try:
         validate(instance=self.instance.as_dict(), schema=self.schema)
       except ConstructorError as ce:
-        if verbose:
+        if self.verbose:
           print(ce)
         raise ce
       except RefResolutionError as re:
-        if verbose:
+        if self.verbose:
           print(re)
         raise re
       except ValidationError as ve:
-        if verbose:
+        if self.verbose:
           for e in d6(self.schema).iter_errors(self.instance.as_dict()):
             print(e);
         raise ve
       except Exception as e:
-        if verbose:
+        if self.verbose:
           print("Exception during validation: {}".format(e))
         raise e
     return None
