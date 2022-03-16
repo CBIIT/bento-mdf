@@ -7,7 +7,7 @@ from jsonschema import (
 from jsonschema import Draft6Validator as d6
 from yaml.parser import ParserError, ScannerError
 from yaml.constructor import ConstructorError
-from yaml.nodes import MappingNode
+from yaml.nodes import MappingNode, SequenceNode
 from pdb import set_trace
 
 MDFSCHEMA_URL = "https://github.com/CBIIT/bento-mdf/raw/master/schema/mdf-schema.yaml"
@@ -39,8 +39,26 @@ def construct_mapping(self, node, deep=False):
     return mapping
 
 
+def construct_sequence(self, node, deep=False):
+    if not isinstance(node, SequenceNode):
+        raise ConstructorError(None, None,
+                               "expected a sequence node, but found %s" %
+                               node.id, node.start_mark)
+    elts = set()
+    for c in node.value:
+        if isinstance(c.value, str):  # just check lists of strings
+            if c.value in elts:
+                raise ConstructorError("while constructing a sequence",
+                                       node.start_mark,
+                                       "found duplicated element (%s)" %
+                                       c.value)
+            else:
+                elts.add(c.value)
+    return [self.construct_object(child, deep=deep) for child in node.value]
+
+
 class MDFValidator:
-    def __init__(self, sch_file, *inst_files, verbose=True):
+    def __init__(self, sch_file, *inst_files, verbose=1):
         self.schema = None
         self.verbose = verbose
         self.instance = om.MergedOptions()
@@ -49,9 +67,10 @@ class MDFValidator:
         self.yloader = yaml.loader.Loader
         self.yaml_valid = False
 
-        # monkey patch to detect dup keys
+        # monkey patches to detect dup keys, elts
         self.yloader.construct_mapping = construct_mapping
-
+        self.yloader.construct_sequence = construct_sequence
+        
     def load_and_validate_schema(self):
         if self.schema:
             return self.schema
@@ -72,9 +91,9 @@ class MDFValidator:
         else:
             pass
         try:
-            if self.verbose:
+            if self.verbose > 1:
                 print("Checking schema YAML =====")
-                self.schema = yaml.load(self.sch_file, Loader=self.yloader)
+            self.schema = yaml.load(self.sch_file, Loader=self.yloader)
         except ConstructorError as ce:
             if self.verbose:
                 print("YAML error in MDF Schema '{fn}':\n{e}".format(
@@ -89,7 +108,7 @@ class MDFValidator:
             if self.verbose:
                 print("Exception in loading MDF Schema yaml: {}".format(e))
             return e
-        if self.verbose:
+        if self.verbose > 1:
             print("Checking as a JSON schema =====")
         try:
             d6.check_schema(self.schema)
@@ -107,7 +126,7 @@ class MDFValidator:
         if self.instance:
             return self.instance
         if (self.inst_files):
-            if self.verbose:
+            if self.verbose > 1:
                 print("Checking instance YAML =====")
             for inst_file in self.inst_files:
                 if isinstance(inst_file, str):
@@ -139,7 +158,7 @@ class MDFValidator:
         if not self.schema or not self.instance:
             raise RuntimeError("Object missing schema and/or instance data")
         if (self.instance):
-            if self.verbose:
+            if self.verbose > 1:
                 print("Checking instance against schema =====")
             try:
                 validate(instance=self.instance.as_dict(), schema=self.schema)
