@@ -41,6 +41,6 @@ def test(v):
 
 if __name__ == '__main__':
   args = ap.parse_args()
-  v = MDFValidator( args.schema,verbose=(not args.quiet),*args.mdf_files)
+  v = MDFValidator( args.schema,verbose=(0 if args.quiet else 2 ),*args.mdf_files)
   exit(test(v)) # emit return val (0 = good) to os
 

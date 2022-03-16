@@ -11,6 +11,7 @@ Nodes:
       - current_step
       - disease
       - ctep_category
+      - case_id # elt dup
       - ctep_subcategory
       - meddra_code
       - prior_drugs
@@ -27,14 +28,6 @@ Nodes:
       - show_node
       - met_site_id
       - metastatic_site_name
-  case: # keydup
-    Props:
-      - show_node
-      - aliquot_id
-      - molecular_sequence_number
-      - nucleic_acid_concentration
-      - nucleic_acid_volume
-      - nucleic_acid_type
   ihc_assay_report:
     Props:
       - show_node

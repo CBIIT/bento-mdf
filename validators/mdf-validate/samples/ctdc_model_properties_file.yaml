@@ -1,5 +1,12 @@
 PropDefinitions:
 #property of case, specimen, metastatic_site, nucleic_acid, ihc_assay_report, sequencing_assay, variant_report, file, snv_variant, delins_variant, indel_variant, copy_number_variant, gene_fusion_variant, assignment_report, arm, clinical_trial
+  case.show_node:
+    # check dotted name is ok
+    Desc: A settable node property that flags a node, and its children as queryable.
+    Src: NA
+    Type: boolean
+    Req: true
+    Private: true
   show_node:
     Desc: A settable node property that flags a node, and its children as queryable.
     Src: NA

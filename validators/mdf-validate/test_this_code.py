@@ -1,4 +1,6 @@
 import pytest
+import sys
+sys.path.insert(0,".")
 from yaml.parser import ParserError
 from yaml.constructor import ConstructorError
 from jsonschema import ValidationError, SchemaError, RefResolutionError
@@ -11,6 +13,7 @@ test_mdf_files = ['samples/ctdc_model_file.yaml','samples/ctdc_model_properties_
 test_schema_bad = 'samples/mdf-bad-schema.yaml'
 test_yaml_bad = 'samples/ctdc_model_bad.yaml'
 test_yaml_with_keydup = 'samples/ctdc_model_keydup.yaml'
+test_yaml_with_eltdup = 'samples/ctdc_model_eltdup.yaml'
 test_mdf_files_invalid_wrt_schema = ['samples/ctdc_model_file_invalid.yaml','samples/ctdc_model_properties_file.yaml']
 test_list_type_files = ['samples/ctdc_model_file.yaml','samples/list-type-test.yaml']
 test_enum_kw_files = ['samples/ctdc_model_file.yaml','samples/ctdc_model_properties_enum_kw.yaml']
@@ -41,6 +44,11 @@ def test_keydup_yaml():
   with pytest.raises(ConstructorError):
     v.load_and_validate_yaml()
 
+def test_eltdup_yaml():
+  v = MDFValidator(test_schema_file, test_yaml_with_eltdup)
+  with pytest.raises(ConstructorError):
+    v.load_and_validate_yaml()
+    
 def test_bad_schema():
   # pytest.skip()
   v =  MDFValidator(test_schema_bad)
