@@ -27,7 +27,7 @@ Nodes:
       - show_node
       - met_site_id
       - metastatic_site_name
-  case:
+  case: # keydup
     Props:
       - show_node
       - aliquot_id

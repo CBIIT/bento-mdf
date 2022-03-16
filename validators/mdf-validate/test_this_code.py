@@ -1,4 +1,6 @@
 import pytest
+import sys
+sys.path.insert(0,".")
 from yaml.parser import ParserError
 from yaml.constructor import ConstructorError
 from jsonschema import ValidationError, SchemaError, RefResolutionError
