@@ -1,8 +1,9 @@
-#!/usr/bin/env python 
-#from pdb import set_trace
+#!/usr/bin/env python
+# from pdb import set_trace
+import requests
 from sys import exit
 from argparse import ArgumentParser, FileType
-import requests
+
 
 from MDFValidate.validator import MDFValidator
 
@@ -21,26 +22,18 @@ ap.add_argument('mdf_files',nargs='+',
 
 
 def test(v):
-  retval = 0
-  try:
-    v.load_and_validate_schema()
-  except:
-    retval+=1;
-    pass
-  try:
-    v.load_and_validate_yaml()
-  except:
-    retval+=1;
-    pass
-  try:
-    v.validate_instance_with_schema()
-  except:
-    retval+=1;
-    pass
-  return retval
+    retval = 0
+    if not v.load_and_validate_schema():
+        retval+=1;
+    if not v.load_and_validate_yaml():
+        retval+=1;
+    if not v.validate_instance_with_schema():
+        retval+=1;
+    return retval
+
 
 if __name__ == '__main__':
-  args = ap.parse_args()
-  v = MDFValidator( args.schema,verbose=(0 if args.quiet else 2 ),*args.mdf_files)
-  exit(test(v)) # emit return val (0 = good) to os
-
+    args = ap.parse_args()
+    v = MDFValidator(args.schema, verbose=(-1 if args.quiet else 2),
+                     *args.mdf_files)
+    exit(test(v))  # emit return val (0 = good) to os
