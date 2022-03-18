@@ -35,32 +35,32 @@ def test_with_remote_schema():
   assert v.load_and_validate_yaml()
 
 def test_bad_yaml():
-  v = MDFValidator(test_schema_file, test_yaml_bad)
-#  with pytest.raises(ParserError):
-  assert not v.load_and_validate_yaml()
+  v = MDFValidator(test_schema_file, test_yaml_bad, raiseError=True)
+  with pytest.raises(ParserError):
+    v.load_and_validate_yaml()
 
 def test_keydup_yaml():
-  v = MDFValidator(test_schema_file, test_yaml_with_keydup)
-#  with pytest.raises(ConstructorError):
-  assert not  v.load_and_validate_yaml()
+  v = MDFValidator(test_schema_file, test_yaml_with_keydup,raiseError=True)
+  with pytest.raises(ConstructorError):
+    v.load_and_validate_yaml()
 
 def test_eltdup_yaml():
-  v = MDFValidator(test_schema_file, test_yaml_with_eltdup)
-#  with pytest.raises(ConstructorError):
-  assert not  v.load_and_validate_yaml()
+  v = MDFValidator(test_schema_file, test_yaml_with_eltdup, raiseError=True)
+  with pytest.raises(ConstructorError):
+    v.load_and_validate_yaml()
     
 def test_bad_schema():
   # pytest.skip()
-  v =  MDFValidator(test_schema_bad)
-#  with pytest.raises(SchemaError):
-  assert not  v.load_and_validate_schema()
+  v =  MDFValidator(test_schema_bad, raiseError=True)
+  with pytest.raises(SchemaError):
+    v.load_and_validate_schema()
    
 def test_instance_not_valid_wrt_schema():
-  v =  MDFValidator(test_schema_file, *test_mdf_files_invalid_wrt_schema)  
+  v =  MDFValidator(test_schema_file, *test_mdf_files_invalid_wrt_schema, raiseError=True)  
   assert v.load_and_validate_schema()
   assert v.load_and_validate_yaml()
-#  with pytest.raises(ValidationError):
-  assert not  v.validate_instance_with_schema()
+  with pytest.raises(ValidationError):
+    v.validate_instance_with_schema()
 
 def test_list_type():
   v = MDFValidator(test_latest_schema, *test_list_type_files)
@@ -77,12 +77,12 @@ def test_enum_vs_type_kw():
   v.validate_instance_with_schema()
 
 def test_enum_and_type_kw():
-  v = MDFValidator(test_latest_schema, *test_enum_and_type_kw_files)
+  v = MDFValidator(test_latest_schema, *test_enum_and_type_kw_files, raiseError=True)
   assert v
   assert v.load_and_validate_schema()
   assert v.load_and_validate_yaml()
-#  with pytest.raises(ValidationError):
-  assert not  v.validate_instance_with_schema()
+  with pytest.raises(ValidationError):
+    v.validate_instance_with_schema()
 
 
 

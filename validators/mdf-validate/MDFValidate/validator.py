@@ -62,7 +62,7 @@ def construct_sequence(self, node, deep=False):
 
 
 class MDFValidator:
-    def __init__(self, sch_file, *inst_files, verbose=0):
+    def __init__(self, sch_file, *inst_files, verbose=0, raiseError=False):
         self.schema = None
         if verbose > 0:
             logger.setLevel(logging.INFO)
@@ -75,6 +75,7 @@ class MDFValidator:
         self.inst_files = inst_files
         self.yloader = yaml.loader.Loader
         self.yaml_valid = False
+        self.raiseError = raiseError
 
         # monkey patches to detect dup keys, elts
         self.yloader.construct_mapping = construct_mapping
@@ -90,12 +91,16 @@ class MDFValidator:
                 self.sch_file = sch.text
             except Exception as e:
                 logger.error("Error in fetching mdf-schema.yml: \n{e}".format(e=e))
+                if self.raiseError:
+                    raise e
                 return
         elif isinstance(self.sch_file, str):
             try:
                 self.sch_file = open(self. sch_file, "r")
             except IOError as e:
                 logger.error(e)
+                if self.raiseError:
+                    raise e
                 return
         else:
             pass
@@ -105,23 +110,33 @@ class MDFValidator:
         except ConstructorError as ce:
             logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
                 fn=self.sch_file.name, e=ce))
+            if self.raiseError:
+                raise
             return
                 
         except ParserError as e:
             logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
                   fn=self.sch_file.name, e=e))
+            if self.raiseError:
+                raise e
             return
         except Exception as e:
             logger.error("Exception in loading MDF Schema yaml: {}".format(e))
+            if self.raiseError:
+                raise e
             return
         logger.info("Checking as a JSON schema =====")
         try:
             d6.check_schema(self.schema)
         except SchemaError as se:
             logger.error("MDF Schema error: {}".format(se))
+            if self.raiseError:
+                raise se
             return
         except Exception as e:
             logger.error("Exception in checking MDF Schema: {}".format(e))
+            if self.raiseError:
+                raise e
             return
         return self.schema
 
@@ -139,15 +154,23 @@ class MDFValidator:
                 except ConstructorError as ce:
                     logger.error("YAML error in '{fn}':\n{e}".format(
                         fn=inst_file.name, e=str(ce)))
+                    if self.raiseError:
+                        raise ce
                     return
                 except ParserError as e:
                     logger.error("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
+                    if self.raiseError:
+                        raise e
                     return
                 except ScannerError as e:
                     logger.error("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
+                    if self.raiseError:
+                        raise e
                     return
                 except Exception as e:
                     logger.error("Exception in loading yaml (instance): {}".format(e))
+                    if self.raiseError:
+                        raise e
                     return
         return self.instance
         logger.error("No instance yaml(s) specified")
@@ -166,15 +189,23 @@ class MDFValidator:
                 validate(instance=self.instance.as_dict(), schema=self.schema)
             except ConstructorError as ce:
                 logger.error(ce)
+                if self.raiseError:
+                    raise ce
                 return
             except RefResolutionError as re:
                 logger.error(re)
+                if self.raiseError:
+                    raise re
                 return
             except ValidationError as ve:
                 for e in d6(self.schema).iter_errors(self.instance.as_dict()):
                     logger.error(e)
+                if self.raiseError:
+                    raise ve
                 return
             except Exception as e:
                 logger.error("Exception during validation: {}".format(e))
+                if self.raiseError:
+                    raise e
                 return
         return True
