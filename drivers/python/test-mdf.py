@@ -20,14 +20,19 @@ ap.add_argument('mdf_files',nargs='+',
                   help="MDF yaml files for validation")
 
 
-def test(v):
+def test(v, files):
     retval = 0
     if not v.load_and_validate_schema():
-        retval+=1;
+        retval += 1
     if not v.load_and_validate_yaml():
-        retval+=1;
+        retval += 1
     if not v.validate_instance_with_schema():
-        retval+=1;
+        retval += 1
+    if not retval:
+        for f in files:
+            f.seek(0)
+        if not MDF(*files, handle="test"):
+            retval += 1
     return retval
 
 
@@ -35,4 +40,4 @@ if __name__ == '__main__':
     args = ap.parse_args()
     v = MDFValidator(args.schema, verbose=(-1 if args.quiet else 2),
                      *args.mdf_files)
-    exit(test(v))  # emit return val (0 = good) to os
+    exit(test(v,args.mdf_files))  # emit return val (0 = good) to os

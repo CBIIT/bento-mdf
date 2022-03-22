@@ -102,6 +102,8 @@ class MDF(object):
                 else:
                     fh = open(f, "r")
                     vargs.append(fh)
+            else:
+                vargs.append(f)
                 
         v = MDFValidator(None, *vargs, raiseError=True)
         self.schema = v.load_and_validate_yaml()
