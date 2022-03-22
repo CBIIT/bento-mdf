@@ -3,10 +3,8 @@
 import requests
 from sys import exit
 from argparse import ArgumentParser, FileType
-from bento_meta.mdf import MDF
-
-
-from MDFValidate.validator import MDFValidator
+from bento_mdf.mdf import MDF
+from bento_mdf.validator import MDFValidator
 
 ap = ArgumentParser(description="Validate MDF against JSONSchema")
 ap.add_argument('--schema',
