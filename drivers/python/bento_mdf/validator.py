@@ -1,7 +1,6 @@
 import delfick_project.option_merge as om
 import yaml
 import logging
-from logging import debug, info, warning, error
 import requests
 from jsonschema import (
   validate, ValidationError, SchemaError, RefResolutionError
@@ -65,14 +64,9 @@ class MDFValidator:
     """Class that encapsulates schema and YAML instance validation for the
     Bento Model Description Format. Use to check and load MDF YAML into 
     a python dict (see load_and_validate)."""
-    def __init__(self, sch_file, *inst_files, verbose=0, raiseError=False):
+    def __init__(self, sch_file, *inst_files, raiseError=False,
+                 logger=logging.getLogger(__name__)):
         self.schema = None
-        if verbose > 0:
-            logger.setLevel(logging.INFO)
-        elif verbose < 0:
-            logger.setLevel(logging.NOTSET)
-        else:
-            logger.setLevel(logging.WARNING)
         self.instance = om.MergedOptions()
         self.sch_file = sch_file
         self.inst_files = inst_files

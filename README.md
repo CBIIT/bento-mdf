@@ -22,14 +22,23 @@ The Bento framework is currently used in the following projects;
 Language drivers and other tools that want to comply with the Bento
 framework should observe the latest [specification](./spec).
 
+[bento_mdf](./drivers/python/) is a reference driver that validates
+and loads MDF into a [bento-meta](https://github.com/CBIIT/bento-meta)
+python object model.
+
 [make-model](./drivers/Perl/make-model/README.md) is a reference
 driver and tool written in [Perl](https://www.perl.org/).
 
 ### Validator
 
-A simple command line validator is included in the repo at
-[mdf-validate](./validators/mdf-validate). See that page for install
-and usage information.
+A simple command line validator `test-mdf.py` is included in 
+[bento_mdf](./drivers/python). Install it like so:
+
+    $ pip install bento-mdf@git+https://github.com/CBIIT/bento-mdf.git/#egg=subdir\&subdirectory=python
+
+and run:
+
+	$ test-mdf.py [model-file.yaml] [model-props-file.yaml] ...
 
 ## Model Description Files (MDF)
 

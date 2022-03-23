@@ -10,7 +10,6 @@ writing the opposite way.
 import sys
 import yaml
 import logging
-from logging import debug, info, warning, error
 from tempfile import TemporaryFile
 from bento_mdf.validator import MDFValidator
 from bento_meta.model import Model
@@ -33,7 +32,6 @@ import json
 from pdb import set_trace
 
 sys.path.extend([".", ".."])
-logger = logging.getLogger(__name__)
 
 def make_nano():
     return generate(
@@ -42,12 +40,15 @@ def make_nano():
     )
 
 class MDF(object):
-    def __init__(self, *yaml_files, handle=None, model=None, _commit=None):
+    def __init__(self, *yaml_files, handle=None, model=None, _commit=None,
+                 raiseError=False, logger=logging.getLogger(__name__)):
         """Create a :class:`Model` from MDF YAML files/Write a :class:`Model` to YAML
         :param str|file|url *yaml_files: MDF filenames or file objects, 
         in desired merge order
         :param str handle: Handle (name) for the resulting Model
         :param :class:`Model` model: Model to convert to MDF
+        :param boolean raiseError: raise on error if True
+        :param :class:`logging.Logger` logger: Python logger (suitable default)
         :attribute model: the :class:`bento_meta.model.Model` created"""
         if not model and (not handle or not isinstance(handle, str)):
             raise ArgError("arg handle= must be a str - name for model")
@@ -59,16 +60,17 @@ class MDF(object):
         self._model = model
         self._commit = _commit
         self._terms = {}
+        self.logger = logger
         if model:
             self.handle = model.handle
         else:
             self.handle = handle
         if self.files:
             self.load_yaml()
-            self.create_model()
+            self.create_model(raiseError=raiseError)
         else:
             if not model:
-                logger.warning("No MDF files or model provided to constructor")
+                self.logger.warning("No MDF files or model provided to constructor")
 
     @property
     def model(self):
@@ -122,7 +124,7 @@ class MDF(object):
         elif (self.schema.get("Handle")):
             self._model = Model(handle=self.schema["Handle"])
         else:
-            logger.error("Model handle not present in MDF nor provided in args")
+            self.logger.error("Model handle not present in MDF nor provided in args")
             success = False
             
         ynodes = self.schema["Nodes"]
@@ -158,20 +160,19 @@ class MDF(object):
                     "_commit": self._commit
                 }
                 if not init["multiplicity"]:
-                    logger.warning("edge '{ename}' from '{src}' to '{dst}' "
+                    self.logger.warning("edge '{ename}' from '{src}' to '{dst}' "
                                    "does not specify a multiplicity".
                                    format(ename=e, src=ends["Src"],
                                           dst=ends["Dst"]))
                     init["multiplicity"] = Edge.default("multiplicity")
                 if init["multiplicity"] not in ('many_to_many', 'many_to_one',
                                                 'one_to_many', 'one_to_one'):
-                    logger.warning("edge '{ename}' from '{src}' to '{dst}'"
+                    self.logger.warning("edge '{ename}' from '{src}' to '{dst}'"
                                    " has non-standard multiplicity '{mult}'".
                                    format(ename=e, src=ends["Src"],
                                           dst=ends["Dst"], mult=init["multiplicity"]
                                    )
                     )
-
                 edge = self._model.add_edge(init)
                 Tags = ye.get("Tags") or ends.get("Tags")
                 if Tags:
@@ -185,7 +186,7 @@ class MDF(object):
         for ent in ChainMap(self._model.nodes, self._model.edges).values():
             if isinstance(ent, Node):
                 pnames = ynodes[ent.handle]["Props"]
-                if yunps:
+                if yunps:  # universal node props
                     pnames.extend(yunps["mayHave"] if yunps.get("mayHave") else [])
                     pnames.extend(yunps["mustHave"] if yunps.get("mustHave") else [])
                 if pnames:
@@ -202,13 +203,13 @@ class MDF(object):
                 # note the end-specified props _replace_ the edge-specified props,
                 # they are not merged:
                 pnames = end.get("Props") or yedges[hdl].get("Props")
-                if yurps:
+                if yurps:  # universal relationship props
                     pnames.extend(yurps["mayHave"] if yurps.get("mayHave") else [])
                     pnames.extend(yurps["mustHave"] if yurps.get("mustHave") else [])
                 if pnames:
                     propnames[ent] = pnames
             else:
-                logger.error(
+                self.logger.error(
                     "Unhandled entity type {type} for properties".format(
                         type=type(ent).__name__
                     )
@@ -221,6 +222,7 @@ class MDF(object):
                     prop_of[p].append(ent)
                 else:
                     prop_of[p] = [ent]
+        defns_for = set(ypropdefs.keys())
         for pname in prop_of:
             for ent in prop_of[pname]:
                 key = ent.handle+"."+pname
@@ -229,13 +231,15 @@ class MDF(object):
                     key = pname
                     ypdef = ypropdefs.get(pname)
                 if not ypdef:
-                    logger.warning(
+                    self.logger.warning(
                         "property '{pname}' does not have a corresponding "
                         "propdef for entity '{handle}'".format(
                             pname=pname, handle=ent.handle
                         )
                     )
-                    break
+                else:
+                    if key in defns_for:
+                        defns_for.remove(key)
                 init = {"handle": pname,
                         "model": self.handle,
                         "_commit": self._commit}
@@ -244,7 +248,7 @@ class MDF(object):
                 elif ypdef.get("Enum"):
                     init.update(self.calc_value_domain(ypdef["Enum"], pname))
                 else:
-                    logger.warning(
+                    self.logger.warning(
                         "property '{pname}' on entity '{handle}' does not "
                         "specify a data type".format(pname=pname,
                                                      handle=ent.handle)
@@ -257,6 +261,10 @@ class MDF(object):
                         prop.tags[t] = Tag({"key": t,
                                             "value": ypdef["Tags"][t],
                                             "_commit": self._commit})
+        if defns_for:
+            self.logger.warning(
+                "No properties in model corresponding to the following "
+                "PropDefintions: {}".format(defns_for))
         if raiseError and not success:
             raise RuntimeError("MDF errors found; see log output.")
         return self._model
@@ -284,16 +292,16 @@ class MDF(object):
                         ret["value_set"] = i_domain["value_set"]
                     return ret
                 else:
-                    logger.warning(
+                    self.logger.warning(
                         "MDF type descriptor defines item_type, but value_type"
-                        " is {}, not 'list'".format(typedef["value_type"]))
+                        " is {}, not 'list' (property '{}')".format(typedef["value_type"],pname))
             elif not typedef:
-                logger.warning("MDF type descriptor is null")
+                self.logger.warning("MDF type descriptor is null for property '{}'".format(pname))
             else:
                 # punt
-                logger.warning(
-                    "MDF type descriptor unrecognized: json looks like {}".
-                    format(json.dumps(typedef))
+                self.logger.warning(
+                    "MDF type descriptor unrecognized: json looks like {} (property '{}')".
+                    format(json.dumps(typedef),pname)
                     )
                 return {"value_domain": json.dumps(typedef)}
         elif isinstance(typedef, list):  # a valueset: create value set and term objs
@@ -314,7 +322,7 @@ class MDF(object):
         elif isinstance(typedef, str):
             return {"value_domain": typedef}
         else:
-            logger.warning("Applying default value domain")
+            self.logger.warning("Applying default value domain to property '{}'".format(pname))
             return {"value_domain": Property.default("value_domain")}
 
     def write_mdf(self, model=None, file=None):
@@ -383,7 +391,7 @@ class MDF(object):
             prname = pr[len(pr)-1]
             prnames.append(prname)
             if props.get(prname):
-                warning("Property name collision at {}".format(pr))
+                self.logger.warning("Property name collision at {}".format(pr))
             props[prname] = model.props[pr]
         for prname in sorted(prnames):
             prop = props[prname]
@@ -397,7 +405,7 @@ class MDF(object):
                 mdf_prop["Enum"] = self.calc_prop_type(prop)
                 for t in prop.terms:
                     if t in mdf["Terms"]:
-                        warning("Term collision at {} (property {})".format(t, prop.handle))
+                        self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
                     mdf["Terms"][t] = {
                         "Definition": prop.terms[t].origin_definition,
                         "Origin": prop.terms[t].origin,
@@ -425,7 +433,7 @@ class MDF(object):
             return Property.default("value_domain")
         if prop.value_domain == "regexp":
             if not prop.pattern:
-                warning("Property {} has 'regexp' value domain, but no pattern specified".format(prop.handle))
+                self.logger.warning("Property {} has 'regexp' value domain, but no pattern specified".format(prop.handle))
                 return {"pattern":"^.*$"}
             else:
                 return {"pattern":prop.pattern}
@@ -433,7 +441,7 @@ class MDF(object):
             return {"value_type":prop.value_domain, "units":prop.units.split(';')}
         if prop.value_domain == "value_set":
             if not prop.value_set:
-                warning("Property {} has 'value_set' value domain, but value_set attribute is None".format(prop.handle))
+                self.logger.warning("Property {} has 'value_set' value domain, but value_set attribute is None".format(prop.handle))
                 return "string"
             values = []
             for trm in sorted(prop.terms):
