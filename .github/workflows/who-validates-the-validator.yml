@@ -17,7 +17,7 @@ jobs:
           python-version: '3.x'
       - name: Test Validator
         run: |
-          pushd validators/mdf-validate
+          pushd drivers/python
           pip install tox
           tox
           popd
