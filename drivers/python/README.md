@@ -1,29 +1,68 @@
-# mdf-validate / test-mdf.py
+bento_mdf
+=======
+
+Python 3 drivers for the graph [Model Description Format](https://github.com/CBIIT/bento-mdf)
 
 This directory provides ``test-mdf.py``, a standalone command line MDF validator.
 
 ## Installation
 
-The validator is written in Python 3. Use ``pip`` to install.
+Install the latest version (including scripts below) from GitHub using
+an up-to-date pip:
 
-       cd bento-mdf
-       pip install ./validators/mdf-validate
+	pip install bento_mdf@git+https://github.com/CBIIT/bento-mdf.git#egg=subdir\&subdirectory=drivers/python
 
-## Usage
+## Scripts
+
+Scripts [`test-mdf.py`](./test-mdf.py) and
+[`load-mdf.py`](./load-mdf.py) are included in the
+distribution. `test-mdf` is a verbose validator that can be used to
+find issues in a set of local MDFs using the [MDF
+JSONSchema](../../schema/mdf-schema.yaml). `load-mdf` will load a
+valid set of MDFs into an existing [Neo4j](https://neo4j.com) [Metamodel Database](https://github.com/CBIIT/bento-meta].
+
+
+## `test-mdf` Usage
 
     $ test-mdf.py -h
-    usage: test-mdf.py [-h] [--schema SCHEMA] mdf-file [mdf-file ...]
+    usage: test-mdf.py [-h] [--schema SCHEMA] [--quiet] [--log-file LOG_FILE]
+                       mdf-file [mdf-file ...]
 
     Validate MDF against JSONSchema
 
     positional arguments:
-      mdf-file         MDF yaml files for validation
+      mdf-file             MDF yaml files for validation
+
+    optional arguments:
+      -h, --help           show this help message and exit
+      --schema SCHEMA      MDF JSONschema file
+      --quiet              Suppress output; return only exit value
+      --log-file LOG_FILE  Log file name
+
+See "Validator Notes" below.
+
+## `load-mdf` Usage
+
+    $ ./load-mdf.py -h
+    usage: load-mdf.py [-h] --commit COMMIT [--handle HANDLE] [--user USER] [--passw PASSW]
+                       [--bolt BoltURL] [--put]
+                       [MDF-FILE ...]
+
+    Load model in MDF into an MDB
+
+    positional arguments:
+      MDF-FILE         MDF file(s)/url(s)
 
     optional arguments:
       -h, --help       show this help message and exit
-      --schema SCHEMA  MDF JSONschema file
+      --commit COMMIT  commit SHA1 for MDF instance (if any)
+      --handle HANDLE  model handle
+      --user USER      MDB username
+      --passw PASSW    MDB password
+      --bolt BoltURL   MDB Bolt url endpoint (specify as 'bolt://...')
+      --put            Load model to database
 
-## Notes
+## Validator `test-mdf.py`Notes
 
 The ``--schema`` argument is optional. ``test-mdf.py`` will automatically retrieve the latest [mdf-schema.yaml](../../schema/mdf-schema.yaml) in the master branch of [this repo](https://github.com/CBIIT/bento-mdf).
 
