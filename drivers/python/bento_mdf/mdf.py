@@ -86,7 +86,7 @@ class MDF(object):
                 if re.match("(?:file|https?)://", f):
                     response = requests.get(f)
                     if not response.ok:
-                        error(
+                        self.logger.error(
                             "Fetching url {} returned code {}".format(
                                 response.url, response.status_code
                             ))
@@ -109,7 +109,6 @@ class MDF(object):
                 
         v = MDFValidator(None, *vargs, raiseError=True)
         self.schema = v.load_and_validate_yaml()
-
 
     def create_model(self, raiseError=False):
         """Create :class:`Model` instance from loaded YAML
@@ -136,7 +135,7 @@ class MDF(object):
         for n in ynodes:
             yn = ynodes[n]
             init = {"handle": n, "model": self.handle, "_commit": self._commit}
-            for a in ["desc","nanoid"]:
+            for a in ["desc", "nanoid"]:
                 if yn.get(a):
                     init[a] = yn[a]
             node = self._model.add_node(init)
@@ -161,22 +160,22 @@ class MDF(object):
                 }
                 if not init["multiplicity"]:
                     self.logger.warning("edge '{ename}' from '{src}' to '{dst}' "
-                                   "does not specify a multiplicity".
-                                   format(ename=e, src=ends["Src"],
-                                          dst=ends["Dst"]))
+                                        "does not specify a multiplicity".
+                                        format(ename=e, src=ends["Src"],
+                                               dst=ends["Dst"]))
                     init["multiplicity"] = Edge.default("multiplicity")
                 if init["multiplicity"] not in ('many_to_many', 'many_to_one',
                                                 'one_to_many', 'one_to_one'):
                     self.logger.warning("edge '{ename}' from '{src}' to '{dst}'"
-                                   " has non-standard multiplicity '{mult}'".
-                                   format(ename=e, src=ends["Src"],
-                                          dst=ends["Dst"], mult=init["multiplicity"]
+                                        " has non-standard multiplicity '{mult}'".
+                                        format(ename=e, src=ends["Src"],
+                                               dst=ends["Dst"], mult=init["multiplicity"]
                                    )
                     )
                 edge = self._model.add_edge(init)
                 Tags = ye.get("Tags") or ends.get("Tags")
                 if Tags:
-                    tags = CollValue({}, owner=edge, owner_key="tags")
+                    # tags = CollValue({}, owner=edge, owner_key="tags")
                     for t in Tags:
                         edge.tags[t] = Tag({"key": t,
                                             "value": Tags[t],

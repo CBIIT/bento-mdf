@@ -102,7 +102,7 @@ class MDFValidator:
         else:
             pass
         try:
-            logger.info("Checking schema YAML =====")
+            self.logger.info("Checking schema YAML =====")
             self.schema = yaml.load(self.sch_file, Loader=self.yloader)
         except ConstructorError as ce:
             logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
@@ -122,7 +122,7 @@ class MDFValidator:
             if self.raiseError:
                 raise e
             return
-        logger.info("Checking as a JSON schema =====")
+        self.logger.info("Checking as a JSON schema =====")
         try:
             d6.check_schema(self.schema)
         except SchemaError as se:
@@ -141,7 +141,7 @@ class MDFValidator:
         if self.instance:
             return self.instance
         if (self.inst_files):
-            logger.info("Checking instance YAML =====")
+            self.logger.info("Checking instance YAML =====")
             for inst_file in self.inst_files:
                 if isinstance(inst_file, str):
                     inst_file = open(inst_file, "r")
@@ -181,7 +181,7 @@ class MDFValidator:
             logger.warning("No valid yaml instance; skipping this validation")
             return
         if (self.instance):
-            logger.info("Checking instance against schema =====")
+            self.logger.info("Checking instance against schema =====")
             try:
                 validate(instance=self.instance.as_dict(), schema=self.schema)
             except ConstructorError as ce:
