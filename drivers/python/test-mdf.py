@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # from pdb import set_trace
-import requests
 from sys import exit
 import logging
 from argparse import ArgumentParser, FileType
@@ -22,12 +21,6 @@ ap.add_argument('mdf_files',nargs='+',
 ap.add_argument("--log-file",
                 help="Log file name")
 
-fmt = logging.Formatter(fmt="%(asctime)s:%(name)s (%(levelname)s) - %(message)s")
-shdl = logging.StreamHandler()
-shdl.setLevel(logging.INFO)
-shdl.setFormatter(fmt)
-
-
 def test(args, logger):
     retval = 0
     v = MDFValidator(args.schema, *args.mdf_files, logger=logger)
@@ -48,13 +41,17 @@ def test(args, logger):
 if __name__ == '__main__':
     args = ap.parse_args()
     logger = logging.getLogger("test-mdf")
-    logger.propagate = False
+    logger.setLevel(logging.DEBUG)
+    fmt = logging.Formatter(fmt="%(asctime)s:%(name)s (%(levelname)s) - %(message)s")
+    shdl = logging.StreamHandler()
+    shdl.setLevel(logging.INFO)
+    shdl.setFormatter(fmt)
     logger.addHandler(shdl)
     if args.quiet:
         shdl.setLevel(logging.CRITICAL)
     if args.log_file:
         fhdl = logging.FileHandler(args.log_file)
-        fhdl.setLevel(logging.INFO)
+        fhdl.setLevel(logging.DEBUG)
         fhdl.setFormatter(fmt)
         logger.addHandler(fhdl)
     exit(test(args, logger))  # emit return val (0 = good) to os
