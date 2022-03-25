@@ -13,9 +13,6 @@ from pdb import set_trace
 
 MDFSCHEMA_URL = "https://github.com/CBIIT/bento-mdf/raw/master/schema/mdf-schema.yaml"
 
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
-
 def construct_mapping(self, node, deep=False):
     if not isinstance(node, MappingNode):
         raise ConstructorError(
@@ -72,6 +69,7 @@ class MDFValidator:
         self.inst_files = inst_files
         self.yloader = yaml.loader.Loader
         self.yaml_valid = False
+        self.logger = logger
         self.raiseError = raiseError
 
         # monkey patches to detect dup keys, elts
@@ -87,7 +85,7 @@ class MDFValidator:
                 sch.raise_for_status()
                 self.sch_file = sch.text
             except Exception as e:
-                logger.error("Error in fetching mdf-schema.yml: \n{e}".format(e=e))
+                self.logger.error("Error in fetching mdf-schema.yml: \n{e}".format(e=e))
                 if self.raiseError:
                     raise e
                 return
@@ -95,7 +93,7 @@ class MDFValidator:
             try:
                 self.sch_file = open(self. sch_file, "r")
             except IOError as e:
-                logger.error(e)
+                self.logger.error(e)
                 if self.raiseError:
                     raise e
                 return
@@ -105,20 +103,20 @@ class MDFValidator:
             self.logger.info("Checking schema YAML =====")
             self.schema = yaml.load(self.sch_file, Loader=self.yloader)
         except ConstructorError as ce:
-            logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
+            self.logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
                 fn=self.sch_file.name, e=ce))
             if self.raiseError:
                 raise
             return
                 
         except ParserError as e:
-            logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
+            self.logger.error("YAML error in MDF Schema '{fn}':\n{e}".format(
                   fn=self.sch_file.name, e=e))
             if self.raiseError:
                 raise e
             return
         except Exception as e:
-            logger.error("Exception in loading MDF Schema yaml: {}".format(e))
+            self.logger.error("Exception in loading MDF Schema yaml: {}".format(e))
             if self.raiseError:
                 raise e
             return
@@ -126,12 +124,12 @@ class MDFValidator:
         try:
             d6.check_schema(self.schema)
         except SchemaError as se:
-            logger.error("MDF Schema error: {}".format(se))
+            self.logger.error("MDF Schema error: {}".format(se))
             if self.raiseError:
                 raise se
             return
         except Exception as e:
-            logger.error("Exception in checking MDF Schema: {}".format(e))
+            self.logger.error("Exception in checking MDF Schema: {}".format(e))
             if self.raiseError:
                 raise e
             return
@@ -149,59 +147,59 @@ class MDFValidator:
                     inst_yaml = yaml.load(inst_file, Loader=self.yloader)
                     self.instance.update(inst_yaml)
                 except ConstructorError as ce:
-                    logger.error("YAML error in '{fn}':\n{e}".format(
+                    self.logger.error("YAML error in '{fn}':\n{e}".format(
                         fn=inst_file.name, e=str(ce)))
                     if self.raiseError:
                         raise ce
                     return
                 except ParserError as e:
-                    logger.error("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
+                    self.logger.error("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
                     if self.raiseError:
                         raise e
                     return
                 except ScannerError as e:
-                    logger.error("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
+                    self.logger.error("YAML error in '{fn}':\n{e}".format(fn=inst_file.name,e=e))
                     if self.raiseError:
                         raise e
                     return
                 except Exception as e:
-                    logger.error("Exception in loading yaml (instance): {}".format(e))
+                    self.logger.error("Exception in loading yaml (instance): {}".format(e))
                     if self.raiseError:
                         raise e
                     return
         return self.instance
-        logger.error("No instance yaml(s) specified")
+        self.logger.error("No instance yaml(s) specified")
         return None
     
     def validate_instance_with_schema(self):
         if not self.schema:
-            logger.warning("No valid schema; skipping this validation")
+            self.logger.warning("No valid schema; skipping this validation")
             return
         if not self.instance:
-            logger.warning("No valid yaml instance; skipping this validation")
+            self.logger.warning("No valid yaml instance; skipping this validation")
             return
         if (self.instance):
             self.logger.info("Checking instance against schema =====")
             try:
                 validate(instance=self.instance.as_dict(), schema=self.schema)
             except ConstructorError as ce:
-                logger.error(ce)
+                self.logger.error(ce)
                 if self.raiseError:
                     raise ce
                 return
             except RefResolutionError as re:
-                logger.error(re)
+                self.logger.error(re)
                 if self.raiseError:
                     raise re
                 return
             except ValidationError as ve:
                 for e in d6(self.schema).iter_errors(self.instance.as_dict()):
-                    logger.error(e)
+                    self.logger.error(e)
                 if self.raiseError:
                     raise ve
                 return
             except Exception as e:
-                logger.error("Exception during validation: {}".format(e))
+                self.logger.error("Exception during validation: {}".format(e))
                 if self.raiseError:
                     raise e
                 return
