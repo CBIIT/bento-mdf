@@ -1,14 +1,5 @@
 $schema: http://json-schema.org/draft-06/schema#
-$id: http://cbiit.github./bento-mdf/schema/mdf-schema.yaml
-
-
-# "uniqueItems" : true - to insure an array is unique
-# still need to check that the document itself doesn't contain duplicate
-# object keys?
-
-# since the keys to the top-level objects are data (the names of nodes,
-# relationships, and properties), want to control the spec of those keys
-# draft 6 of JSONSchema has propertyNames property to do this
+$id: https://github.com/CBIIT/bento-mdf/schema/mdf-schema.yaml#
 
 type: object
 properties:
@@ -109,6 +100,10 @@ defs:
     $id: "#fileNameId"
     type: string
     pattern: "^[A-Za-z0-9_-~/.]+\\.json|jsn|yml|yaml$"
+  nanoid:
+    $id: "#nanoid"
+    type: string
+    pattern: "^[abcdefghijkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ0123456789]{6}$"
   url:
     $id: "#url"
     type: string
@@ -266,6 +261,8 @@ defs:
         type: string
       Tags:
         $ref: "#/defs/tagsSpec"
+      nanoid:
+        $ref: "#/defs/nanoid"
     required:
       - Props
   relnSpec:
@@ -323,6 +320,8 @@ defs:
             - Dst
       Tags:
         $ref: "#/defs/tagsSpec"
+      nanoid:
+        $ref: "#/defs/nanoid"
     required:
       - Props
       - Mul
@@ -398,7 +397,8 @@ defs:
 
       Tags:
         $ref: "#/defs/tagsSpec"
-    
+      nanoid:
+        $ref: "#/defs/nanoid"
     oneOf:
       -
         required:
@@ -439,6 +439,8 @@ defs:
           Text definition for the term, ideally as provided by the authority
           given in the Origin field.
         type: string
+      nanoid:
+        $ref: "#/defs/nanoid"
     required:
       - Value
       - Origin
