@@ -134,7 +134,9 @@ class MDF(object):
         ypropdefs = self.schema["PropDefinitions"]
         yunps = self.schema.get("UniversalNodeProperties")
         yurps = self.schema.get("UniversalRelationshipProperties")
-        yterms = self.schema.get("Terms").as_dict()
+        yterms = self.schema.get("Terms")
+        if yterms:
+            yterms = yterms.as_dict()
 
         # create terms first, if any -- properties depend on these
         for t_hdl in tqdm(yterms):
