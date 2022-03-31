@@ -139,19 +139,20 @@ class MDF(object):
             yterms = yterms.as_dict()
 
         # create terms first, if any -- properties depend on these
-        for t_hdl in tqdm(yterms):
-            ytm = yterms[t_hdl]
-            ytm["_commit"] = self._commit
-            if 'origin' in ytm:
-                ytm["origin_name"] = ytm["origin"]
-                del ytm["origin"]
-            else:
-                ytm["origin_name"] = self.handle
-            if 'origin_definition' in ytm and ytm['origin_definition']:
-                ytm["origin_definition"] = unquote(ytm["origin_definition"])
-            tm = Term(ytm)
-            self._terms[t_hdl] = tm
-            self._terms[tm.value] = tm
+        if yterms:
+            for t_hdl in tqdm(yterms):
+                ytm = yterms[t_hdl]
+                ytm["_commit"] = self._commit
+                if 'origin' in ytm:
+                    ytm["origin_name"] = ytm["origin"]
+                    del ytm["origin"]
+                else:
+                    ytm["origin_name"] = self.handle
+                if 'origin_definition' in ytm and ytm['origin_definition']:
+                    ytm["origin_definition"] = unquote(ytm["origin_definition"])
+                tm = Term(ytm)
+                self._terms[t_hdl] = tm
+                self._terms[tm.value] = tm
         
         # create nodes
         for n in ynodes:
