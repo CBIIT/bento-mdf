@@ -10,6 +10,8 @@ writing the opposite way.
 import sys
 import yaml
 import logging
+from tqdm import tqdm
+from urllib.parse import unquote
 from tempfile import TemporaryFile
 from bento_mdf.validator import MDFValidator
 from bento_meta.model import Model
@@ -121,6 +123,7 @@ class MDF(object):
         if (self.handle):
             self._model = Model(handle=self.handle)
         elif (self.schema.get("Handle")):
+            self.handle = self.schema["Handle"]
             self._model = Model(handle=self.schema["Handle"])
         else:
             self.logger.error("Model handle not present in MDF nor provided in args")
@@ -131,6 +134,23 @@ class MDF(object):
         ypropdefs = self.schema["PropDefinitions"]
         yunps = self.schema.get("UniversalNodeProperties")
         yurps = self.schema.get("UniversalRelationshipProperties")
+        yterms = self.schema.get("Terms").as_dict()
+
+        # create terms first, if any -- properties depend on these
+        for t_hdl in tqdm(yterms):
+            ytm = yterms[t_hdl]
+            ytm["_commit"] = self._commit
+            if 'origin' in ytm:
+                ytm["origin_name"] = ytm["origin"]
+                del ytm["origin"]
+            else:
+                ytm["origin_name"] = self.handle
+            if 'origin_definition' in ytm and ytm['origin_definition']:
+                ytm["origin_definition"] = unquote(ytm["origin_definition"])
+            tm = Term(ytm)
+            self._terms[t_hdl] = tm
+            self._terms[tm.value] = tm
+        
         # create nodes
         for n in ynodes:
             yn = ynodes[n]
@@ -314,9 +334,13 @@ class MDF(object):
                 for t in typedef:
                     if isinstance(t, bool):  # stringify booleans in term context
                         t = "True" if t else "False"
-                    if not self._terms.get(t):
-                        self._terms[t] = Term({"value": t, "_commit": self._commit})
-                    vs.terms[t] = self._terms[t]
+                    if t not in self._terms:
+                        self._terms[t] = Term({
+                            "value": t,
+                            "origin_name": self.handle,
+                            "_commit": self._commit
+                        })
+                    vs.terms[self._terms[t].value] = self._terms[t]
             return {"value_domain": "value_set", "value_set": vs}
         elif isinstance(typedef, str):
             return {"value_domain": typedef}
