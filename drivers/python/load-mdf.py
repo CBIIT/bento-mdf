@@ -5,7 +5,7 @@ import os
 import getpass
 import argparse
 from bento_mdf.mdf import MDF
-from bento_meta.mdb import MDB, make_nanoid
+from bento_meta.mdb import WriteableMDB, make_nanoid, load_mdf
 
 parser = argparse.ArgumentParser(description="Load model in MDF into an MDB")
 parser.add_argument('files', nargs="*",
@@ -18,6 +18,7 @@ parser.add_argument('--user', help="MDB username")
 parser.add_argument('--passw', help="MDB password")
 parser.add_argument('--bolt', metavar="BoltURL", help="MDB Bolt url endpoint (specify as 'bolt://...')")
 parser.add_argument('--put', action='store_true', help="Load model to database")
+parser.add_argument('--make-nanoids', action='store_true', help="Add new nanoids to graph nodes")
 # example:
 # args = parser.parse_args([
 #     "https://raw.githubusercontent.com/CBIIT/icdc-model-tool/master/model-desc/icdc-model.yml",
@@ -44,25 +45,26 @@ if args.put and not args.passw:
     args.passw = getpass.getpass()
 
 print("load model from MDFs")
-mdf = MDF(*args.files, handle=args.handle, _commit=args.commit)
+mdf = MDF(*args.files, handle=args.handle, _commit=args.commit, raiseError=True)
 model = mdf.model
 if (args.bolt):
-    mdb = MDB(uri=args.bolt, user=args.user, password=args.passw)
+    mdb = WriteableMDB(uri=args.bolt, user=args.user, password=args.passw)
     model.mdb = mdb
 
 if args.put:
     print("Put model to DB")
-    model.dput()
-    print("Add nanoids to nodes")
-    with mdb.driver.session() as s:
-        result = s.run(
-            "match (n {_commit:$commit}) where not exists(n.nanoid) "
-            "with n limit 1 set n.nanoid=$nanoid return n",
-            {"commit":args.commit, "nanoid":make_nanoid()}
-            )
-        while (result.peek()):
+    load_mdf(mdf,model.mdb)
+    if args.make_nanoids:
+        print("Add nanoids to nodes")
+        with mdb.driver.session() as s:
             result = s.run(
                 "match (n {_commit:$commit}) where not exists(n.nanoid) "
                 "with n limit 1 set n.nanoid=$nanoid return n",
                 {"commit":args.commit, "nanoid":make_nanoid()}
-                )
+            )
+            while (result.peek()):
+                result = s.run(
+                    "match (n {_commit:$commit}) where not exists(n.nanoid) "
+                    "with n limit 1 set n.nanoid=$nanoid return n",
+                    {"commit":args.commit, "nanoid":make_nanoid()}
+                    )
