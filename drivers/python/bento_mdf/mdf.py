@@ -171,6 +171,22 @@ class MDF(object):
         for e in yedges:
             ye = yedges[e]
             for ends in ye["Ends"]:
+                if ends["Src"] not in self._model.nodes:
+                    self.logger.warning(
+                        "No node '{src}' defined for edge "
+                        "spec '{ename}' from '{src}' to '{dst}'"
+                        .format(src=ends["Src"], dst=ends["Dst"],
+                                ename=e)
+                        )
+                    continue
+                if ends["Dst"] not in self._model.nodes:
+                    self.logger.warning(
+                        "No node '{dst}' defined for edge "
+                        "spec '{ename}' from '{src}' to '{dst}'"
+                        .format(src=ends["Src"], dst=ends["Dst"],
+                                ename=e)
+                        )
+                    continue
                 init = {
                     "handle": e,
                     "model": self.handle,
@@ -214,7 +230,7 @@ class MDF(object):
                 if pnames:
                     propnames[ent] = pnames
             elif isinstance(ent, Edge):
-                # props elts appearing Ends hash take precedence over 
+                # props elts appearing in Ends hash take precedence over 
                 # Props elt in the handle's hash
                 (hdl, src, dst) = ent.triplet
                 [end] = [
@@ -259,6 +275,8 @@ class MDF(object):
                             pname=pname, handle=ent.handle
                         )
                     )
+                    continue
+
                 else:
                     if key in defns_for:
                         defns_for.remove(key)
