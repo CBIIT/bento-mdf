@@ -20,7 +20,8 @@ properties:
       $ref: "#/defs/propSpec"
   Terms:
     propertyNames:
-      $ref: "#/defs/snake_case_id"
+      # $ref: "#/defs/snake_case_id"
+      type: string
     additionalProperties:
       $ref: "#/defs/termSpec"
   UniversalNodeProperties:
@@ -261,6 +262,12 @@ defs:
         type: string
       Tags:
         $ref: "#/defs/tagsSpec"
+      Term:
+        description: |
+          If a Node is representative of an entity or concept in an 
+          external authority, the terminology, code, and authority
+          can be noted in this entry.
+        $ref: "#/defs/termSpec"
       nanoid:
         $ref: "#/defs/nanoid"
     required:
@@ -320,6 +327,12 @@ defs:
             - Dst
       Tags:
         $ref: "#/defs/tagsSpec"
+      Term:
+        description: |
+          If a Relationship is representative of an entity or concept in an 
+          external authority, the terminology, code, and authority
+          can be noted in this entry.
+        $ref: "#/defs/termSpec"
       nanoid:
         $ref: "#/defs/nanoid"
     required:
@@ -397,6 +410,12 @@ defs:
 
       Tags:
         $ref: "#/defs/tagsSpec"
+      Term:
+        description: |
+          If a Property is representative of an entity or concept in an 
+          external authority, the terminology, code, and authority
+          can be noted in this entry.
+        $ref: "#/defs/termSpec"
       nanoid:
         $ref: "#/defs/nanoid"
     oneOf:
@@ -423,7 +442,7 @@ defs:
         description: |
           A (standardized) abbreviation desiginating the authority, source, or "coiner"
           of the term, reponsible for maintaining its definition and value representation.
-          Example: NCIt for the NCI Thesaurus.
+          Example: NCIt for the NCI Thesaurus, DICOM.
         type: string
       Code:
         description: |

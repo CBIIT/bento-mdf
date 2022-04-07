@@ -240,6 +240,18 @@ separate file, like PropDefinitions, e.g. `<model>-model-terms.yml`.
 			Defintion: |
 				(authority's) text definition of term's concept 
 
+#### Terms for Entities
+
+Nodes, Relationships, or Properties themselves may in some contexts
+have an external semantic representation in some framework. For
+example, a `participant` Node may need to be associated with a precise
+definition of "participant" as a person who is receiving medical care
+(e.g., NCIt Patient concept [C16960](
+https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&version=22.03d&ns=ncit&code=C16960&key=n93267819&b=1&n=null)). 
+To record this, any Node, Relationship, or Property specification may
+also include a `Term` key, with subkeys `Value`, `Origin`, etc.,
+as in the previous paragraph.
+
 ### Universal Properties
 
 In some use cases, it is desirable for every node (or relationship) to
