@@ -142,15 +142,25 @@ class MDF(object):
         if yterms:
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
-                ytm["_commit"] = self._commit
-                if 'origin' in ytm:
-                    ytm["origin_name"] = ytm["origin"]
-                    del ytm["origin"]
+                tm = {}
+                tm["_commit"] = self._commit
+                if 'Origin' in ytm:
+                    tm["origin_name"] = ytm["Origin"]
                 else:
-                    ytm["origin_name"] = self.handle
-                if 'origin_definition' in ytm and ytm['origin_definition']:
-                    ytm["origin_definition"] = unquote(ytm["origin_definition"])
-                tm = Term(ytm)
+                    self.logger.warning(
+                        "No Origin provided for term '{term}'".format(term=t_hdl)
+                    )
+                    tm["origin_name"] = self.handle
+                tm["value"] = ytm["Value"]
+                if 'Definition' in ytm and ytm['Definition']:
+                    tm["origin_definition"] = unquote(ytm["Definition"])
+                if 'Code' in ytm:
+                    tm["origin_id"] = ytm["Code"]
+                if 'Version' in ytm:
+                    tm["origin_version"] = ytm["Version"]
+                if 'nanoid' in ytm:
+                    tm["nanoid"] = ytm["nanoid"]
+                tm = Term(tm)
                 self._terms[t_hdl] = tm
                 self._terms[tm.value] = tm
         
