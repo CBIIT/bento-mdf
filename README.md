@@ -248,7 +248,7 @@ example, a `participant` Node may need to be associated with a precise
 definition of "participant" as a person who is receiving medical care
 (e.g., NCIt Patient concept [C16960](
 https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&version=22.03d&ns=ncit&code=C16960&key=n93267819&b=1&n=null)). 
-To record this, any Node, Relationship, or PropDefintion specification may
+To record this, any Node, Relationship, or PropDefinition specification may
 also include a `Term` key, with subkeys `Value`, `Origin`, etc.,
 as in the previous paragraph.
 

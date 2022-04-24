@@ -168,9 +168,10 @@ class MDF(object):
         for n in ynodes:
             yn = ynodes[n]
             init = {"handle": n, "model": self.handle, "_commit": self._commit}
-            for a in ["desc", "nanoid"]:
-                if yn.get(a):
-                    init[a] = yn[a]
+            if 'Desc' in yn and yn['Desc']:
+                init['desc'] = yn['Desc']
+            if 'nanoid' in yn and yn['nanoid']:
+                init['nanoid'] = yn['nanoid']
             node = self._model.add_node(init)
             if yn.get("Tags"):
                 for t in yn["Tags"]:
@@ -293,9 +294,13 @@ class MDF(object):
                 init = {"handle": pname,
                         "model": self.handle,
                         "_commit": self._commit}
-                if ypdef.get("Type"):
+                if 'Desc' in ypdef and ypdef['Desc']:
+                    init['desc'] = ypdef['Desc']
+                if 'nanoid' in ypdef and ypdef['nanoid']:
+                    init['nanoid'] = ypdef['nanoid']
+                if 'Type' in ypdef:
                     init.update(self.calc_value_domain(ypdef["Type"], pname))
-                elif ypdef.get("Enum"):
+                elif 'Enum' in ypdef:
                     init.update(self.calc_value_domain(ypdef["Enum"], pname))
                 else:
                     self.logger.warning(
