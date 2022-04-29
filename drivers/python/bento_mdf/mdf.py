@@ -244,11 +244,16 @@ class MDF(object):
                 # props elts appearing in Ends hash take precedence over 
                 # Props elt in the handle's hash
                 (hdl, src, dst) = ent.triplet
-                [end] = [
+                ends = [
                     e
                     for e in yedges[hdl]["Ends"]
                     if e["Src"] == src and e["Dst"] == dst
                 ]
+                if len(ends) > 1:
+                    self.logger.warning("edge '{ename}' has more than one Ends pair Src:'{src}',"
+                                        "Dst:'{dst}'".format(ename=hdl, src=src, dst=dst))
+                end = ends[0]
+            
                 # note the end-specified props _replace_ the edge-specified props,
                 # they are not merged:
                 pnames = end.get("Props") or yedges[hdl].get("Props")
