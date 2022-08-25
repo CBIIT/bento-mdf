@@ -102,7 +102,7 @@ def test_create_model_qual_props():
     assert m.model.nodes['diagnosis'].props['disease'].value_domain == 'url'
     assert m.model.edges[('derived_from','file','file')].props['disease'].value_domain == 'url'
     
-@pytest.mark.skip("TODO")
+#@pytest.mark.skip("TODO")
 
 def test_write_mdf():
     yml = yaml.load(open('{}samples/test-model.yml'.format(tdir),'r'),Loader=yloader)
@@ -119,7 +119,7 @@ def test_write_mdf():
         if yml["Nodes"][n].get("Props"):
             assert set(yml["Nodes"][n]["Props"]) == set(mdf["Nodes"][n]["Props"])
     for n in yml["Relationships"]:
-        if yml["Relationships"][n].get("Props"):
+        if "Props" in yml["Relationships"][n]:
             assert set(yml["Relationships"][n]["Props"]) == set(mdf["Relationships"][n]["Props"])
     yp = yml["PropDefinitions"]
     mp = mdf["PropDefinitions"]

@@ -142,25 +142,7 @@ class MDF(object):
         if yterms:
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
-                tm = {}
-                tm["_commit"] = self._commit
-                if 'Origin' in ytm:
-                    tm["origin_name"] = ytm["Origin"]
-                else:
-                    self.logger.warning(
-                        "No Origin provided for term '{term}'".format(term=t_hdl)
-                    )
-                    tm["origin_name"] = self.handle
-                tm["value"] = ytm["Value"]
-                if 'Definition' in ytm and ytm['Definition']:
-                    tm["origin_definition"] = unquote(ytm["Definition"])
-                if 'Code' in ytm:
-                    tm["origin_id"] = ytm["Code"]
-                if 'Version' in ytm:
-                    tm["origin_version"] = ytm["Version"]
-                if 'nanoid' in ytm:
-                    tm["nanoid"] = ytm["nanoid"]
-                tm = Term(tm)
+                tm = self.create_term_from_mdf(ytm)
                 self._terms[t_hdl] = tm
                 self._terms[tm.value] = tm
         
@@ -173,11 +155,17 @@ class MDF(object):
             if 'nanoid' in yn and yn['nanoid']:
                 init['nanoid'] = yn['nanoid']
             node = self._model.add_node(init)
-            if yn.get("Tags"):
+            if "Tags" in yn:
                 for t in yn["Tags"]:
                     node.tags[t] = Tag({"key": t,
                                         "value": yn["Tags"][t],
                                         "_commit": self._commit})
+            if "Term" in yn:
+                tm = self.create_term_from_mdf(yn["Term"])
+                self._model.annotate(node, tm)
+                self._terms[t_hdl] = tm
+                self._terms[tm.value] = tm
+                
         # create edges (relationships)
         for e in yedges:
             ye = yedges[e]
@@ -230,6 +218,12 @@ class MDF(object):
                         edge.tags[t] = Tag({"key": t,
                                             "value": Tags[t],
                                             "_commit": self._commit})
+                if "Term" in ye:
+                    tm = self.create_term_from_mdf(ye["Term"])
+                    self._model.annotate(node, tm)
+                    self._terms[t_hdl] = tm
+                    self._terms[tm.value] = tm
+                    
         # create properties
         propnames = {}
         for ent in ChainMap(self._model.nodes, self._model.edges).values():
@@ -316,11 +310,16 @@ class MDF(object):
                     init["value_domain"] = Property.default("value_domain")
                 prop = self._model.add_prop(ent, init)
                 ent.props[prop.handle] = prop
-                if ypdef.get("Tags"):
+                if "Tags" in ypdef:
                     for t in ypdef["Tags"]:
                         prop.tags[t] = Tag({"key": t,
                                             "value": ypdef["Tags"][t],
                                             "_commit": self._commit})
+                if "Term" in ypdef:
+                    tm = self.create_term_from_mdf(ypdef["Term"])
+                    self._model.annotate(node, tm)
+                    self._terms[t_hdl] = tm
+                    self._terms[tm.value] = tm
         if defns_for:
             self.logger.warning(
                 "No properties in model corresponding to the following "
@@ -328,6 +327,28 @@ class MDF(object):
         if raiseError and not success:
             raise RuntimeError("MDF errors found; see log output.")
         return self._model
+
+    def create_term_from_mdf(self, ytm):
+        tm = {}
+        tm["_commit"] = self._commit
+        if 'Origin' in ytm:
+            tm["origin_name"] = ytm["Origin"]
+        else:
+            self.logger.warning(
+                "No Origin provided for term '{term}'".format(term=t_hdl)
+            )
+            tm["origin_name"] = self.handle
+        tm["value"] = ytm["Value"]
+        if 'Definition' in ytm and ytm['Definition']:
+            tm["origin_definition"] = unquote(ytm["Definition"])
+        if 'Code' in ytm:
+            tm["origin_id"] = ytm["Code"]
+        if 'Version' in ytm:
+            tm["origin_version"] = ytm["Version"]
+        if 'nanoid' in ytm:
+            tm["nanoid"] = ytm["nanoid"]
+        return Term(tm)
+        
 
     def calc_value_domain(self, typedef, pname=None):
         if isinstance(typedef, dict):
@@ -409,6 +430,20 @@ class MDF(object):
                 mdf_node["Tags"] = {}
                 for t in node.tags:
                     mdf_node["Tags"][t] = node.tags[t].value
+            if node.concept:
+                if not node.concept.terms:
+                    self.logger.warning("Node '{}' has associated concept but with no terms defined".format(node.handle))
+                else:
+                    # Use the first term in the collection - WARN: this may not be what
+                    # is desired in the MDF in later use cases
+                    tm = [x for x in node.concept.terms.values()]
+                    mdf_node["Term"] = {
+                        "Value": tm.value,
+                        "Definition": tm.origin_definition,
+                        "Origin": tm.origin,
+                        "Code": tm.origin_id,
+                        }
+
             mdf_node["Props"] = [prop for prop in sorted(node.props)]
 
             if node.nanoid:
@@ -449,6 +484,19 @@ class MDF(object):
                     mdf_edge["Desc"] = edge.desc
                 else:
                     ends["Desc"] = edge.desc
+            if edge.concept:
+                if not edge.concept.terms:
+                    self.logger.warning("Edge '{}' has associated concept but with no terms defined".format(node.handle))
+                else:
+                    # Use the first term in the collection - WARN: this may not be what
+                    # is desired in the MDF in later use cases
+                    tm = [x for x in edge.concept.terms.values()]
+                    mdf_edge["Term"] = {
+                        "Value": tm.value,
+                        "Definition": tm.origin_definition,
+                        "Origin": tm.origin,
+                        "Code": tm.origin_id,
+                    }
         prnames = []
         props = {}
         for pr in model.props:
@@ -471,6 +519,7 @@ class MDF(object):
                     if t in mdf["Terms"]:
                         self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
                     mdf["Terms"][t] = {
+                        "Value": prop.terms[t].value,
                         "Definition": prop.terms[t].origin_definition,
                         "Origin": prop.terms[t].origin,
                         "Code": prop.terms[t].origin_id,
@@ -483,6 +532,20 @@ class MDF(object):
                 mdf_prop["NanoID"] = prop.nanoid
             if prop.desc:
                 mdf_prop["Desc"] = prop.desc
+            if prop.concept:
+                if not prop.concept.terms:
+                    self.logger.warning("Property '{}' has associated concept but with no terms defined".format(node.handle))
+                else:
+                    # Use the first term in the collection - WARN: this may not be what
+                    # is desired in the MDF in later use cases
+                    tm = [x for x in prop.concept.terms.values()]
+                    mdf_prop["Term"] = {
+                        "Value": tm.value,
+                        "Definition": tm.origin_definition,
+                        "Origin": tm.origin,
+                        "Code": tm.origin_id,
+                    }
+
 
         if file:
             fh = file
