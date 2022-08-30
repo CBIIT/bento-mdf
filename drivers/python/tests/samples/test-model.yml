@@ -6,6 +6,10 @@ Nodes:
     Props:
       - case_id
       - patient_id
+    Term:
+      Handle: case_term
+      Value: case
+      Origin: CTDC
   sample:
     Props:
       - sample_type
@@ -29,6 +33,14 @@ Relationships:
           - days_to_sample
       - Src: diagnosis
         Dst: case
+        Term:
+          Handle: 'of_case_dx_case_term'
+          Value: 'of_case'
+          Origin: 'Booga'
+    Term:
+      Handle: 'of_case_term'
+      Value: 'of_case'
+      Origin: 'CTDC'
   of_sample:
     Mul: one_to_one
     Ends:
@@ -53,6 +65,9 @@ PropDefinitions:
   case_id:
     Type:
       pattern: "^CASE-[0-9]+$"
+    Term:
+      Value: 'case_id'
+      Origin: 'CTDC'
   patient_id:
     Type: string
   sample_type:

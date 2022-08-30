@@ -429,6 +429,14 @@ defs:
     $id: "#termSpec"
     type: object
     properties:
+      Handle:
+        description: |
+          This is a human-readable short name for the Term, that can be but is not
+          necessarily the Value; it should be understood as a token that can be used
+          to refer to this Term object. In the Terms subsection, the Handle should be
+          inferred from the key assigned to the Term object. For the Term attribute of
+          entities, the Handle may be explictly defined with the Handle key, otherwise
+          the implicit handle should be identical with the Value.
       Desc:
         description: |
           Human-readable, non-normative description of this term.
@@ -437,6 +445,7 @@ defs:
         description: |
           The string value used in data representations of the term. Can be, but is not
           necessarily, the term "handle", i.e. the key for the term in the Terms object.
+          See Handle key above.
         type: string
       Origin:
         description: |

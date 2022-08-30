@@ -26,7 +26,7 @@ def test_load_yaml():
     m = MDF(handle='test')
     m.files = ['{}samples/ctdc_model_file.yaml'.format(tdir),
                    '{}samples/ctdc_model_properties_file.yaml'.format(tdir)]
-    m.load_yaml()
+    m.load_yaml(verify=False)
     assert m.schema["Nodes"]
 
 
@@ -58,6 +58,12 @@ def test_created_model():
     assert set([x.handle for x in m.model.props.values()]) == {
         'case_id','patient_id','sample_type','amount','md5sum','file_name',
         'file_size', 'disease','days_to_sample','workflow_id','id'}
+    assert m.model.nodes['case'].concept
+    assert [x for x in m.model.nodes['case'].concept.terms.values()][0].origin_name == "CTDC"
+    assert m.model.edges[('of_case','sample','case')].concept
+    assert [x for x in m.model.edges[('of_case','sample','case')].concept.terms.values()][0].origin_name == "CTDC"
+    assert m.model.props[('case','case_id')].concept
+    assert [x for x in m.model.props[('case','case_id')].concept.terms.values()][0].origin_name == "CTDC"
     file_ = m.model.nodes['file']
     assert file_
     assert file_.props
@@ -111,21 +117,33 @@ def test_write_mdf():
     assert isinstance(wr_m.model,Model)
     mdf = wr_m.write_mdf()
     assert isinstance(mdf,dict)
-    # assert set(yml) == set(mdf)
+
     assert set(yml["Nodes"]) == set(mdf["Nodes"])
     assert set(yml["Relationships"]) == set(mdf["Relationships"])
     assert set(yml["PropDefinitions"]) == set(mdf["PropDefinitions"])
     for n in yml["Nodes"]:
-        if yml["Nodes"][n].get("Props"):
+        if "Props" in yml["Nodes"][n]:
             assert set(yml["Nodes"][n]["Props"]) == set(mdf["Nodes"][n]["Props"])
     for n in yml["Relationships"]:
+        def_props = set()
         if "Props" in yml["Relationships"][n]:
-            assert set(yml["Relationships"][n]["Props"]) == set(mdf["Relationships"][n]["Props"])
+            def_props = set(yml["Relationships"][n]["Props"])
+        yml_ends = yml["Relationships"][n]["Ends"]
+        yml_ends = {(x["Src"], x["Dst"]):x for x in yml_ends}
+        mdf_ends = mdf["Relationships"][n]["Ends"]
+        mdf_ends = {(x["Src"], x["Dst"]):x for x in mdf_ends}
+        for ends in yml_ends:
+            assert mdf_ends[ends]
+            if "Props" in yml_ends[ends]:
+                assert set(mdf_ends[ends]["Props"]) == set(yml_ends[ends]["Props"])
+            else:
+                if def_props: # i.e., there are default properties in the source file
+                    assert set(mdf_ends[ends]["Props"]) == def_props
     yp = yml["PropDefinitions"]
     mp = mdf["PropDefinitions"]
     assert yp["case_id"]["Type"]["pattern"] == mp["case_id"]["Type"]["pattern"]
     assert yp["patient_id"]["Type"] == mp["patient_id"]["Type"]
-    assert set(yp["sample_type"]["Type"]) == set(mp["sample_type"]["Type"])
+    assert set(yp["sample_type"]["Type"]) == set(mp["sample_type"]["Enum"])
     assert set(yp["amount"]["Type"]["units"]) == set(mp["amount"]["Type"]["units"])  
     assert set(yp["file_size"]["Type"]["units"]) == set(mp["file_size"]["Type"]["units"])  
     assert yp["file_size"]["Type"]["value_type"] == mp["file_size"]["Type"]["value_type"]

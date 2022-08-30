@@ -80,13 +80,13 @@ class MDF(object):
            MDF input"""
         return self._model
 
-    def load_yaml(self):
+    def load_yaml(self, verify=True):
         """Validate and load YAML files or open file handles specified in constructor"""
         vargs = []
         for f in self.files:
             if isinstance(f, str):
                 if re.match("(?:file|https?)://", f):
-                    response = requests.get(f)
+                    response = requests.get(f, verify=verify)
                     if not response.ok:
                         self.logger.error(
                             "Fetching url {} returned code {}".format(
@@ -143,8 +143,11 @@ class MDF(object):
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
                 tm = self.create_term_from_mdf(ytm)
-                self._terms[t_hdl] = tm
-                self._terms[tm.value] = tm
+                if not tm:
+                    success = False
+                else:
+                    self._terms[t_hdl] = tm
+                    self._terms[tm.value] = tm
         
         # create nodes
         for n in ynodes:
@@ -162,9 +165,12 @@ class MDF(object):
                                         "_commit": self._commit})
             if "Term" in yn:
                 tm = self.create_term_from_mdf(yn["Term"])
-                self._model.annotate(node, tm)
-                self._terms[t_hdl] = tm
-                self._terms[tm.value] = tm
+                if not tm:
+                    success = False
+                else:
+                    self._model.annotate(node, tm)
+                    self._terms[yn["Term"].get("Handle") or yn["Term"]["Value"] ] = tm
+                    self._terms[tm.value] = tm
                 
         # create edges (relationships)
         for e in yedges:
@@ -218,12 +224,17 @@ class MDF(object):
                         edge.tags[t] = Tag({"key": t,
                                             "value": Tags[t],
                                             "_commit": self._commit})
-                if "Term" in ye:
-                    tm = self.create_term_from_mdf(ye["Term"])
-                    self._model.annotate(node, tm)
-                    self._terms[t_hdl] = tm
-                    self._terms[tm.value] = tm
-                    
+                yterm = ends.get("Term") or ye.get("Term")
+                if yterm:
+                    tm = self.create_term_from_mdf(yterm)
+                    if not tm:
+                        success = False
+                    else:
+                        self._model.annotate(edge, tm)
+                        self._terms[yterm.get("Handle") or yterm["Value"] ] = tm
+                        self._terms[tm.value] = tm
+
+
         # create properties
         propnames = {}
         for ent in ChainMap(self._model.nodes, self._model.edges).values():
@@ -317,9 +328,12 @@ class MDF(object):
                                             "_commit": self._commit})
                 if "Term" in ypdef:
                     tm = self.create_term_from_mdf(ypdef["Term"])
-                    self._model.annotate(node, tm)
-                    self._terms[t_hdl] = tm
-                    self._terms[tm.value] = tm
+                    if not tm:
+                        success = False
+                    else:
+                        self._model.annotate(prop, tm)
+                        self._terms[ypdef["Term"].get("Handle") or ypdef["Term"]["Value"] ] = tm
+                        self._terms[tm.value] = tm
         if defns_for:
             self.logger.warning(
                 "No properties in model corresponding to the following "
@@ -329,6 +343,11 @@ class MDF(object):
         return self._model
 
     def create_term_from_mdf(self, ytm):
+        if not "Value" in ytm:
+            self.logger.error(
+                "Term specs must have a Value key and a non-null string value"
+            )
+            return False
         tm = {}
         tm["_commit"] = self._commit
         if 'Origin' in ytm:
@@ -436,7 +455,7 @@ class MDF(object):
                 else:
                     # Use the first term in the collection - WARN: this may not be what
                     # is desired in the MDF in later use cases
-                    tm = [x for x in node.concept.terms.values()]
+                    tm = [x for x in node.concept.terms.values()][0]
                     mdf_node["Term"] = {
                         "Value": tm.value,
                         "Definition": tm.origin_definition,
@@ -450,21 +469,26 @@ class MDF(object):
                 mdf_node["NanoID"] = node.nanoid
             if node.desc:
                 mdf_node["Desc"] = node.desc
+        # write props only in Ends object (no default set of properties)
+        # MDF - if props are defined above the Ends object, this is the default set of properties
+        # for any fully qualified edge without explicit properties. But if there are explict
+        # properties applied to a fully qualified edge (i.e., in the Ends object), these are
+        # the only properties for that edge.
         for rl in sorted(model.edges):
             edge = model.edges[rl]
             mdf_edge = {}
             ends = {}
-            if mdf["Relationships"].get(edge.handle):
+            if edge.handle in mdf["Relationships"]:
                 mdf_edge = mdf["Relationships"][edge.handle]
             else:
                 mdf["Relationships"][edge.handle] = mdf_edge
             ends = {"Src": edge.src.handle,
                     "Dst": edge.dst.handle}
-            if mdf_edge.get("Ends"):
+            if "Ends" in mdf_edge:
                 mdf_edge["Ends"].append(ends)
             else:
                 mdf_edge["Ends"] = [ends]
-            if not mdf_edge.get("Mul"):
+            if not "Mul" in mdf_edge:
                 mdf_edge["Mul"] = edge.multiplicity or Edge.default("multiplicity")
             else:
                 if mdf_edge["Mul"] != edge.multiplicity:
@@ -476,7 +500,9 @@ class MDF(object):
             if edge.is_required:
                 ends["Req"] = True
             if edge.props:
-                ends["Props"] = [prop for prop in sorted(edge.props)]
+                ends["Props"] = sorted(list(set(edge.props)))
+            else:
+                ends["Props"] = None
             if edge.nanoid:
                 ends["NanoID"] = edge.nanoid
             if edge.desc:
@@ -490,7 +516,7 @@ class MDF(object):
                 else:
                     # Use the first term in the collection - WARN: this may not be what
                     # is desired in the MDF in later use cases
-                    tm = [x for x in edge.concept.terms.values()]
+                    tm = [x for x in edge.concept.terms.values()][0]
                     mdf_edge["Term"] = {
                         "Value": tm.value,
                         "Definition": tm.origin_definition,
@@ -538,7 +564,7 @@ class MDF(object):
                 else:
                     # Use the first term in the collection - WARN: this may not be what
                     # is desired in the MDF in later use cases
-                    tm = [x for x in prop.concept.terms.values()]
+                    tm = [x for x in prop.concept.terms.values()][0]
                     mdf_prop["Term"] = {
                         "Value": tm.value,
                         "Definition": tm.origin_definition,

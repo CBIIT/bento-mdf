@@ -1,5 +1,8 @@
 Nodes:
   case:
+    Term:
+      Value: case
+      Origin: CTDC
     Props:
       - show_node
       - case_id
