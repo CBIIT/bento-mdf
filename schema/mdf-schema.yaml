@@ -267,7 +267,11 @@ defs:
           If a Node is representative of an entity or concept in an 
           external authority, the terminology, code, and authority
           can be noted in this entry.
-        $ref: "#/defs/termSpec"
+          This field is list-valued - multiple terms may be provided.
+        type: array
+        items:
+          $ref: "#/defs/termSpec"
+        uniqueItems: true
       nanoid:
         $ref: "#/defs/nanoid"
     required:
@@ -332,7 +336,11 @@ defs:
           If a Relationship is representative of an entity or concept in an 
           external authority, the terminology, code, and authority
           can be noted in this entry.
-        $ref: "#/defs/termSpec"
+          This field is list-valued - multiple terms may be provided.
+        type: array
+        items:
+          $ref: "#/defs/termSpec"
+        uniqueItems: true
       nanoid:
         $ref: "#/defs/nanoid"
     required:
@@ -415,8 +423,12 @@ defs:
           If a Property is representative of an entity or concept in an 
           external authority, the terminology, code, and authority
           can be noted in this entry.
-        $ref: "#/defs/termSpec"
-      nanoid:
+          This field is list-valued - multiple terms may be provided.
+        type: array
+        items:
+          $ref: "#/defs/termSpec"
+        uniqueItems: true
+      nanoid: 
         $ref: "#/defs/nanoid"
     oneOf:
       -
