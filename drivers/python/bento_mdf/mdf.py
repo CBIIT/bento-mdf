@@ -142,7 +142,7 @@ class MDF(object):
         if yterms:
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
-                tm = self.create_term_from_mdf(ytm)
+                tm = self.create_term_from_mdf(ytm, t_hdl)
                 if not tm:
                     success = False
                 else:
@@ -164,13 +164,8 @@ class MDF(object):
                                         "value": yn["Tags"][t],
                                         "_commit": self._commit})
             if "Term" in yn:
-                tm = self.create_term_from_mdf(yn["Term"])
-                if not tm:
+                if not self.annotate_entity_from_mdf(node, yn["Term"]):
                     success = False
-                else:
-                    self._model.annotate(node, tm)
-                    self._terms[yn["Term"].get("Handle") or yn["Term"]["Value"] ] = tm
-                    self._terms[tm.value] = tm
                 
         # create edges (relationships)
         for e in yedges:
@@ -226,14 +221,8 @@ class MDF(object):
                                             "_commit": self._commit})
                 yterm = ends.get("Term") or ye.get("Term")
                 if yterm:
-                    tm = self.create_term_from_mdf(yterm)
-                    if not tm:
+                    if not self.annotate_entity_from_mdf(edge, yterm):
                         success = False
-                    else:
-                        self._model.annotate(edge, tm)
-                        self._terms[yterm.get("Handle") or yterm["Value"] ] = tm
-                        self._terms[tm.value] = tm
-
 
         # create properties
         propnames = {}
@@ -327,13 +316,9 @@ class MDF(object):
                                             "value": ypdef["Tags"][t],
                                             "_commit": self._commit})
                 if "Term" in ypdef:
-                    tm = self.create_term_from_mdf(ypdef["Term"])
-                    if not tm:
+                    if not self.annotate_entity_from_mdf(prop, ypdef["Term"]):
                         success = False
-                    else:
-                        self._model.annotate(prop, tm)
-                        self._terms[ypdef["Term"].get("Handle") or ypdef["Term"]["Value"] ] = tm
-                        self._terms[tm.value] = tm
+
         if defns_for:
             self.logger.warning(
                 "No properties in model corresponding to the following "
@@ -342,7 +327,7 @@ class MDF(object):
             raise RuntimeError("MDF errors found; see log output.")
         return self._model
 
-    def create_term_from_mdf(self, ytm):
+    def create_term_from_mdf(self, ytm, t_hdl=None):
         if not "Value" in ytm:
             self.logger.error(
                 "Term specs must have a Value key and a non-null string value"
@@ -367,6 +352,18 @@ class MDF(object):
         if 'nanoid' in ytm:
             tm["nanoid"] = ytm["nanoid"]
         return Term(tm)
+
+    def annotate_entity_from_mdf(self, ent, yterm_list):
+        success = True
+        for yterm in yterm_list:
+            tm = self.create_term_from_mdf(yterm)
+            if not tm:
+                success = False
+            else:
+                self._model.annotate(ent, tm)
+                self._terms[yterm.get("Handle") or yterm["Value"] ] = tm
+                self._terms[tm.value] = tm
+        return success
         
 
     def calc_value_domain(self, typedef, pname=None):
@@ -528,9 +525,10 @@ class MDF(object):
         for pr in model.props:
             prname = pr[len(pr)-1]
             prnames.append(prname)
-            if props.get(prname):
-                self.logger.warning("Property name collision at {}".format(pr))
-            props[prname] = model.props[pr]
+            # if props.get(prname):
+            #    self.logger.warning("Property name collision at {}".format(pr))
+            if not prname in props:
+                props[prname] = model.props[pr]
         for prname in sorted(prnames):
             prop = props[prname]
             mdf_prop = {}
@@ -542,13 +540,14 @@ class MDF(object):
             if prop.value_domain == "value_set":
                 mdf_prop["Enum"] = self.calc_prop_type(prop)
                 for t in prop.terms:
-                    if t in mdf["Terms"]:
-                        self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
-                    mdf["Terms"][t] = {
-                        "Value": prop.terms[t].value,
-                        "Definition": prop.terms[t].origin_definition,
-                        "Origin": prop.terms[t].origin,
-                        "Code": prop.terms[t].origin_id,
+                    # if t in mdf["Terms"]:
+                    #    self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
+                    if not t in mdf["Terms"]:
+                        mdf["Terms"][t] = {
+                            "Value": prop.terms[t].value,
+                            "Definition": prop.terms[t].origin_definition,
+                            "Origin": prop.terms[t].origin,
+                            "Code": prop.terms[t].origin_id,
                         }
             else:
                 mdf_prop["Type"] = self.calc_prop_type(prop)

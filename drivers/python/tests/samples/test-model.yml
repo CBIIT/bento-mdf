@@ -7,9 +7,9 @@ Nodes:
       - case_id
       - patient_id
     Term:
-      Handle: case_term
-      Value: case
-      Origin: CTDC
+      - Handle: case_term
+        Value: case
+        Origin: CTDC
   sample:
     Props:
       - sample_type
@@ -34,13 +34,13 @@ Relationships:
       - Src: diagnosis
         Dst: case
         Term:
-          Handle: 'of_case_dx_case_term'
-          Value: 'of_case'
-          Origin: 'Booga'
+          - Handle: 'of_case_dx_case_term'
+            Value: 'of_case'
+            Origin: 'Booga'
     Term:
-      Handle: 'of_case_term'
-      Value: 'of_case'
-      Origin: 'CTDC'
+      - Handle: 'of_case_term'
+        Value: 'of_case'
+        Origin: 'CTDC'
   of_sample:
     Mul: one_to_one
     Ends:
@@ -66,8 +66,8 @@ PropDefinitions:
     Type:
       pattern: "^CASE-[0-9]+$"
     Term:
-      Value: 'case_id'
-      Origin: 'CTDC'
+      - Value: 'case_id'
+        Origin: 'CTDC'
   patient_id:
     Type: string
   sample_type:
