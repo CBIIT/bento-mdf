@@ -62,6 +62,7 @@ class MDF(object):
         self._model = model
         self._commit = _commit
         self._terms = {}
+        self._props = {}
         self.logger = logger
         if model:
             self.handle = model.handle
@@ -142,12 +143,7 @@ class MDF(object):
         if yterms:
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
-                tm = self.create_term_from_mdf(ytm, t_hdl)
-                if not tm:
-                    success = False
-                else:
-                    self._terms[t_hdl] = tm
-                    self._terms[tm.value] = tm
+                self.create_or_merge_term_from_mdf(ytm, t_hdl)
         
         # create nodes
         for n in ynodes:
@@ -164,8 +160,7 @@ class MDF(object):
                                         "value": yn["Tags"][t],
                                         "_commit": self._commit})
             if "Term" in yn:
-                if not self.annotate_entity_from_mdf(node, yn["Term"]):
-                    success = False
+                self.annotate_entity_from_mdf(node, yn["Term"])
                 
         # create edges (relationships)
         for e in yedges:
@@ -221,8 +216,7 @@ class MDF(object):
                                             "_commit": self._commit})
                 yterm = ends.get("Term") or ye.get("Term")
                 if yterm:
-                    if not self.annotate_entity_from_mdf(edge, yterm):
-                        success = False
+                    self.annotate_entity_from_mdf(edge, yterm)
 
         # create properties
         propnames = {}
@@ -290,35 +284,9 @@ class MDF(object):
                 else:
                     if key in defns_for:
                         defns_for.remove(key)
-                init = {"handle": pname,
-                        "model": self.handle,
-                        "_commit": self._commit}
-                if 'Desc' in ypdef and ypdef['Desc']:
-                    init['desc'] = ypdef['Desc']
-                if 'NanoID' in ypdef and ypdef['NanoID']:
-                    init['nanoid'] = ypdef['NanoID']
-                if 'Type' in ypdef:
-                    init.update(self.calc_value_domain(ypdef["Type"], pname))
-                elif 'Enum' in ypdef:
-                    init.update(self.calc_value_domain(ypdef["Enum"], pname))
-                else:
-                    self.logger.warning(
-                        "property '{pname}' on entity '{handle}' does not "
-                        "specify a data type".format(pname=pname,
-                                                     handle=ent.handle)
-                    )
-                    init["value_domain"] = Property.default("value_domain")
-                prop = self._model.add_prop(ent, init)
+                prop = self.create_or_merge_prop_from_mdf(ypdef, p_hdl=pname)
+                self._model.add_prop(ent, prop)
                 ent.props[prop.handle] = prop
-                if "Tags" in ypdef:
-                    for t in ypdef["Tags"]:
-                        prop.tags[t] = Tag({"key": t,
-                                            "value": ypdef["Tags"][t],
-                                            "_commit": self._commit})
-                if "Term" in ypdef:
-                    if not self.annotate_entity_from_mdf(prop, ypdef["Term"]):
-                        success = False
-
         if defns_for:
             self.logger.warning(
                 "No properties in model corresponding to the following "
@@ -327,7 +295,39 @@ class MDF(object):
             raise RuntimeError("MDF errors found; see log output.")
         return self._model
 
-    def create_term_from_mdf(self, ytm, t_hdl=None):
+    def create_or_merge_prop_from_mdf(self, ypdef, p_hdl):
+        init = {"handle": p_hdl,
+                "model": self.handle,
+                "_commit": self._commit}
+        if (init["model"], init["handle"]) in self._props:
+            pass  # merge property
+        else:
+            if 'Desc' in ypdef and ypdef['Desc']:
+                init['desc'] = ypdef['Desc']
+            if 'NanoID' in ypdef and ypdef['NanoID']:
+                init['nanoid'] = ypdef['NanoID']
+            if 'Type' in ypdef:
+                init.update(self.calc_value_domain(ypdef["Type"], p_hdl))
+            elif 'Enum' in ypdef:
+                init.update(self.calc_value_domain(ypdef["Enum"], p_hdl))
+            else:
+                self.logger.warning(
+                    "property '{p_hdl}' does not "
+                    "specify a data type".format(p_hdl=p_hdl)
+                )
+                init["value_domain"] = Property.default("value_domain")
+            prop = Property(init)
+            if "Tags" in ypdef:
+                for t in ypdef["Tags"]:
+                    prop.tags[t] = Tag({"key": t,
+                                        "value": ypdef["Tags"][t],
+                                        "_commit": self._commit})
+            if "Term" in ypdef:
+                self.annotate_entity_from_mdf(prop, ypdef["Term"])
+            self._props[(init["model"], init["handle"])] = prop
+        return self._props[(init["model"], init["handle"])]
+        
+    def create_or_merge_term_from_mdf(self, ytm, t_hdl=None):
         if not "Value" in ytm:
             self.logger.error(
                 "Term specs must have a Value key and a non-null string value"
@@ -343,30 +343,26 @@ class MDF(object):
             )
             tm["origin_name"] = self.handle
         tm["value"] = ytm["Value"]
-        if 'Definition' in ytm and ytm['Definition']:
-            tm["origin_definition"] = unquote(ytm["Definition"])
-        if 'Code' in ytm:
-            tm["origin_id"] = ytm["Code"]
-        if 'Version' in ytm:
-            tm["origin_version"] = ytm["Version"]
-        if 'Handle' in ytm:
-            tm["handle"] = ytm["Handle"]
-        if 'NanoID' in ytm:
-            tm["nanoid"] = ytm["NanoID"]
-        return Term(tm)
+        if (tm["value"],tm["origin_name"]) in self._terms:
+            pass  # merge term
+        else:
+            if 'Definition' in ytm and ytm['Definition']:
+                tm["origin_definition"] = unquote(ytm["Definition"])
+            if 'Code' in ytm:
+                tm["origin_id"] = ytm["Code"]
+            if 'Version' in ytm:
+                tm["origin_version"] = ytm["Version"]
+            if 'Handle' in ytm:
+                tm["handle"] = ytm["Handle"]
+            if 'NanoID' in ytm:
+                tm["nanoid"] = ytm["NanoID"]
+            self._terms[(tm["value"],tm["origin_name"])] = Term(tm)
+        return self._terms[(tm["value"],tm["origin_name"])]
 
     def annotate_entity_from_mdf(self, ent, yterm_list):
-        success = True
         for yterm in yterm_list:
-            tm = self.create_term_from_mdf(yterm)
-            if not tm:
-                success = False
-            else:
-                self._model.annotate(ent, tm)
-                self._terms[yterm.get("Handle") or yterm["Value"] ] = tm
-                self._terms[tm.value] = tm
-        return success
-        
+            tm = self.create_or_merge_term_from_mdf(yterm)
+            self._model.annotate(ent, tm)
 
     def calc_value_domain(self, typedef, pname=None):
         if isinstance(typedef, dict):
