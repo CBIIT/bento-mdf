@@ -155,8 +155,8 @@ class MDF(object):
             init = {"handle": n, "model": self.handle, "_commit": self._commit}
             if 'Desc' in yn and yn['Desc']:
                 init['desc'] = yn['Desc']
-            if 'nanoid' in yn and yn['nanoid']:
-                init['nanoid'] = yn['nanoid']
+            if 'NanoID' in yn and yn['NanoID']:
+                init['nanoid'] = yn['NanoID']
             node = self._model.add_node(init)
             if "Tags" in yn:
                 for t in yn["Tags"]:
@@ -295,8 +295,8 @@ class MDF(object):
                         "_commit": self._commit}
                 if 'Desc' in ypdef and ypdef['Desc']:
                     init['desc'] = ypdef['Desc']
-                if 'nanoid' in ypdef and ypdef['nanoid']:
-                    init['nanoid'] = ypdef['nanoid']
+                if 'NanoID' in ypdef and ypdef['NanoID']:
+                    init['nanoid'] = ypdef['NanoID']
                 if 'Type' in ypdef:
                     init.update(self.calc_value_domain(ypdef["Type"], pname))
                 elif 'Enum' in ypdef:
@@ -349,8 +349,10 @@ class MDF(object):
             tm["origin_id"] = ytm["Code"]
         if 'Version' in ytm:
             tm["origin_version"] = ytm["Version"]
-        if 'nanoid' in ytm:
-            tm["nanoid"] = ytm["nanoid"]
+        if 'Handle' in ytm:
+            tm["handle"] = ytm["Handle"]
+        if 'NanoID' in ytm:
+            tm["nanoid"] = ytm["NanoID"]
         return Term(tm)
 
     def annotate_entity_from_mdf(self, ent, yterm_list):
@@ -450,15 +452,12 @@ class MDF(object):
                 if not node.concept.terms:
                     self.logger.warning("Node '{}' has associated concept but with no terms defined".format(node.handle))
                 else:
-                    # Use the first term in the collection - WARN: this may not be what
-                    # is desired in the MDF in later use cases
-                    tm = [x for x in node.concept.terms.values()][0]
-                    mdf_node["Term"] = {
+                    mdf_node["Term"] = [{
                         "Value": tm.value,
                         "Definition": tm.origin_definition,
                         "Origin": tm.origin,
                         "Code": tm.origin_id,
-                        }
+                        } for tm in node.concept.terms.values()]
 
             mdf_node["Props"] = [prop for prop in sorted(node.props)]
 
@@ -511,15 +510,13 @@ class MDF(object):
                 if not edge.concept.terms:
                     self.logger.warning("Edge '{}' has associated concept but with no terms defined".format(node.handle))
                 else:
-                    # Use the first term in the collection - WARN: this may not be what
-                    # is desired in the MDF in later use cases
-                    tm = [x for x in edge.concept.terms.values()][0]
-                    mdf_edge["Term"] = {
-                        "Value": tm.value,
-                        "Definition": tm.origin_definition,
-                        "Origin": tm.origin,
-                        "Code": tm.origin_id,
-                    }
+                    mdf_edge["Term"] = [
+                        {
+                            "Value": tm.value,
+                            "Definition": tm.origin_definition,
+                            "Origin": tm.origin,
+                            "Code": tm.origin_id,
+                        } for tm in edge.concept.terms.values()]
         prnames = []
         props = {}
         for pr in model.props:
@@ -561,17 +558,12 @@ class MDF(object):
                 if not prop.concept.terms:
                     self.logger.warning("Property '{}' has associated concept but with no terms defined".format(node.handle))
                 else:
-                    # Use the first term in the collection - WARN: this may not be what
-                    # is desired in the MDF in later use cases
-                    tm = [x for x in prop.concept.terms.values()][0]
-                    mdf_prop["Term"] = {
+                    mdf_prop["Term"] = [{
                         "Value": tm.value,
                         "Definition": tm.origin_definition,
                         "Origin": tm.origin,
                         "Code": tm.origin_id,
-                    }
-
-
+                    } for tm in prop.concept.terms.values()]
         if file:
             fh = file
             if isinstance(file,str):

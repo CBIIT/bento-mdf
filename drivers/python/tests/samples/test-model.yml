@@ -10,6 +10,8 @@ Nodes:
       - Handle: case_term
         Value: case
         Origin: CTDC
+      - Value: subject
+        Origin: caDSR
   sample:
     Props:
       - sample_type

@@ -97,6 +97,9 @@ def test_created_model():
     assert m.model.edges[('derived_from','sample','sample')].tags['item1'].value == 'value1'
     assert m.model.edges[('derived_from','sample','sample')].tags['item2'].value == 'value2'
     assert m.model.nodes['file'].props['md5sum'].tags['another'].value == 'value3'
+    assert m.model.nodes['case'].concept.terms[('case','CTDC')]
+    assert m.model.nodes['case'].concept.terms[('case','CTDC')].handle == 'case_term'
+    assert m.model.nodes['case'].concept.terms[('subject','caDSR')]    
 
 def test_create_model_qual_props():
     m = MDF(handle='test')
