@@ -363,6 +363,9 @@ class MDF(object):
         for yterm in yterm_list:
             tm = self.create_or_merge_term_from_mdf(yterm)
             self._model.annotate(ent, tm)
+            if self._commit:
+                if not ent.concept._commit:
+                    ent.concept._commit = self._commit
 
     def calc_value_domain(self, typedef, pname=None):
         if isinstance(typedef, dict):
