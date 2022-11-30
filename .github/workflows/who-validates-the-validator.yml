@@ -20,6 +20,6 @@ jobs:
           pushd drivers/python
           pip install tox
           pip install "bento-meta@git+https://github.com/CBIIT/bento-meta.git#egg=subdir&subdirectory=python"
-          tox --sitepackages=true
+          tox --sitepackages
           popd
           
