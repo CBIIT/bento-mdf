@@ -9,16 +9,9 @@ on:
 
 jobs:
   validate-and-build:
-    uses: CBIIT/bento-workflows/.github/workflows/model-test-and-deploy.yml@v1.1.0
+    uses: CBIIT/bento-workflows/.github/workflows/model-test-and-deploy.yml@{{ wfversion }}
     with:
       model_files: |
         {{ mdfs|join(' ') }}
       model_prefix: {{ base }}
       event_name: {{ '${{' }} github.event_name {{ '}}' }}
-    secrets:
-      {% raw -%}
-      docker_repo: ${{ secrets.REPO }}
-      docker_svc: ${{ secrets.RSVC }}
-      repo_user: ${{ secrets.REPO_USER }}
-      repo_pw: ${{ secrets.REPO_PW }}
-      {% endraw %}

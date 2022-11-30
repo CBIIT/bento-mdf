@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # new-repo-setup
 # after setting up a new model repo and pulling bento-mdf as a submodule:
 # run in the root dir
@@ -26,6 +27,9 @@ ap = ArgumentParser(description="Set up a new model repo with validation and doc
 ap.add_argument('--force',
                   help="force setup despite warnings",
                   action='store_true')
+ap.add_argument('--workflow-version',
+                  help="version string of desired model-test-and-deploy.yml (gh action)",
+                  action='store_true', default='v1.1.4.2')
 ap.add_argument('mdf_files',nargs='+',
                   type=str,
                   metavar='mdf-file',
@@ -106,7 +110,9 @@ except FileExistsError:
     print("- Remove ./docs subdir and re-run script to refresh.")
 
 readme_content = open('./docs/README.md.content','w')
-print(jenv.get_template('README.md.content.jinja').render(base=base,readme=readme),
+print(jenv.get_template('README.md.content.jinja').render(base=base,
+                                                          readme=readme,
+                                                          wfversion=args.workflow_version),
         file=readme_content)
 
 try:
