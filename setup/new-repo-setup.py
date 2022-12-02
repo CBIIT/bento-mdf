@@ -111,8 +111,7 @@ except FileExistsError:
 
 readme_content = open('./docs/README.md.content','w')
 print(jenv.get_template('README.md.content.jinja').render(base=base,
-                                                          readme=readme,
-                                                          wfversion=args.workflow_version),
+                                                          readme=readme),
         file=readme_content)
 
 try:
@@ -143,7 +142,8 @@ if not os.path.exists('./.github/workflows/model-test-and-deploy.yml') or args.f
     raise e
   
   wkfl = open('./.github/workflows/model-test-and-deploy.yml','w')
-  print(jenv.get_template('model-test-and-deploy.yml.jinja').render(base=base,mdfs=mdfs),
+  print(jenv.get_template('model-test-and-deploy.yml.jinja').
+        render(base=base, mdfs=mdfs, wfversion=args.workflow_version),
         file=wkfl)
 else:
   print("- Not overwriting existing GitHub Actions yml file")
