@@ -27,6 +27,10 @@ license = "Apache 2.0"
 readme = "README.md"
 include = ["logs/log.ini"]
 
+[tool.poetry.scripts]
+"test-mdf.py" = { reference = "bin/test-mdf.py", type = "file" }
+"load-mdf" = { reference = "bin/load-mdf.py", type = "file" }
+
 [tool.poetry.dependencies]
 python = "^3.8"
 bento-meta = "^0.0.50"
