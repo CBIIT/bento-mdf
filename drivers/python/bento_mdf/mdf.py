@@ -43,6 +43,7 @@ def make_nano():
 
 class MDF(object):
     def __init__(self, *yaml_files, handle=None, model=None, _commit=None,
+                 mdf_schema=None,
                  raiseError=False, logger=logging.getLogger(__name__)):
         """Create a :class:`Model` from MDF YAML files/Write a :class:`Model` to YAML
         :param str|file|url *yaml_files: MDF filenames or file objects, 
@@ -110,7 +111,8 @@ class MDF(object):
             else:
                 vargs.append(f)
                 
-        v = MDFValidator(None, *vargs, raiseError=True)
+        v = MDFValidator(None, *vargs, sch_file=mdf_schema, raiseError=True)
+        self.mdf_schema = v.load_and_validate_schema
         self.schema = v.load_and_validate_yaml()
 
     def create_model(self, raiseError=False):
@@ -316,7 +318,20 @@ class MDF(object):
                     "specify a data type".format(p_hdl=p_hdl)
                 )
                 init["value_domain"] = Property.default("value_domain")
+            # handle union type
+            u_types = None
+            if init["value_domain"] == "union":
+                u_types = init["types"]
+                del init["types"]
+                # reduce to the first value set present in type list
+                specs = [x for x in u_types if x["value_domain"] == "value_set"]
+                if specs:
+                    init.update(specs[0])
+                else:
+                    init["value_domain"]="union"
             prop = Property(init)
+            if u_types:
+                prop.value_types.extend(u_types)
             if "Tags" in ypdef:
                 for t in ypdef["Tags"]:
                     prop.tags[t] = Tag({"key": t,
@@ -403,25 +418,38 @@ class MDF(object):
                     )
                 return {"value_domain": json.dumps(typedef)}
         elif isinstance(typedef, list):  # a valueset: create value set and term objs
-            vs = ValueSet({"nanoid": make_nano(), "_commit": self._commit})
-            vs.handle = self.handle + vs.nanoid
-            # interpret boolean values as strings
-            if (isinstance(typedef[0], str) and
-                re.match("^(?:https?|bolt)://", typedef[0])):  # looks like url
-                vs.url = typedef[0]
-            else:  # an enum
+            # could be either a Union or an Enum...
+            if (not isinstance(typedef[0], str) or
+                typedef[0] in self.mdf_schema["defs"]["simpleType"]["enum"]):
+                # guess is a union type
+                ret = []
                 for t in typedef:
-                    if isinstance(t, bool):  # stringify booleans in term context
-                        t = "True" if t else "False"
-                    if t not in self._terms:
-                        self._terms[t] = Term({
-                            "value": t,
-                            "origin_name": self.handle,
-                            "_commit": self._commit
-                        })
-                    vs.terms[self._terms[t].value] = self._terms[t]
-            return {"value_domain": "value_set", "value_set": vs}
+                    ret.append(self.calc_value_domain(t)
+                return {"value_domain": "union", "types":ret}
+            else:
+                vs = ValueSet({"nanoid": make_nano(), "_commit": self._commit})
+                vs.handle = self.handle + vs.nanoid
+                # interpret boolean values as strings
+                if (isinstance(typedef[0], str) and
+                    re.match("^(?:https?|bolt)://", typedef[0])):  # looks like url
+                    vs.url = typedef[0]
+                else:  # an enum
+                    for t in typedef:
+                        if isinstance(t, bool):  # stringify booleans in term context
+                            t = "True" if t else "False"
+                        if t not in self._terms:
+                            self._terms[t] = Term({
+                                "value": t,
+                                "origin_name": self.handle,
+                                "_commit": self._commit
+                            })
+                        vs.terms[self._terms[t].value] = self._terms[t]
+                return {"value_domain": "value_set", "value_set": vs}
         elif isinstance(typedef, str):
+            if typedef not in self.mdf_schema["defs"]["simpleType"]["enum"]:
+                self.logger.warning(
+                    "Type descriptor '{}' not present in MDF schema simpleType definition"
+                    .format(typedef))
             return {"value_domain": typedef}
         else:
             self.logger.warning("Applying default value domain to property '{}'".format(pname))
