@@ -110,9 +110,20 @@ def test_create_model_qual_props():
     assert m.model.nodes['case'].props['disease'].value_domain == 'string'
     assert m.model.nodes['diagnosis'].props['disease'].value_domain == 'url'
     assert m.model.edges[('derived_from','file','file')].props['disease'].value_domain == 'url'
-    
-#@pytest.mark.skip("TODO")
 
+def test_create_model_union_type():
+    m = MDF(handle='test')
+    m.files = ['{}samples/test-model-union-type.yml'.format(tdir)]
+    m.load_yaml()
+    m.create_model()
+    assert m.model
+    assert m.model.nodes['case'].props['disease'].value_domain == 'union'
+    assert type(m.model.nodes['case'].props['disease'].value_types) == list
+    assert {x['value_domain'] for x in m.model.nodes['case'].props['disease'].value_types} == {'string', 'url'}
+    assert m.model.nodes['sample'].props['sample_type'].value_domain == 'value_set'
+    assert {t.value for t in m.model.nodes['sample'].props['sample_type'].terms.values()} == {'normal', 'tumor'}
+
+#@pytest.mark.skip("TODO")
 def test_write_mdf():
     yml = yaml.load(open('{}samples/test-model.yml'.format(tdir),'r'),Loader=yloader)
     m = MDF('{}samples/test-model.yml'.format(tdir),handle='test')
