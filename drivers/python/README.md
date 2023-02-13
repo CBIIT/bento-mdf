@@ -19,7 +19,7 @@ Scripts [`test-mdf.py`](./test-mdf.py) and
 distribution. `test-mdf` is a verbose validator that can be used to
 find issues in a set of local MDFs using the [MDF
 JSONSchema](../../schema/mdf-schema.yaml). `load-mdf` will load a
-valid set of MDFs into an existing [Neo4j](https://neo4j.com) [Metamodel Database](https://github.com/CBIIT/bento-meta].
+valid set of MDFs into an existing [Neo4j](https://neo4j.com) [Metamodel Database](https://github.com/CBIIT/bento-meta).
 
 
 ## `test-mdf` Usage
