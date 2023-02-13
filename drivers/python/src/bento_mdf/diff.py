@@ -169,7 +169,7 @@ def diff_models(mdl_a, mdl_b):
                 if a_att == b_att:  # only if both 'None' *or* is same object
                     continue
                 if not a_att or not b_att:  # one is 'None'
-                    diff_.update_result(thing, entk, att, sorted(a_att), sorted(b_att))
+                    diff_.update_result(thing, entk, att, a_att, b_att)
                     continue
 
                 if type(a_att) == type(b_att):
