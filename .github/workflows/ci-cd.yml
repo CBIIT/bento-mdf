@@ -1,6 +1,7 @@
 name: ci-cd
 
-on: [push, pull_request]
+# on: [push, pull_request]
+on: []
 
 jobs:
     ci:
