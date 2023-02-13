@@ -16,10 +16,10 @@ jobs:
         with:
           python-version: '3.x'
       - name: Test Validator
+        uses: snok/install-poetry@v1
         run: |
           pushd drivers/python
-          pip install tox
-          pip install bento-meta
-          tox --sitepackages
-          popd
+          poetry install
+          poetry run pytest
+
           
