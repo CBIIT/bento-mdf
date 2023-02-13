@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.4.3"
+version = "0.4.4"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
     { name="Mark A. Jensen", email = "mark.jensen@nih.gov"}
@@ -18,7 +18,7 @@ classifiers = [
 
 [tool.poetry]
 name = "bento-mdf"
-version = "0.4.3"
+version = "0.4.4"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
     "Mark A. Jensen <mark.jensen@nih.gov>"
@@ -33,9 +33,9 @@ include = ["logs/log.ini"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-bento-meta = "^0.0.50"
+bento-meta = ">=0.0.54"
 jsonschema = "^4.17.3"
-pyyaml = ">=6.0"
+pyyaml = ">=6"
 delfick-project = "^0.7.9"
 requests = "^2.28.2"
 tqdm = "^4.64.1"
@@ -43,7 +43,7 @@ tqdm = "^4.64.1"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
 jsonschema = "^4.17.3"
-pyyaml = "^6.0"
+pyyaml = ">=6"
 tqdm = "^4.64.1"
 myst-nb = "^0.17.1"
 sphinx-autoapi = "^2.0.1"
