@@ -333,7 +333,7 @@ class MDF(object):
                 if specs:
                     init.update(specs[0])
                 else:
-                    init["value_domain"]="union"
+                    init["value_domain"] = "union"
             prop = Property(init)
             if u_types:
                 prop.value_types.extend(u_types)
