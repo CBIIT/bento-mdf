@@ -1,7 +1,6 @@
 name: ci-cd
 
-# on: [push, pull_request]
-on: []
+on: [push, pull_request]
 
 jobs:
     ci:
@@ -35,8 +34,8 @@ jobs:
           with:
             files: ./coverage.xml   # coverage report
             
-        - name: Build documentation
-          run: poetry run make html --directory docs/
+        # - name: Build documentation
+        #   run: poetry run make html --directory docs/
 
     cd:
         # Only run this job if the "ci" job passes
