@@ -11,8 +11,10 @@ use Hash::Merge;
 use strict;
 use warnings;
 
-our $VERSION="0.2";
+our $VERSION="0.21";
 our $MERGER = Hash::Merge->new();
+my $PROP_VIZ_LIMIT = 25;
+
 if (defined $OVERLAY_MERGE_BEH) {
   $MERGER->add_behavior_spec($OVERLAY_MERGE_BEH, 'R_OVERLAY');
 }
@@ -212,6 +214,11 @@ sub viz {
    );
   for ($self->nodes) {
     my @lbl = sort map { $_->name } $self->model->node($_)->props;
+    if (@lbl > $PROP_VIZ_LIMIT) {
+      my $addl = @lbl - $PROP_VIZ_LIMIT;
+      @lbl = @lbl[0..$PROP_VIZ_LIMIT-1];
+      $lbl[$PROP_VIZ_LIMIT] = "+ $addl properties";
+    }
     unshift @lbl, $_;
     if (@lbl>1) {
       $lbl[1] = "|{$lbl[1]";
