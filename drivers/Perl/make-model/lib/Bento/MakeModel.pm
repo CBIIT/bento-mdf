@@ -200,7 +200,7 @@ sub value_tokens {
 
 sub viz {
   my $self = shift;
-  my ($outf) = @_;
+  my ($outf, $nodes_only) = @_;
   unless (eval "require GraphViz2; 1") {
     ERROR "GraphViz2 package not installed; barfing.";
     return;
@@ -213,18 +213,24 @@ sub viz {
     label_scheme => 3,
    );
   for ($self->nodes) {
-    my @lbl = sort map { $_->name } $self->model->node($_)->props;
-    if (@lbl > $PROP_VIZ_LIMIT) {
-      my $addl = @lbl - $PROP_VIZ_LIMIT;
-      @lbl = @lbl[0..$PROP_VIZ_LIMIT-1];
-      $lbl[$PROP_VIZ_LIMIT] = "+ $addl properties";
+    if ($nodes_only) {
+       $graph->add_node(name => $_);
     }
-    unshift @lbl, $_;
-    if (@lbl>1) {
-      $lbl[1] = "|{$lbl[1]";
-      $lbl[-1] = "$lbl[-1]}|";
+    else {
+      my @lbl = sort map { $_->name } $self->model->node($_)->props;
+      if (@lbl > $PROP_VIZ_LIMIT) {
+	my $addl = @lbl - $PROP_VIZ_LIMIT;
+	@lbl = @lbl[0..$PROP_VIZ_LIMIT-1];
+	$lbl[$PROP_VIZ_LIMIT] = "+ $addl properties";
+      }
+      unshift @lbl, $_;
+      if (@lbl>1) {
+	$lbl[1] = "|{$lbl[1]";
+	$lbl[-1] = "$lbl[-1]}|";
+      }
+      $graph->add_node(name => $_, label => \@lbl);
     }
-    $graph->add_node(name => $_, label => \@lbl);
+
   }
   for my $r ($self->model->edges) {
     $graph->add_edge( from => $r->src->name, to => $r->dst->name, label=>$r->type->name );

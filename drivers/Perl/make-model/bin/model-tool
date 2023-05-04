@@ -13,6 +13,7 @@ use warnings;
 my $J = JSON->new->pretty;
 my $verbose = 0;
 my $make_graph = undef;
+my $make_node_graph = undef;
 my $output_table = undef;
 my $include_unlinked;
 my ($warn, $dry_run);
@@ -20,7 +21,8 @@ my @search_dirs = ('init');
 my @V = ($FATAL,$ERROR, $WARN, $INFO, $DEBUG );
 my $logger = get_logger("");
 GetOptions (
-  'graph|g:s' => \$make_graph,
+  'graph|g:s' => \$make_graph, # 
+  'node-graph|n:s' => \$make_node_graph,
   'table|T:s' => \$output_table,
   'verbose|v+' => \$verbose,
   'warn|W' => \$warn,
@@ -34,6 +36,11 @@ if ($dry_run) {
 
 if ( !$dry_run && defined $make_graph && !$make_graph ) {
   FATAL "Option --graph requires an argument\n";
+  pod2usage(3);
+}
+
+if ( !$dry_run && defined $make_node_graph && !$make_node_graph ) {
+  FATAL "Option --node-graph requires an argument\n";
   pod2usage(3);
 }
 
@@ -67,6 +74,10 @@ try {
 
 if ($make_graph && !$dry_run) {
   $make_graph ne '-' ? $mm->viz($make_graph) : $mm->viz;
+}
+
+if ($make_node_graph && !$dry_run) {
+  $make_node_graph ne '-' ? $mm->viz($make_node_graph, 'nodes_only') : $mm->viz;
 }
 
 if ($output_table && !$dry_run) {

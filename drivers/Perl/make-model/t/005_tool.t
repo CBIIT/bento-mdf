@@ -46,11 +46,13 @@ lives_ok { run( [$^X, $tool, '-g', File::Spec->catfile($dir,'try.svg'),'-T','-v'
 like ($err, qr/FATAL.*requires an arg/s, "Got correct error");
 
 $in = $out = $err = '';
-lives_ok { run( [$^X, $tool, '-g', File::Spec->catfile($dir,'try.svg'), @descfiles],
+lives_ok { run( [$^X, $tool, '-g', File::Spec->catfile($dir,'try.svg'),
+		 '-n', File::Spec->catfile($dir, 'try-nodes-only.svg'), @descfiles],
 		\$in, \$out, \$err ) } "-g";
 diag $out if $out;
 diag $err if $err;
-ok(( -e File::Spec->catfile($dir,'try.svg')), "svg created");
+ok(( -e File::Spec->catfile($dir,'try.svg')), "try.svg created");
+ok(( -e File::Spec->catfile($dir,'try-nodes-only.svg')), "try-nodes-only.svg created");
 
 $in = $out = $err = '';
 lives_ok { run( [$^X, $tool, '-T', File::Spec->catfile($dir,'try.txt'), @descfiles],
