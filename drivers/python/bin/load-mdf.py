@@ -16,9 +16,12 @@ parser.add_argument('--commit', default='',
 parser.add_argument('--handle', help="model handle")
 parser.add_argument('--user', help="MDB username")
 parser.add_argument('--passw', help="MDB password")
-parser.add_argument('--bolt', metavar="BoltURL", help="MDB Bolt url endpoint (specify as 'bolt://...')")
-parser.add_argument('--put', action='store_true', help="Load model to database")
-parser.add_argument('--make-nanoids', action='store_true', help="Add new nanoids to graph nodes")
+parser.add_argument('--bolt', metavar="BoltURL",
+                    help="MDB Bolt url endpoint (specify as 'bolt://...')")
+parser.add_argument('--put', action='store_true',
+                    help="Load model to database")
+parser.add_argument('--make-nanoids', action='store_true',
+                    help="Add new nanoids to graph nodes")
 # example:
 # args = parser.parse_args([
 #     "https://raw.githubusercontent.com/CBIIT/icdc-model-tool/master/model-desc/icdc-model.yml",
@@ -45,7 +48,8 @@ if args.put and not args.passw:
     args.passw = getpass.getpass()
 
 print("load model from MDFs")
-mdf = MDF(*args.files, handle=args.handle, _commit=args.commit, raiseError=True)
+mdf = MDF(*args.files, handle=args.handle,
+          _commit=args.commit, raiseError=True)
 model = mdf.model
 if (args.bolt):
     mdb = WriteableMDB(uri=args.bolt, user=args.user, password=args.passw)
@@ -53,18 +57,18 @@ if (args.bolt):
 
 if args.put:
     print("Put model to DB")
-    load_mdf(mdf,model.mdb)
+    load_mdf(mdf, model.mdb)
     if args.make_nanoids:
         print("Add nanoids to nodes")
         with mdb.driver.session() as s:
             result = s.run(
                 "match (n {_commit:$commit}) where not exists(n.nanoid) "
                 "with n limit 1 set n.nanoid=$nanoid return n",
-                {"commit":args.commit, "nanoid":make_nanoid()}
+                {"commit": args.commit, "nanoid": make_nanoid()}
             )
             while (result.peek()):
                 result = s.run(
                     "match (n {_commit:$commit}) where not exists(n.nanoid) "
                     "with n limit 1 set n.nanoid=$nanoid return n",
-                    {"commit":args.commit, "nanoid":make_nanoid()}
+                    {"commit": args.commit, "nanoid": make_nanoid()}
                     )

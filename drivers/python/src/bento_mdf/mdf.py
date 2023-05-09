@@ -3,7 +3,7 @@ bento_mdf.mdf
 ==============
 
 This module contains :class:`MDF`, a class for reading a graph data model in
-Model Description Format into a :class:`bento_meta.model.Model` object, and 
+Model Description Format into a :class:`bento_meta.model.Model` object, and
 writing the opposite way.
 
 """
@@ -365,21 +365,21 @@ class MDF(object):
             )
             tm["origin_name"] = self.handle
         tm["value"] = ytm["Value"]
-        if (tm["value"],tm["origin_name"]) in self._terms:
+        tm_key = t_hdl if t_hdl else tm["value"]
+        if (tm_key,tm["origin_name"]) in self._terms:
             pass  # merge term
         else:
+            tm["handle"] = ytm["Handle"] if 'Handle' in ytm else t_hdl
             if 'Definition' in ytm and ytm['Definition']:
                 tm["origin_definition"] = unquote(ytm["Definition"])
             if 'Code' in ytm:
                 tm["origin_id"] = ytm["Code"]
             if 'Version' in ytm:
                 tm["origin_version"] = ytm["Version"]
-            if 'Handle' in ytm:
-                tm["handle"] = ytm["Handle"]
             if 'NanoID' in ytm:
                 tm["nanoid"] = ytm["NanoID"]
-            self._terms[(tm["value"],tm["origin_name"])] = Term(tm)
-        return self._terms[(tm["value"],tm["origin_name"])]
+            self._terms[(tm_key, tm["origin_name"])] = Term(tm)
+        return self._terms[(tm_key, tm["origin_name"])]
 
     def annotate_entity_from_mdf(self, ent, yterm_list):
         for yterm in yterm_list:
@@ -421,7 +421,7 @@ class MDF(object):
                 # punt
                 self.logger.warning(
                     "MDF type descriptor unrecognized: json looks like {} (property '{}')".
-                    format(json.dumps(typedef),pname)
+                    format(json.dumps(typedef), pname)
                     )
                 return {"value_domain": json.dumps(typedef)}
         elif isinstance(typedef, list):  # a valueset: create value set and term objs
@@ -432,13 +432,13 @@ class MDF(object):
                 ret = []
                 for t in typedef:
                     ret.append(self.calc_value_domain(t))
-                return {"value_domain": "union", "types":ret}
+                return {"value_domain": "union", "types": ret}
             else:
                 vs = ValueSet({"nanoid": make_nano(), "_commit": self._commit})
                 vs.handle = self.handle + vs.nanoid
                 # interpret boolean values as strings
                 if (isinstance(typedef[0], str) and
-                    re.match("^(?:https?|bolt)://", typedef[0])):  # looks like url
+                        re.match("^(?:https?|bolt)://", typedef[0])):  # looks like url
                     vs.url = typedef[0]
                 else:  # an enum
                     for t in typedef:
@@ -455,11 +455,13 @@ class MDF(object):
         elif isinstance(typedef, str):
             if typedef not in self.mdf_schema["defs"]["simpleType"]["enum"]:
                 self.logger.warning(
-                    "Type descriptor '{}' not present in MDF schema simpleType definition"
+                    "Type descriptor '{}' not present in MDF schema "
+                    "simpleType definition"
                     .format(typedef))
             return {"value_domain": typedef}
         else:
-            self.logger.warning("Applying default value domain to property '{}'".format(pname))
+            self.logger.warning(
+                "Applying default value domain to property '{}'".format(pname))
             return {"value_domain": Property.default("value_domain")}
 
     def write_mdf(self, model=None, file=None):
@@ -469,11 +471,11 @@ class MDF(object):
         :returns: MDF as dict"""
         if not model:
             model = self.model
-        mdf = {"Nodes":{},
-               "Relationships":{},
-               "PropDefinitions":{},
-               "Terms":{},
-               "Handle":model.handle}
+        mdf = {"Nodes": {},
+               "Relationships": {},
+               "PropDefinitions": {},
+               "Terms": {},
+               "Handle": model.handle}
         for nd in sorted(model.nodes):
             node = model.nodes[nd]
             mdf_node = {}
@@ -518,7 +520,7 @@ class MDF(object):
                 mdf_edge["Ends"].append(ends)
             else:
                 mdf_edge["Ends"] = [ends]
-            if not "Mul" in mdf_edge:
+            if "Mul" not in mdf_edge:
                 mdf_edge["Mul"] = edge.multiplicity or Edge.default("multiplicity")
             else:
                 if mdf_edge["Mul"] != edge.multiplicity:
@@ -573,7 +575,7 @@ class MDF(object):
                 for t in prop.terms:
                     # if t in mdf["Terms"]:
                     #    self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
-                    if not t in mdf["Terms"]:
+                    if t not in mdf["Terms"]:
                         mdf["Terms"][t] = {
                             "Value": prop.terms[t].value,
                             "Definition": prop.terms[t].origin_definition,
@@ -612,11 +614,11 @@ class MDF(object):
         if prop.value_domain == "regexp":
             if not prop.pattern:
                 self.logger.warning("Property {} has 'regexp' value domain, but no pattern specified".format(prop.handle))
-                return {"pattern":"^.*$"}
+                return {"pattern": "^.*$"}
             else:
-                return {"pattern":prop.pattern}
+                return {"pattern": prop.pattern}
         if prop.units:
-            return {"value_type":prop.value_domain, "units":prop.units.split(';')}
+            return {"value_type": prop.value_domain, "units": prop.units.split(';')}
         if prop.value_domain == "value_set":
             if not prop.value_set:
                 self.logger.warning("Property {} has 'value_set' value domain, but value_set attribute is None".format(prop.handle))
