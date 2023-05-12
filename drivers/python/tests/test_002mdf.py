@@ -2,7 +2,7 @@ import re
 import sys
 import os.path
 sys.path.insert(0,'.')
-sys.path.insert(0,'..')
+sys.path.insert(0,'../src')
 import pytest
 from pdb import set_trace
 from bento_mdf.mdf import MDF
@@ -97,8 +97,8 @@ def test_created_model():
     assert m.model.edges[('derived_from','sample','sample')].tags['item1'].value == 'value1'
     assert m.model.edges[('derived_from','sample','sample')].tags['item2'].value == 'value2'
     assert m.model.nodes['file'].props['md5sum'].tags['another'].value == 'value3'
-    assert m.model.nodes['case'].concept.terms[('case','CTDC')]
-    assert m.model.nodes['case'].concept.terms[('case','CTDC')].handle == 'case_term'
+    assert m.model.nodes['case'].concept.terms[('case_term','CTDC')]
+    assert m.model.nodes['case'].concept.terms[('case_term','CTDC')].value == 'case'
     assert m.model.nodes['case'].concept.terms[('subject','caDSR')]    
 
 def test_create_model_qual_props():
@@ -106,11 +106,25 @@ def test_create_model_qual_props():
     m.files = ['{}samples/test-model-qual-props.yml'.format(tdir)]
     m.load_yaml()
     m.create_model()
-    assert m.model
     assert m.model.nodes['case'].props['disease'].value_domain == 'string'
     assert m.model.nodes['diagnosis'].props['disease'].value_domain == 'url'
     assert m.model.edges[('derived_from','file','file')].props['disease'].value_domain == 'url'
 
+
+def test_create_mode_with_terms_section():
+    m = MDF(handle='test')
+    m.files = ['{}samples/test-model-with-terms.yml'.format(tdir)]
+    m.load_yaml()
+    m.create_model()
+    assert m._terms[('normal','Fred')]
+    assert m._terms[('tumor','Al')]
+    assert m.model.nodes['sample'].props['sample_type'].terms['normal']
+    assert m.model.nodes['sample'].props['sample_type'].terms['tumor']
+    assert m.model.nodes['sample'].props['sample_type'].terms['undetermined']
+    assert m.model.nodes['sample'].props['sample_type'].terms['normal'].origin_id == 10083
+    assert m.model.nodes['sample'].props['sample_type'].terms['tumor'].origin_id == 10084
+
+    
 def test_create_model_union_type():
     m = MDF(handle='test')
     m.files = ['{}samples/test-model-union-type.yml'.format(tdir)]

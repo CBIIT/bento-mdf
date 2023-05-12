@@ -309,34 +309,37 @@ class MDF(object):
         if not force_create and (init["model"], init["handle"]) in self._props:
             pass  # merge property
         else:
+            prop = Property(init)
             if 'Desc' in ypdef and ypdef['Desc']:
-                init['desc'] = ypdef['Desc']
+                prop.desc = ypdef['Desc']
             if 'NanoID' in ypdef and ypdef['NanoID']:
-                init['nanoid'] = ypdef['NanoID']
+                prop.nanoid = ypdef['NanoID']
             if 'Type' in ypdef:
-                init.update(self.calc_value_domain(ypdef["Type"], p_hdl))
+                self.calc_value_domain(ypdef["Type"], prop)
             elif 'Enum' in ypdef:
-                init.update(self.calc_value_domain(ypdef["Enum"], p_hdl))
+                self.calc_value_domain(ypdef["Enum"], prop)
             else:
                 self.logger.warning(
                     "property '{p_hdl}' does not "
                     "specify a data type".format(p_hdl=p_hdl)
                 )
                 init["value_domain"] = Property.default("value_domain")
-            # handle union type
-            u_types = None
-            if init["value_domain"] == "union":
-                u_types = init["types"]
-                del init["types"]
-                # reduce to the first value set present in type list
-                specs = [x for x in u_types if x["value_domain"] == "value_set"]
-                if specs:
-                    init.update(specs[0])
-                else:
-                    init["value_domain"] = "union"
-            prop = Property(init)
-            if u_types:
-                prop.value_types.extend(u_types)
+
+            # TODO: handle union type
+            # removing this kludge by commenting:
+            # u_types = None
+            # if init["value_domain"] == "union":
+            #     u_types = init["types"]
+            #     del init["types"]
+            #     # reduce to the first value set present in type list
+            #     specs = [x for x in u_types if x["value_domain"] == "value_set"]
+            #     if specs:
+            #         init.update(specs[0])
+            #     else:
+            #         init["value_domain"] = "union"
+
+            # if u_types:
+            #     prop.value_types.extend(u_types)
             if "Tags" in ypdef:
                 for t in ypdef["Tags"]:
                     prop.tags[t] = Tag({"key": t,
@@ -389,24 +392,33 @@ class MDF(object):
                 if not ent.concept._commit:
                     ent.concept._commit = self._commit
 
-    def calc_value_domain(self, typedef, pname=None):
+    def calc_value_domain(self, typedef, prop=None):
+        pname = prop.handle if prop else '(none)';
         if isinstance(typedef, dict):
             if typedef.get("pattern"):
-                return {"value_domain": "regexp",
-                        "pattern": typedef["pattern"]}
+                prop.value_domain = "regexp"
+                prop.pattern = typedef["pattern"]
+                # return {"value_domain": "regexp",
+                #         "pattern": typedef["pattern"]}
             elif typedef.get("units"):
-                return {
-                    "value_domain": typedef.get("value_type"),
-                    "units": ";".join(typedef.get("units")),
-                }
+                prop.value_domain = typedef.get("value_type")
+                prop.units = ";".join(typedef.get("units"))
+                # return {
+                #     "value_domain": typedef.get("value_type"),
+                #     "units": ";".join(typedef.get("units")),
+                # }
             elif typedef.get("item_type"):
                 if (typedef["value_type"] == 'list'):
                     i_domain = self.calc_value_domain(typedef["item_type"])
+                    prop.value_domain = "list"
+                    prop.item_domain = i_domain["value_domain"]
                     ret = {"value_domain": "list",
                            "item_domain": i_domain["value_domain"]}
                     if i_domain.get("pattern"):
+                        prop.pattern = i_domain["pattern"]
                         ret["pattern"] = i_domain["pattern"]
                     if i_domain.get("units"):
+                        prop.units = i_domain["units"]
                         ret["units"] = i_domain["units"]
                     if i_domain.get("value_set"):
                         ret["value_set"] = i_domain["value_set"]
@@ -432,26 +444,38 @@ class MDF(object):
                 ret = []
                 for t in typedef:
                     ret.append(self.calc_value_domain(t))
+                prop.value_domain = "union"
+                prop.value_types = ret
                 return {"value_domain": "union", "types": ret}
             else:
-                vs = ValueSet({"nanoid": make_nano(), "_commit": self._commit})
-                vs.handle = self.handle + vs.nanoid
-                # interpret boolean values as strings
                 if (isinstance(typedef[0], str) and
                         re.match("^(?:https?|bolt)://", typedef[0])):  # looks like url
+                    # here create a ValueSet for the purpose of storing the url
+                    prop.value_domain = 'value_set'
+                    vs = ValueSet({"nanoid": make_nano(), "_commit": self._commit})
+                    vs.handle = self.handle + vs.nanoid
                     vs.url = typedef[0]
-                else:  # an enum
+                else:  # an enum, use model machinery to add terms
+                    prop.value_domain = 'value_set'
                     for t in typedef:
                         if isinstance(t, bool):  # stringify booleans in term context
                             t = "True" if t else "False"
-                        if t not in self._terms:
-                            self._terms[t] = Term({
+                        # here is where we 'merge' terms
+                        # look for this term value/handle among the Terms
+                        keys = [k for k in self._terms if k[0] == t]
+                        tm = None
+                        if keys:
+                            tm = self._terms[keys[0]]
+                        else:
+                            # create a stub term
+                            tm = Term({
                                 "value": t,
                                 "origin_name": self.handle,
                                 "_commit": self._commit
                             })
-                        vs.terms[self._terms[t].value] = self._terms[t]
-                return {"value_domain": "value_set", "value_set": vs}
+                            self._terms[(t, self.handle)] = tm
+                        self.model.add_terms(prop, tm)
+                return {"value_domain": "value_set", "value_set": prop.value_set}
         elif isinstance(typedef, str):
             if typedef not in self.mdf_schema["defs"]["simpleType"]["enum"]:
                 self.logger.warning(
@@ -462,6 +486,8 @@ class MDF(object):
         else:
             self.logger.warning(
                 "Applying default value domain to property '{}'".format(pname))
+            if prop:
+                prop.value_domain = Property.default("value_domain")
             return {"value_domain": Property.default("value_domain")}
 
     def write_mdf(self, model=None, file=None):
