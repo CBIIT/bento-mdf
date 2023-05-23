@@ -68,3 +68,9 @@ remove_dist = false
 patch_without_tag = true
 major_on_zero = false # while major version on 0.y.z, won't bump to 1.0.0
 version_source = "tag" # temp?
+
+[tool.pytest.ini_options]
+filterwarnings = [
+   "ignore::UserWarning",
+   ]
+   

@@ -53,8 +53,6 @@ class MDF(object):
         :param boolean raiseError: raise on error if True
         :param :class:`logging.Logger` logger: Python logger (suitable default)
         :attribute model: the :class:`bento_meta.model.Model` created"""
-        if not model and (not handle or not isinstance(handle, str)):
-            raise ArgError("arg handle= must be a str - name for model")
         if model and not isinstance(model,Model):
             raise ArgError("arg model= must be a Model instance")
             

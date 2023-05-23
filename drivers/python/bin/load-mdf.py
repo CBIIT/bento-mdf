@@ -5,7 +5,10 @@ import os
 import getpass
 import argparse
 from bento_mdf.mdf import MDF
-from bento_meta.mdb import WriteableMDB, make_nanoid, load_mdf
+from bento_meta.mdb import (
+    WriteableMDB, make_nanoid, load_mdf, load_model_statements
+    )
+from sys import stderr
 
 parser = argparse.ArgumentParser(description="Load model in MDF into an MDB")
 parser.add_argument('files', nargs="*",
@@ -41,25 +44,28 @@ parser.add_argument('--make-nanoids', action='store_true',
 args = parser.parse_args()
 
 if not args.files:
-    parser.print_help()
+    parser.print_help(file=stderr)
     parser.exit(1)
 
+if args.put and not args.bolt:
+    print("error: --bolt and --user args required to put to database",file=stderr)
+    parser.exit(2)
+    
 if args.put and not args.passw:
     args.passw = getpass.getpass()
 
-print("load model from MDFs")
+print("load model from MDFs", file=stderr)
 mdf = MDF(*args.files, handle=args.handle,
           _commit=args.commit, raiseError=True)
 model = mdf.model
-if (args.bolt):
-    mdb = WriteableMDB(uri=args.bolt, user=args.user, password=args.passw)
-    model.mdb = mdb
 
 if args.put:
-    print("Put model to DB")
+    print("Put model to DB",file=stderr)
+    mdb = WriteableMDB(uri=args.bolt, user=args.user, password=args.passw)
+    model.mdb = mdb
     load_mdf(mdf, model.mdb)
     if args.make_nanoids:
-        print("Add nanoids to nodes")
+        print("Add nanoids to nodes",file=stderr)
         with mdb.driver.session() as s:
             result = s.run(
                 "match (n {_commit:$commit}) where not exists(n.nanoid) "
@@ -72,3 +78,7 @@ if args.put:
                     "with n limit 1 set n.nanoid=$nanoid return n",
                     {"commit": args.commit, "nanoid": make_nanoid()}
                     )
+else:
+    for s in load_model_statements(model, args.commit):
+        print(s)
+

@@ -121,6 +121,7 @@ def test_create_mode_with_terms_section():
     assert m.model.nodes['sample'].props['sample_type'].terms['normal']
     assert m.model.nodes['sample'].props['sample_type'].terms['tumor']
     assert m.model.nodes['sample'].props['sample_type'].terms['undetermined']
+    assert m.model.nodes['sample'].props['sample_type'].terms['undetermined'].origin_name == 'test'
     assert m.model.nodes['sample'].props['sample_type'].terms['normal'].origin_id == 10083
     assert m.model.nodes['sample'].props['sample_type'].terms['tumor'].origin_id == 10084
 
