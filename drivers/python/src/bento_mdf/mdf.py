@@ -239,8 +239,10 @@ class MDF(object):
                     if e["Src"] == src and e["Dst"] == dst
                 ]
                 if len(ends) > 1:
-                    self.logger.warning("edge '{ename}' has more than one Ends pair Src:'{src}',"
-                                        "Dst:'{dst}'".format(ename=hdl, src=src, dst=dst))
+                    self.logger.warning(
+                        "edge '{ename}' has more than one Ends pair Src:'{src}',"
+                        "Dst:'{dst}'".format(ename=hdl, src=src, dst=dst)
+                    )
                 end = ends[0]
             
                 # note the end-specified props _replace_ the edge-specified props,
@@ -396,15 +398,15 @@ class MDF(object):
             if typedef.get("pattern"):
                 prop.value_domain = "regexp"
                 prop.pattern = typedef["pattern"]
-                # return {"value_domain": "regexp",
-                #         "pattern": typedef["pattern"]}
+                return {"value_domain": "regexp",
+                        "pattern": typedef["pattern"]}
             elif typedef.get("units"):
                 prop.value_domain = typedef.get("value_type")
                 prop.units = ";".join(typedef.get("units"))
-                # return {
-                #     "value_domain": typedef.get("value_type"),
-                #     "units": ";".join(typedef.get("units")),
-                # }
+                return {
+                    "value_domain": typedef.get("value_type"),
+                    "units": ";".join(typedef.get("units")),
+                }
             elif typedef.get("item_type"):
                 if (typedef["value_type"] == 'list'):
                     i_domain = self.calc_value_domain(typedef["item_type"])
@@ -433,6 +435,8 @@ class MDF(object):
                     "MDF type descriptor unrecognized: json looks like {} (property '{}')".
                     format(json.dumps(typedef), pname)
                     )
+                if prop:
+                    prop.value_domain = json.dumps(typedef)
                 return {"value_domain": json.dumps(typedef)}
         elif isinstance(typedef, list):  # a valueset: create value set and term objs
             # could be either a Union or an Enum...
@@ -442,19 +446,23 @@ class MDF(object):
                 ret = []
                 for t in typedef:
                     ret.append(self.calc_value_domain(t))
-                prop.value_domain = "union"
-                prop.value_types = ret
+                if prop:
+                    prop.value_domain = "union"
+                    prop.value_types = ret
                 return {"value_domain": "union", "types": ret}
             else:
+                vs_terms = []
                 if (isinstance(typedef[0], str) and
                         re.match("^(?:https?|bolt)://", typedef[0])):  # looks like url
                     # here create a ValueSet for the purpose of storing the url
-                    prop.value_domain = 'value_set'
+                    if prop:
+                        prop.value_domain = 'value_set'
                     vs = ValueSet({"nanoid": make_nano(), "_commit": self._commit})
                     vs.handle = self.handle + vs.nanoid
                     vs.url = typedef[0]
                 else:  # an enum, use model machinery to add terms
-                    prop.value_domain = 'value_set'
+                    if prop:
+                        prop.value_domain = 'value_set'
                     for t in typedef:
                         if isinstance(t, bool):  # stringify booleans in term context
                             t = "True" if t else "False"
@@ -472,14 +480,18 @@ class MDF(object):
                                 "_commit": self._commit
                             })
                             self._terms[(t, self.handle)] = tm
-                        self.model.add_terms(prop, tm)
-                return {"value_domain": "value_set", "value_set": prop.value_set}
+                        vs_terms.append(tm)
+                        if prop:
+                            self.model.add_terms(prop, tm)
+                return {"value_domain": "value_set", "value_set": vs_terms}
         elif isinstance(typedef, str):
             if typedef not in self.mdf_schema["defs"]["simpleType"]["enum"]:
                 self.logger.warning(
                     "Type descriptor '{}' not present in MDF schema "
                     "simpleType definition"
                     .format(typedef))
+            if prop:
+                prop.value_domain = typedef
             return {"value_domain": typedef}
         else:
             self.logger.warning(

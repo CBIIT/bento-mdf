@@ -18,8 +18,8 @@ tdir = 'tests/' if os.path.exists('tests') else ''
 def test_class():
     m = MDF(handle='test')
     assert isinstance(m,MDF)
-    with pytest.raises(ArgError,match="arg handle= must"):
-        MDF()
+    with pytest.raises(ArgError,match="arg model= must"):
+        MDF(model="boog")
 
 
 def test_load_yaml():
@@ -135,8 +135,9 @@ def test_create_model_union_type():
     assert m.model.nodes['case'].props['disease'].value_domain == 'union'
     assert type(m.model.nodes['case'].props['disease'].value_types) == list
     assert {x['value_domain'] for x in m.model.nodes['case'].props['disease'].value_types} == {'string', 'url'}
-    assert m.model.nodes['sample'].props['sample_type'].value_domain == 'value_set'
-    assert {t.value for t in m.model.nodes['sample'].props['sample_type'].terms.values()} == {'normal', 'tumor'}
+    assert m.model.nodes['sample'].props['sample_type'].value_domain == 'union'
+    vt = m.model.nodes['sample'].props['sample_type'].value_types
+    assert {t.value for t in vt[1]["value_set"]} == {'normal', 'tumor'}
 
 #@pytest.mark.skip("TODO")
 def test_write_mdf():
