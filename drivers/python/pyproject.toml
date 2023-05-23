@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.7.0"
+version = "0.7.1"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
     { name="Mark A. Jensen", email = "mark.jensen@nih.gov"}
@@ -18,7 +18,7 @@ classifiers = [
 
 [tool.poetry]
 name = "bento-mdf"
-version = "0.7.0"
+version = "0.7.1"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
     "Mark A. Jensen <mark.jensen@nih.gov>"
