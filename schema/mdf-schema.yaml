@@ -368,7 +368,14 @@ defs:
           loading, e.g.).
       Nul:
         type: boolean
+        description: |
+          A boolean value (default False). Whether or not a property can accept
+          null as a valid value.
       Req:
+        description: |
+          A boolean value (default False or \'No\'). Whether or not data _must_ include a
+          value for the property. The value \'Preferred\' indicates that submitters should
+          submit data for the property if they have the data.
         oneOf:
           -
             type: boolean
@@ -383,16 +390,25 @@ defs:
           True if this property is being retained for backward compatibility,
           but should not be used in new models.
         type: boolean
+      Strict:
+        description: |
+          A boolean value (default True). This attribute is intended as a hint to validation
+          code. If True, data values should adhere strictly to the Type/Enum specified for
+          the property. If False, the validation should be \'less strict\', the interpretation
+          of which is use case-dependent. The primary reason for this attribute is to indicate
+          that validation should not fail on an Enum-valued property when the data value is not
+          found in the specified Enum. This is useful when the acceptable value list has not
+          been solidified in initial development.
       oneOf:
         -
           Type:
             description: |
               Property values can have (1) simple types (number, integer, string
-              datetime, or --if necessary-- "TBD"; (2) a number_with_units type
-              (e.g., { "value_type":"integer", "units":"mm" }); (3) a regular
+              datetime, or --if necessary-- \'TBD\'; (2) a number_with_units type
+              (e.g., { \"value_type\":\"integer\", \"units\":\"mm\" }); (3) a regular
               expression that a (string) value must match; (4) an enumeration
               of acceptable values, or a url or path fragment to an api that will validate against
-              such a list
+              such a list.
             oneOf:
               -
                 $ref: "#/defs/simpleType"
