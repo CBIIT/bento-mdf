@@ -399,6 +399,7 @@ defs:
           that validation should not fail on an Enum-valued property when the data value is not
           found in the specified Enum. This is useful when the acceptable value list has not
           been solidified in initial development.
+        type: boolean
       oneOf:
         -
           Type:
