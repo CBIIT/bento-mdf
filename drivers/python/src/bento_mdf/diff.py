@@ -1,10 +1,13 @@
-import sys
 import logging
 import os.path
+import sys
+
 sys.path.append("..")
+from warnings import warn
+
 from bento_mdf.mdf import MDF
 from bento_meta.objects import *
-from warnings import warn
+
 # NOTE: the diff class was changed from keeping the final data structure "result"
 #       from being 'set' based to being 'list' so that it could be dumped into
 #       json structure (which is incompatible with sets)
@@ -115,9 +118,9 @@ def diff_models(mdl_a, mdl_b):
     for thing in sets:
         aset = set(getattr(mdl_a, thing))
         bset = set(getattr(mdl_b, thing))
-        sets[thing]["a"] = sorted(list(set(aset - bset)))
-        sets[thing]["b"] = sorted(list(set(bset - aset)))
-        sets[thing]["common"] = sorted(list(set(aset & bset)))
+        sets[thing]["a"] = list(set(aset - bset))
+        sets[thing]["b"] = list(set(bset - aset))
+        sets[thing]["common"] = list(set(aset & bset))
 
         logging.debug("ok, where is {} at?".format(thing))
         logging.debug("aset is {}".format(aset))
@@ -155,8 +158,8 @@ def diff_models(mdl_a, mdl_b):
                         thing,
                         entk,
                         att,
-                        sorted(getattr(a_ent, att)),
-                        sorted(getattr(b_ent, att)),
+                        getattr(a_ent, att),
+                        getattr(b_ent, att),
                     )
 
             # try and see if the "object" type is the same?
@@ -179,17 +182,18 @@ def diff_models(mdl_a, mdl_b):
                                 thing,
                                 entk,
                                 att,
-                                sorted(list(set(a_att.terms) - set(b_att.terms))),
-                                sorted(list(set(b_att.terms) - set(a_att.terms))),
+                                list(set(a_att.terms) - set(b_att.terms)),
+                                list(set(b_att.terms) - set(a_att.terms)),
                             )
                     # items are something-other-than valuesets
+                    # items are concepts
+                    elif type(a_att) == Concept:
+                        continue  # new concept nanos generated when Model loaded so can't compare???
                     elif getattr(a_att, "handle"):
                         if a_att.handle == b_att.handle:
                             continue
                         else:
-                            diff_.update_result(
-                                thing, entk, att, sorted(a_att), sorted(b_att)
-                            )
+                            diff_.update_result(thing, entk, att, a_att, b_att)
                     else:
                         warn(
                             "can't handle attribute with type {}".format(
@@ -202,7 +206,7 @@ def diff_models(mdl_a, mdl_b):
                             )
                         )
                 else:
-                    diff_.update_result(thing, entk, att, sorted(a_att), sorted(b_att))
+                    diff_.update_result(thing, entk, att, a_att, b_att)
 
             # try and see if the "collection" set is the same?
             logging.info("...collection")
@@ -214,8 +218,8 @@ def diff_models(mdl_a, mdl_b):
                         thing,
                         entk,
                         att,
-                        sorted(list(set(aset - bset))),
-                        sorted(list(set(bset - aset))),
+                        list(set(aset - bset)),
+                        list(set(bset - aset)),
                     )
 
     logging.info("done")
