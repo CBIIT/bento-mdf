@@ -10,7 +10,7 @@ This directory provides ``test-mdf.py``, a standalone command line MDF validator
 Install the latest version (including scripts below) from GitHub using
 an up-to-date pip:
 
-	pip install bento_mdf@git+https://github.com/CBIIT/bento-mdf.git#egg=subdir\&subdirectory=drivers/python
+	pip install bento-mdf
 
 ## Scripts
 
