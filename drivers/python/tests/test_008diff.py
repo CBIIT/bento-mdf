@@ -1,113 +1,158 @@
-import re
-import sys
 import os
-sys.path.insert(0,'.')
-sys.path.insert(0,'..')
-import pytest
-#from pdb import set_trace
-from bento_mdf.mdf import MDF
+import sys
+
+sys.path.insert(0, ".")
+sys.path.insert(0, "..")
 from bento_mdf.diff import diff_models
 
-tdir = 'tests/' if os.path.exists('tests') else ''
+# from pdb import set_trace
+from bento_mdf.mdf import MDF
+
+tdir = "tests/" if os.path.exists("tests") else ""
+
+
 def test_diff_of_same_yaml():
-    '''diff of a yml against a copy of itself better darn be empty'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-a.yml', handle='test')
+    """diff of a yml against a copy of itself better darn be empty"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-a.yml", handle="test")
     actual = diff_models(a.model, b.model)
     expected = {}
     assert actual == expected
 
 
 def test_diff_of_extra_node_properties_and_terms():
-    '''a_b'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-b.yml', handle='test')
+    """a_b"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-b.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    #expected = {'nodes': {'file': {'props': {'a': set(), 'b': {'encryption_type'}}}}, 'props': {('sample', 'sample_type'): {'value_set': {'a': set(), 'b': {'not a tumor'}}}, 'a': set(), 'b': {('file', 'encryption_type')}}}
-    expected = {'nodes': {'file': {'props': {'a': None, 'b': ['encryption_type']}}}, 'props': {('sample', 'sample_type'): {'value_set': {'a': None, 'b': ['not a tumor']}}, 'a': None, 'b': [('file', 'encryption_type')]}}
+    # expected = {'nodes': {'file': {'props': {'a': set(), 'b': {'encryption_type'}}}}, 'props': {('sample', 'sample_type'): {'value_set': {'a': set(), 'b': {'not a tumor'}}}, 'a': set(), 'b': {('file', 'encryption_type')}}}
+    expected = {
+        "nodes": {"file": {"props": {"a": None, "b": ["encryption_type"]}}},
+        "props": {
+            ("sample", "sample_type"): {"value_set": {"a": None, "b": ["not a tumor"]}},
+            "a": None,
+            "b": [("file", "encryption_type")],
+        },
+    }
     assert actual == expected
 
 
 def test_diff_of_extra_node_property():
-    '''a_d'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-d.yml', handle='test')
+    """a_d"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-d.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    #expected = {'nodes': {'diagnosis': {'props': {'a': set(), 'b': {'fatal'}}}}, 'props': {'a': set(), 'b': {('diagnosis', 'fatal')}}}
-    expected = {'nodes': {'diagnosis': {'props': {'a': None, 'b': ['fatal']}}}, 'props': {'a': None, 'b': [('diagnosis', 'fatal')]}}
+    # expected = {'nodes': {'diagnosis': {'props': {'a': set(), 'b': {'fatal'}}}}, 'props': {'a': set(), 'b': {('diagnosis', 'fatal')}}}
+    expected = {
+        "nodes": {"diagnosis": {"props": {"a": None, "b": ["fatal"]}}},
+        "props": {"a": None, "b": [("diagnosis", "fatal")]},
+    }
     assert actual == expected
 
 
 def test_diff_of_extra_node_edge_and_property():
-    '''a_e'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-e.yml', handle='test')
+    """a_e"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-e.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    #expected = {'nodes': {'a': set(), 'b': {'outcome'}}, 'edges': {'a': set(), 'b': {('end_result', 'diagnosis', 'outcome')}}, 'props': {'a': set(), 'b': {('outcome', 'fatal')}}}
-    expected = {'nodes': {'a': None, 'b': ['outcome']}, 'edges': {'a': None, 'b': [('end_result', 'diagnosis', 'outcome')]}, 'props': {'a': None, 'b': [('outcome', 'fatal')]}}
+    # expected = {'nodes': {'a': set(), 'b': {'outcome'}}, 'edges': {'a': set(), 'b': {('end_result', 'diagnosis', 'outcome')}}, 'props': {'a': set(), 'b': {('outcome', 'fatal')}}}
+    expected = {
+        "nodes": {"a": None, "b": ["outcome"]},
+        "edges": {"a": None, "b": [("end_result", "diagnosis", "outcome")]},
+        "props": {"a": None, "b": [("outcome", "fatal")]},
+    }
     assert actual == expected
 
+
 def test_diff_of_extra_node():
-    '''a_f'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-f.yml', handle='test')
+    """a_f"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-f.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    #expected = {'nodes': {'a': {'diagnosis'}, 'b': set()}, 'edges': {'a': {('of_case', 'diagnosis', 'case')}, 'b': set()}, 'props': {'a': {('diagnosis', 'disease')}, 'b': set()}}
-    expected = {'nodes': {'a': ['diagnosis'], 'b': None}, 'edges': {'a': [('of_case', 'diagnosis', 'case')], 'b': None}, 'props': {'a': [('diagnosis', 'disease')], 'b': None}}
+    # expected = {'nodes': {'a': {'diagnosis'}, 'b': set()}, 'edges': {'a': {('of_case', 'diagnosis', 'case')}, 'b': set()}, 'props': {'a': {('diagnosis', 'disease')}, 'b': set()}}
+    expected = {
+        "nodes": {"a": ["diagnosis"], "b": None},
+        "edges": {"a": [("of_case", "diagnosis", "case")], "b": None},
+        "props": {"a": [("diagnosis", "disease")], "b": None},
+    }
     assert actual == expected
 
 
 def test_diff_of_missing_node():
-    '''a_g'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-g.yml', handle='test')
+    """a_g"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-g.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    expected = {'nodes': {'a': None, 'b': ['outcome']}, 'props': {'a': None, 'b': [('outcome', 'disease')]}}
+    expected = {
+        "nodes": {"a": None, "b": ["outcome"]},
+        "props": {"a": None, "b": [("outcome", "disease")]},
+    }
     assert actual == expected
 
 
 def test_diff_of_swapped_nodeprops():
-    '''a_h'''
-    a = MDF(tdir+'samples/test-model-a.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-h.yml', handle='test')
+    """a_h"""
+    a = MDF(tdir + "samples/test-model-a.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-h.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    #expected = {'nodes': {'file': {'props': {'a': {'file_name', 'file_size', 'md5sum'}, 'b': {'disease'}}}, 'diagnosis': {'props': {'a': {'disease'}, 'b': {'file_name', 'file_size', 'md5sum'}}}}, 'props': {'a': {('file', 'file_name'), ('file', 'file_size'), ('diagnosis', 'disease'), ('file', 'md5sum')}, 'b': {('diagnosis', 'file_name'), ('file', 'disease'), ('diagnosis', 'file_size'), ('diagnosis', 'md5sum')}}}
-    #expected = {'nodes': {'file': {'props': {'a': ['file_name', 'file_size', 'md5sum'], 'b': ['disease']}}, 'diagnosis': {'props': {'a': ['disease'], 'b': ['file_name', 'file_size', 'md5sum']}}}, 'props': {'a': [('file', 'file_name'), ('file', 'file_size'), ('diagnosis', 'disease'), ('file', 'md5sum')], 'b': [('diagnosis', 'file_name'), ('file', 'disease'), ('diagnosis', 'file_size'), ('diagnosis', 'md5sum')]}}
-    expected = {'nodes': {
-                          'diagnosis': {'props': {'a': ['disease'], 'b': ['file_name', 'file_size', 'md5sum']}},
-                           'file': {'props': {'a': ['file_name', 'file_size', 'md5sum'], 'b': ['disease']}}
-                         },
-                'props': {'a': [ 
-                                 ('diagnosis', 'disease'), 
-                                 ('file', 'file_name'), 
-                                 ('file', 'file_size'), 
-                                 ('file', 'md5sum')
-                               ], 
-                          
-                          'b': [('diagnosis', 'file_name'), 
-                                ('diagnosis', 'file_size'), 
-                                ('diagnosis', 'md5sum'),
-                                ('file', 'disease')
-                               ] 
-                         }
-              }
+    for node_val in actual["nodes"].values():
+        node_val["props"]["a"].sort()
+        node_val["props"]["b"].sort()
+    actual["props"]["a"].sort()
+    actual["props"]["b"].sort()
+    # expected = {'nodes': {'file': {'props': {'a': {'file_name', 'file_size', 'md5sum'}, 'b': {'disease'}}}, 'diagnosis': {'props': {'a': {'disease'}, 'b': {'file_name', 'file_size', 'md5sum'}}}}, 'props': {'a': {('file', 'file_name'), ('file', 'file_size'), ('diagnosis', 'disease'), ('file', 'md5sum')}, 'b': {('diagnosis', 'file_name'), ('file', 'disease'), ('diagnosis', 'file_size'), ('diagnosis', 'md5sum')}}}
+    # expected = {'nodes': {'file': {'props': {'a': ['file_name', 'file_size', 'md5sum'], 'b': ['disease']}}, 'diagnosis': {'props': {'a': ['disease'], 'b': ['file_name', 'file_size', 'md5sum']}}}, 'props': {'a': [('file', 'file_name'), ('file', 'file_size'), ('diagnosis', 'disease'), ('file', 'md5sum')], 'b': [('diagnosis', 'file_name'), ('file', 'disease'), ('diagnosis', 'file_size'), ('diagnosis', 'md5sum')]}}
+    expected = {
+        "nodes": {
+            "diagnosis": {
+                "props": {"a": ["disease"], "b": ["file_name", "file_size", "md5sum"]}
+            },
+            "file": {
+                "props": {"a": ["file_name", "file_size", "md5sum"], "b": ["disease"]}
+            },
+        },
+        "props": {
+            "a": [
+                ("diagnosis", "disease"),
+                ("file", "file_name"),
+                ("file", "file_size"),
+                ("file", "md5sum"),
+            ],
+            "b": [
+                ("diagnosis", "file_name"),
+                ("diagnosis", "file_size"),
+                ("diagnosis", "md5sum"),
+                ("file", "disease"),
+            ],
+        },
+    }
     assert actual == expected
 
 
 def test_diff_where_yaml_has_extra_term():
-    '''c_d'''
-    a = MDF(tdir+'samples/test-model-c.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-d.yml', handle='test')
+    """c_d"""
+    a = MDF(tdir + "samples/test-model-c.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-d.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    expected = {'props': {('diagnosis', 'fatal'): {'value_set': {'a': None, 'b': ['unknown']}}}}
+    expected = {
+        "props": {("diagnosis", "fatal"): {"value_set": {"a": None, "b": ["unknown"]}}}
+    }
     assert actual == expected
 
 
 def test_diff_of_assorted_changes():
-    '''d_e'''
-    a = MDF(tdir+'samples/test-model-d.yml', handle='test')
-    b = MDF(tdir+'samples/test-model-e.yml', handle='test')
+    """d_e"""
+    a = MDF(tdir + "samples/test-model-d.yml", handle="test")
+    b = MDF(tdir + "samples/test-model-e.yml", handle="test")
     actual = diff_models(a.model, b.model)
-    #expected = {'nodes': {'diagnosis': {'props': {'a': {'fatal'}, 'b': set()}}, 'a': set(), 'b': {'outcome'}}, 'edges': {'a': set(), 'b': {('end_result', 'diagnosis', 'outcome')}}, 'props': {'a': {('diagnosis', 'fatal')}, 'b': {('outcome', 'fatal')}}}
-    expected = {'nodes': {'diagnosis': {'props': {'a': ['fatal'], 'b': None}}, 'a': None, 'b': ['outcome']}, 'edges': {'a': None, 'b': [('end_result', 'diagnosis', 'outcome')]}, 'props': {'a': [('diagnosis', 'fatal')], 'b': [('outcome', 'fatal')]}}
+    # expected = {'nodes': {'diagnosis': {'props': {'a': {'fatal'}, 'b': set()}}, 'a': set(), 'b': {'outcome'}}, 'edges': {'a': set(), 'b': {('end_result', 'diagnosis', 'outcome')}}, 'props': {'a': {('diagnosis', 'fatal')}, 'b': {('outcome', 'fatal')}}}
+    expected = {
+        "nodes": {
+            "diagnosis": {"props": {"a": ["fatal"], "b": None}},
+            "a": None,
+            "b": ["outcome"],
+        },
+        "edges": {"a": None, "b": [("end_result", "diagnosis", "outcome")]},
+        "props": {"a": [("diagnosis", "fatal")], "b": [("outcome", "fatal")]},
+    }
     assert actual == expected
