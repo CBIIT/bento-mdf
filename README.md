@@ -373,7 +373,7 @@ For example, one may markup a set of nodes to be rendered in a certain color:
 
 ## Model Description Format - Mappings
 
-MDF-Map is an extension of MDF that allows a user to provide a simple, human-readable description of cross-model mappings between two or more models. It is intended to 
+MDF-Map is an extension of MDF that allows a user to provide a simple, human-readable description of cross-model mappings between two or more models.
 
 	Source: MyModel 
 	URI: "https://sts.ctos-data-team.org/model/MyModel"

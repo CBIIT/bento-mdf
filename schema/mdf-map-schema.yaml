@@ -1,0 +1,42 @@
+$schema: http://json-schema.org/draft-06/schema#
+$id: https://github.com/CBIIT/bento-mdf/schema/mdf-map-schema.yaml#
+
+type: object
+properties:
+  Source:
+    type: string
+  Models:
+    type: object
+    additionalProperties: # target model handle(s)
+      type: object
+      properties:
+        anyOf:
+          Version:
+            type: string
+          VersionDate:
+            type: string
+            format: date
+          URI:
+            $ref: "./mdf-schema.yaml#/defs/definitionName"
+  Props:
+    type: object
+    additionalProperties: # source node handle(s)
+      type: object
+      additionalProperites: # source prop handle(s)
+        type: object
+        additionalProperties: # target model handle(s)
+          type: object
+          additionalProperties: # target prop handle(s)
+            type: array
+            items:
+              type: object
+              properties:
+                anyOf:
+                  Constant:
+                    type: boolean
+                  Parents:
+                    oneOf:
+                      - type: string
+                      - type: array
+                        items:
+                          type: string
