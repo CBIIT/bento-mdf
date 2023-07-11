@@ -8,4 +8,4 @@ jobs:
     with:
       workdir: ./drivers/python
       pkg_name: bento-mdf
-      secrets: inherit
+    secrets: inherit
