@@ -34,7 +34,7 @@ driver and tool written in [Perl](https://www.perl.org/).
 A simple command line validator `test-mdf.py` is included in 
 [bento_mdf](./drivers/python). Install it like so:
 
-    $ pip install bento-mdf@git+https://github.com/CBIIT/bento-mdf.git/#egg=subdir\&subdirectory=python
+    $ pip install bento-mdf
 
 and run:
 
@@ -370,3 +370,49 @@ For example, one may markup a set of nodes to be rendered in a certain color:
         - breed
       Tags:
         color: blue
+
+## Model Description Format - Mappings
+
+MDF-Map is an extension of MDF that allows a user to provide a simple, human-readable description of cross-model mappings between two or more models.
+
+	Source: MyModel 
+	URI: "https://sts.ctos-data-team.org/model/MyModel"
+
+### Source
+The `Source` value is intended to be a short, human-readable name that represents the entity performing or asserting the cross-model mappings such as the CRDC Data Standards Service (DSS) or Cancer Data Aggregator (CDA).
+
+    Source: MappingSource
+
+### Models
+The `Models` top-level key points to an object containing descriptions of each target model that the source maps to such as Integrated Canine Data Commons (ICDC). Model descriptions look like:
+
+    <targetmodel1> :
+        Version: <string|number|...>
+        VersionDate: <date>
+        URI: <string>
+
+
+The `Version` key refers to the version of the model being mapped to.
+
+The `VersionDate` key refers to the date of the model.
+
+The `URI` key refers to a resolving URL that can provide more information about the model being mapped. If the model is stored in MDF, this could reference a GitHub release or commit for the mapped version of the model.
+
+At least one of these keys should be present for each model.
+
+### Props
+The `Props` top-level key refers to mappings between source and target property names/handles given as strings. Property mappings look like: 
+
+    <sourcenode1> :
+        <sourceprop1> :
+            <targetmodel1> :
+                - <targetprop1> :
+                    Parents: <string>
+                - <targetprop2> :
+                    Constant: <true|false>
+
+The mapping source properties are grouped by source node/endpoint/domain. Each property then has an object where the keys are target model handles (e.g. ICDC) and the values are arrays of the target model's properties that map to that source property.
+
+The `Parents` key refers to a node or series of nodes that the target property is a child of. Multiple nodes may be provided in a dot notation such as `parentnode1.parentnode2.childprop` to indicate a nested structure. If the target property is a root-level property, `Parents` is omitted.
+
+The `Constant` key is a boolean value that indicates the source property maps to a single constant value in the target model. For example, a property with the handle "File Format" might always map to the constant "DICOM" in the Imaging Data Commons. The default value is false.
