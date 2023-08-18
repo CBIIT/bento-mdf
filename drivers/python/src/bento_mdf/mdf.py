@@ -492,7 +492,11 @@ class MDF(object):
                             t = "True" if t else "False"
                         # here is where we 'merge' terms
                         # look for this term value/handle among the Terms
-                        keys = [k for k in self._terms if k[0] == t]
+                        keys = [
+                            key
+                            for key, term in self._terms.items()
+                            if t in (key[0], term.value)
+                        ]
                         tm = None
                         if keys:
                             tm = self._terms[keys[0]]
