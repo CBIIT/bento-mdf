@@ -1,16 +1,18 @@
-import logging
-import os.path
-import sys
+"""
+diff.py
 
-sys.path.append("..")
+Provides diffing functionality for Bento models
+"""
+import logging
+import sys
+from typing import Dict, List, Optional, Tuple, Union
 from warnings import warn
 
-from bento_mdf.mdf import MDF
-from bento_meta.objects import *
+from bento_meta.entity import Entity
+from bento_meta.model import Model
+from bento_meta.objects import Concept, Edge, Node, Property, ValueSet
 
-# NOTE: the diff class was changed from keeping the final data structure "result"
-#       from being 'set' based to being 'list' so that it could be dumped into
-#       json structure (which is incompatible with sets)
+sys.path.append("..")
 
 
 class Diff:
@@ -24,11 +26,12 @@ class Diff:
         """This will eventually hold the diff results"""
         self.result = {}
 
-    def update_result(self, thing, entk, att, a_att, b_att):
+    def update_result(
+        self, thing: str, entk: Union[str, Tuple[str, str]], att: str, a_att, b_att
+    ) -> None:
+        """Updates the diff result with the given entity key and attribute values."""
         logging.info(
-            "  entering update_result with thing {}, entk {}, att {}".format(
-                thing, entk, att
-            )
+            f"  entering update_result with thing {thing}, entk {entk}, att {att}"
         )
         if thing not in self.result:
             self.result[thing] = {}
@@ -36,27 +39,16 @@ class Diff:
             self.result[thing][entk] = {}
         if att not in self.result[thing][entk]:
             self.result[thing][entk][att] = {}
-        cleaned_a_att = self.sanitize_empty(a_att)
-        cleaned_b_att = self.sanitize_empty(b_att)
-        self.result[thing][entk][att]["a"] = cleaned_a_att
-        self.result[thing][entk][att]["b"] = cleaned_b_att
+        cleaned_a_att = self.sanitize_empty_list(a_att)
+        cleaned_b_att = self.sanitize_empty_list(b_att)
+        self.result[thing][entk][att]["removed"] = cleaned_a_att
+        self.result[thing][entk][att]["added"] = cleaned_b_att
 
-    def sanitize_empty(self, item):
-        return self.sanitize_empty_list(item)
-
-    def sanitize_empty_set(self, item):
-        """an option to turn 'a':set() to 'a':None in final result"""
-        if item != set():
+    def sanitize_empty_list(self, item: List) -> Optional[List]:
+        """an option to turn 'a': [] to 'a': None in final result"""
+        if item != []:
             return item
-        else:
-            return None
-
-    def sanitize_empty_list(self, item):
-        """an option to turn 'a': [] to 'a':None in final result"""
-        if item != list():
-            return item
-        else:
-            return None
+        return None
 
     def valuesets_are_different(self, vs_a, vs_b):
         """see if the group of terms in each value set is different"""
@@ -72,169 +64,197 @@ class Diff:
 
         if set_of_terms_in_a == set_of_terms_in_b:
             return False
-        else:
-            return True
+        return True
 
-    def finalize_result(self):
+    def finalize_result(self) -> None:
         """adds info for uniq nodes, edges, props from self.sets back to self.result"""
         logging.info("finalizing result")
         for key, value in self.sets.items():
-            logging.debug("key {} value {} ".format(key, value))
-            logging.debug("sets is {}".format(self.sets))
-            logging.debug("result is {}".format(self.result))
+            logging.debug(f"key {key} value {value} ")
+            logging.debug(f"sets is {self.sets}")
+            logging.debug(f"result is {self.result}")
 
-            if 0:
-                if (value["a"] != set()) or (value["b"] != set()):
-                    cleaned_a = self.sanitize_empty(value["a"])
-                    cleaned_b = self.sanitize_empty(value["b"])
+            if (value["removed"] != []) or (value["added"] != []):
+                cleaned_a = self.sanitize_empty_list(value["removed"])
+                cleaned_b = self.sanitize_empty_list(value["added"])
 
-                    # the key (node/edges/prop) may not be in results (b/c no common diff yet found!)
-                    if key not in self.result.keys():
-                        self.result[key] = {}
-                    self.result[key].update({"a": cleaned_a, "b": cleaned_b})
-
-            if (value["a"] != list()) or (value["b"] != list()):
-                cleaned_a = self.sanitize_empty(value["a"])
-                cleaned_b = self.sanitize_empty(value["b"])
-
-                # the key (node/edges/prop) may not be in results (b/c no common diff yet found!)
-                if key not in self.result.keys():
+                # the key (node/edges/prop) may not be in results (no common diff yet found!)
+                if key not in self.result:
                     self.result[key] = {}
-                self.result[key].update({"a": cleaned_a, "b": cleaned_b})
+                self.result[key].update({"removed": cleaned_a, "added": cleaned_b})
 
 
-def diff_models(mdl_a, mdl_b):
+# TODO: separate functionality - currently diffs ents btwn the 2 models
+# as well as fetching the actual bento-meta Entities from the models?
+def diff_entities(mdl_a: Model, mdl_b: Model, diff: Diff) -> None:
+    """
+    Populate diff.sets with unique entities from each model.
+
+    "removed": entity in mdl_a but not in mdl_b
+    "added": entity in mdl_b but not in mdl_a
+    "common": entity found in both models
+    """
+    diff_sets = diff.sets
+
+    for ent_type, ent_handles in diff_sets.items():
+        a_ents = getattr(mdl_a, ent_type)
+        b_ents = getattr(mdl_b, ent_type)
+        aset = set(a_ents)
+        bset = set(b_ents)
+        ent_handles["removed"] = {x: a_ents[x] for x in set(aset - bset)}
+        ent_handles["added"] = {x: b_ents[x] for x in set(bset - aset)}
+        ent_handles["common"] = {
+            x: {"a": a_ents[x], "b": b_ents[x]} for x in set(aset & bset)
+        }
+
+        logging.debug(f"ok, where is {ent_type} at?")
+        logging.debug(f"aset is {aset}")
+        logging.debug(f"bset is {bset}")
+        logging.debug(f' you want a:{diff_sets[ent_type]["removed"]}')
+        logging.debug(f' you want b:{diff_sets[ent_type]["added"]}')
+
+
+def diff_simple_atts(
+    a_ent: Entity,
+    b_ent: Entity,
+    simple_atts: List[str],
+    ent_type: str,
+    entk: Union[str, Tuple[str, str]],
+    diff: Diff,
+) -> None:
+    """try and see if the simple attributes are the same"""
+    logging.info("...simple")
+
+    for att in simple_atts:
+        if getattr(a_ent, att) == getattr(b_ent, att):
+            logging.info(f"...comparing simple {getattr(a_ent, att)}")
+            logging.info(f"...comparing simple {getattr(b_ent, att)}")
+            continue
+        diff.update_result(
+            ent_type,
+            entk,
+            att,
+            getattr(a_ent, att),
+            getattr(b_ent, att),
+        )
+
+
+def diff_object_atts(
+    a_ent: Entity,
+    b_ent: Entity,
+    obj_atts: List[str],
+    ent_type: str,
+    entk: Union[str, Tuple[str, str]],
+    diff: Diff,
+) -> None:
+    """
+    try and see if the "object" type is the same?
+
+    a_att,b_att are things like "valuesets", "properties"
+    """
+    logging.info("...object")
+    for att in obj_atts:
+        a_att = getattr(a_ent, att)
+        b_att = getattr(b_ent, att)
+
+        if a_att == b_att:  # only if both 'None' *or* is same object
+            continue
+        if not a_att or not b_att:  # one is 'None'
+            diff.update_result(ent_type, entk, att, a_att, b_att)
+            continue
+
+        if type(a_att) is type(b_att):
+            if isinstance(a_att, ValueSet):  # kludge for ValueSet+Terms
+                if diff.valuesets_are_different(a_att, b_att):
+                    diff.update_result(
+                        ent_type,
+                        entk,
+                        att,
+                        list(set(a_att.terms) - set(b_att.terms)),
+                        list(set(b_att.terms) - set(a_att.terms)),
+                    )
+            # items are something-other-than valuesets
+            # items are concepts
+            elif isinstance(a_att, Concept):
+                continue  # new concept nanos generated when Model loaded so can't compare???
+            elif getattr(a_att, "handle"):
+                if a_att.handle == b_att.handle:
+                    continue
+                diff.update_result(ent_type, entk, att, a_att, b_att)
+            else:
+                warn(f"can't handle attribute with type {type(a_att).__name__}")
+                logging.warning(
+                    f"can't handle attribute with type {type(a_att).__name__}"
+                )
+        else:
+            diff.update_result(ent_type, entk, att, a_att, b_att)
+
+
+def diff_collection_atts(
+    a_ent: Entity,
+    b_ent: Entity,
+    coll_atts: List[str],
+    ent_type: str,
+    entk: Union[str, Tuple[str, str]],
+    diff: Diff,
+) -> None:
+    """try and see if the "collection" set is the same?"""
+    logging.info("...collection")
+    for att in coll_atts:
+        aset = set(getattr(a_ent, att))
+        bset = set(getattr(b_ent, att))
+        if aset != bset:
+            diff.update_result(
+                ent_type,
+                entk,
+                att,
+                list(set(aset - bset)),
+                list(set(bset - aset)),
+            )
+
+
+def diff_attributes(diff: Diff) -> None:
+    """
+    Populate diff.sets with added/removed/changed attributes for common entities.
+    """
+
+    sets = diff.sets
+    clss = diff.clss
+
+    for ent_type, ent_handles in sets.items():
+        logging.info(f"now doing ..{ent_type}")
+        # cls becomes a "Node" object, "Edge" object, etc
+        cls = clss[ent_type]
+
+        simple_atts = [x for x, y in cls.attspec_.items() if y == "simple"]
+        obj_atts = [x for x, y in cls.attspec_.items() if y == "object"]
+        coll_atts = [x for x, y in cls.attspec_.items() if y == "collection"]
+
+        for entk, ab_ent_dict in ent_handles["common"].items():
+            logging.info(f"...common entk is {entk}")
+            a_ent = ab_ent_dict["a"]
+            b_ent = ab_ent_dict["b"]
+
+            diff_simple_atts(a_ent, b_ent, simple_atts, ent_type, entk, diff)
+
+            diff_object_atts(a_ent, b_ent, obj_atts, ent_type, entk, diff)
+
+            diff_collection_atts(a_ent, b_ent, coll_atts, ent_type, entk, diff)
+
+
+def diff_models(mdl_a: Model, mdl_b: Model) -> Dict:
     """
     find the diff between two models
     populate the diff results into "sets" and keep some final stuff in result.result
     """
     diff_ = Diff()
-    sets = diff_.sets
-    clss = diff_.clss
 
     logging.info("point A")
-    # set_trace()
-
-    for thing in sets:
-        aset = set(getattr(mdl_a, thing))
-        bset = set(getattr(mdl_b, thing))
-        sets[thing]["a"] = list(set(aset - bset))
-        sets[thing]["b"] = list(set(bset - aset))
-        sets[thing]["common"] = list(set(aset & bset))
-
-        logging.debug("ok, where is {} at?".format(thing))
-        logging.debug("aset is {}".format(aset))
-        logging.debug("bset is {}".format(bset))
-
-        logging.debug(" you want a:{}".format(sets[thing]["a"]))
-        logging.debug(" you want b:{}".format(sets[thing]["b"]))
+    diff_entities(mdl_a, mdl_b, diff_)
 
     logging.info("point B")
-    # set_trace()
-
-    for thing in sets:
-        logging.info("now doing ..{}".format(thing))
-        # cls becomes a "Node" object, "Edge" object, etc
-        cls = clss[thing]
-
-        simple_atts = [x for x in cls.attspec_ if cls.attspec_[x] == "simple"]
-        obj_atts = [x for x in cls.attspec_ if cls.attspec_[x] == "object"]
-        coll_atts = [x for x in cls.attspec_ if cls.attspec_[x] == "collection"]
-
-        for entk in sets[thing]["common"]:
-            logging.info("...common entk is {}".format(entk))
-            a_ent = getattr(mdl_a, thing)[entk]
-            b_ent = getattr(mdl_b, thing)[entk]
-
-            # try and see if the simple attributes are the same
-            logging.info("...simple")
-            for att in simple_atts:
-                if getattr(a_ent, att) == getattr(b_ent, att):
-                    logging.info("...comparing simple {}".format(getattr(a_ent, att)))
-                    logging.info("...comparing simple {}".format(getattr(b_ent, att)))
-                    continue
-                else:
-                    diff_.update_result(
-                        thing,
-                        entk,
-                        att,
-                        getattr(a_ent, att),
-                        getattr(b_ent, att),
-                    )
-
-            # try and see if the "object" type is the same?
-            #     a_att,b_att are things like "valuesets", "properties"
-            logging.info("...object")
-            for att in obj_atts:
-                a_att = getattr(a_ent, att)
-                b_att = getattr(b_ent, att)
-
-                if a_att == b_att:  # only if both 'None' *or* is same object
-                    continue
-                if not a_att or not b_att:  # one is 'None'
-                    diff_.update_result(thing, entk, att, a_att, b_att)
-                    continue
-
-                if type(a_att) == type(b_att):
-                    if type(a_att) == ValueSet:  # kludge for ValueSet+Terms
-                        if diff_.valuesets_are_different(a_att, b_att):
-                            diff_.update_result(
-                                thing,
-                                entk,
-                                att,
-                                list(set(a_att.terms) - set(b_att.terms)),
-                                list(set(b_att.terms) - set(a_att.terms)),
-                            )
-                    # items are something-other-than valuesets
-                    # items are concepts
-                    elif type(a_att) == Concept:
-                        continue  # new concept nanos generated when Model loaded so can't compare???
-                    elif getattr(a_att, "handle"):
-                        if a_att.handle == b_att.handle:
-                            continue
-                        else:
-                            diff_.update_result(thing, entk, att, a_att, b_att)
-                    else:
-                        warn(
-                            "can't handle attribute with type {}".format(
-                                type(a_att).__name__
-                            )
-                        )
-                        logging.warning(
-                            "can't handle attribute with type {}".format(
-                                type(a_att).__name__
-                            )
-                        )
-                else:
-                    diff_.update_result(thing, entk, att, a_att, b_att)
-
-            # try and see if the "collection" set is the same?
-            logging.info("...collection")
-            for att in coll_atts:
-                aset = set(getattr(a_ent, att))
-                bset = set(getattr(b_ent, att))
-                if aset != bset:
-                    diff_.update_result(
-                        thing,
-                        entk,
-                        att,
-                        list(set(aset - bset)),
-                        list(set(bset - aset)),
-                    )
+    diff_attributes(diff_)
 
     logging.info("done")
     diff_.finalize_result()
     return diff_.result
-
-
-if __name__ == "__main__":
-    # m = hashlib.md5();
-    # m.update(b"Hey dude");
-    # print(m.hexdigest());
-
-    smp_dir = "../tests/samples"
-    mdl_a = MDF(os.path.join(smp_dir, "test-model-a.yml"), handle="test")
-    mdl_b = MDF(os.path.join(smp_dir, "test-model-b.yml"), handle="test")
-    result = diff_models(mdl_a.model, mdl_b.model)
-    print(result)
-    pass
