@@ -39,16 +39,30 @@ class Diff:
             self.result[thing][entk] = {}
         if att not in self.result[thing][entk]:
             self.result[thing][entk][att] = {}
-        cleaned_a_att = self.sanitize_empty_list(a_att)
-        cleaned_b_att = self.sanitize_empty_list(b_att)
+        cleaned_a_att = self.sanitize_empty(a_att)
+        cleaned_b_att = self.sanitize_empty(b_att)
         self.result[thing][entk][att]["removed"] = cleaned_a_att
         self.result[thing][entk][att]["added"] = cleaned_b_att
 
-    def sanitize_empty_list(self, item: List) -> Optional[List]:
+    def sanitize_empty_list(self, item: list) -> Optional[list]:
         """an option to turn 'a': [] to 'a': None in final result"""
         if item != []:
             return item
         return None
+
+    def sanitize_empty_dict(self, item: dict) -> Optional[dict]:
+        """an option to turn 'a': {} to 'a': None in final result"""
+        if item != {}:
+            return item
+        return None
+
+    def sanitize_empty(self, item: Union[list, dict]) -> Optional[Union[list, dict]]:
+        """sanitize item to None if empty"""
+        if isinstance(item, dict):
+            return self.sanitize_empty_dict(item)
+        if isinstance(item, list):
+            return self.sanitize_empty_list(item)
+        raise TypeError(f"Item must be a list or dict, got {type(item)}")
 
     def valuesets_are_different(self, vs_a, vs_b):
         """see if the group of terms in each value set is different"""
@@ -66,22 +80,99 @@ class Diff:
             return False
         return True
 
-    def finalize_result(self) -> None:
+    def summarize_result(self) -> None:
+        """
+        Summarizes the differences in the diff dictionary.
+
+        :param diff: The diff dictionary.
+        :return: A string summarizing the differences.
+        """
+
+        def create_overall_summary():
+            summary_added_removed = []
+            summary_changed = []
+            for ent_type, diffs in self.result.items():
+                for key in diffs:
+                    if key in ["added", "removed"]:
+                        count = count_items(ent_type, key)
+                        if count > 0:
+                            summary_added_removed.append(
+                                f"{count} {ent_type[:-1]}(s) {key}"
+                            )
+                    else:
+                        changed = summarize_attr_changes(ent_type, diffs, ent_key=key)
+                        summary_changed.append(changed)
+
+            return "; ".join(summary_added_removed + summary_changed)
+
+        def create_detailed_summary():
+            return ""
+
+        def summarize_attr_changes(ent_type, diffs, ent_key):
+            changed_parts = []
+            count = len(diffs[ent_key])
+            changed_parts.append(f"{count} {ent_type[:-1]} attribute(s) changed")
+            return "; ".join(changed_parts)
+
+        def count_items(ent_type, action):
+            items = get_items(ent_type, action)
+            if not items:
+                return 0
+            return len(items)
+
+        def get_items(ent_type, action):
+            items = self.result.get(ent_type, {}).get(action, {})
+            if isinstance(items, dict):
+                return list(items.items())
+            return items
+
+        def format_detail(ent_type, action, item):
+            key, val = item
+            detail = f"{action.capitalize()} {ent_type[:-1]}: '{key}'"
+            if ent_type == "edges":
+                detail += f" with src: '{key[1]}' & dst: '{key[2]}'"
+            elif ent_type == "props":
+                detail += f" property: '{key[1]}' of parent: '{key[0]}'"
+            return detail
+
+        if not self.result:
+            return
+
+        overall_summary = create_overall_summary()
+        detailed_summary = create_detailed_summary()
+
+        summary_str = f"{overall_summary}\n{detailed_summary}"
+        self.result["summary"] = summary_str
+
+    def clean_no_diff(self) -> None:
+        """Clean up the result dict by removing empty diffs."""
+        to_remove = []
+        for ent_type, diffs in self.result.items():
+            if all(val is None for val in diffs.values()):
+                to_remove.append(ent_type)
+        for ent_type in to_remove:
+            del self.result[ent_type]
+
+    def finalize_result(self, include_summary: False) -> None:
         """adds info for uniq nodes, edges, props from self.sets back to self.result"""
         logging.info("finalizing result")
-        for key, value in self.sets.items():
-            logging.debug(f"key {key} value {value} ")
+        for ent_type, diffs in self.sets.items():
+            logging.debug(f"key {ent_type} value {diffs} ")
             logging.debug(f"sets is {self.sets}")
             logging.debug(f"result is {self.result}")
 
-            if (value["removed"] != []) or (value["added"] != []):
-                cleaned_a = self.sanitize_empty_list(value["removed"])
-                cleaned_b = self.sanitize_empty_list(value["added"])
+            # if (value["removed"] != []) or (value["added"] != []):
+            if (diffs["removed"] is not None) or (diffs["added"] is not None):
+                cleaned_a = self.sanitize_empty(diffs["removed"])
+                cleaned_b = self.sanitize_empty(diffs["added"])
 
                 # the key (node/edges/prop) may not be in results (no common diff yet found!)
-                if key not in self.result:
-                    self.result[key] = {}
-                self.result[key].update({"removed": cleaned_a, "added": cleaned_b})
+                if ent_type not in self.result:
+                    self.result[ent_type] = {}
+                self.result[ent_type].update({"removed": cleaned_a, "added": cleaned_b})
+        self.clean_no_diff()
+        if include_summary:
+            self.summarize_result()
 
 
 # TODO: separate functionality - currently diffs ents btwn the 2 models
@@ -131,11 +222,11 @@ def diff_simple_atts(
             logging.info(f"...comparing simple {getattr(b_ent, att)}")
             continue
         diff.update_result(
-            ent_type,
-            entk,
-            att,
-            getattr(a_ent, att),
-            getattr(b_ent, att),
+            thing=ent_type,
+            entk=entk,
+            att=att,
+            a_att=getattr(a_ent, att),
+            b_att=getattr(b_ent, att),
         )
 
 
@@ -160,18 +251,20 @@ def diff_object_atts(
         if a_att == b_att:  # only if both 'None' *or* is same object
             continue
         if not a_att or not b_att:  # one is 'None'
-            diff.update_result(ent_type, entk, att, a_att, b_att)
+            diff.update_result(
+                thing=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
+            )
             continue
 
         if type(a_att) is type(b_att):
             if isinstance(a_att, ValueSet):  # kludge for ValueSet+Terms
                 if diff.valuesets_are_different(a_att, b_att):
                     diff.update_result(
-                        ent_type,
-                        entk,
-                        att,
-                        list(set(a_att.terms) - set(b_att.terms)),
-                        list(set(b_att.terms) - set(a_att.terms)),
+                        thing=ent_type,
+                        entk=entk,
+                        att=att,
+                        a_att=list(set(a_att.terms) - set(b_att.terms)),
+                        b_att=list(set(b_att.terms) - set(a_att.terms)),
                     )
             # items are something-other-than valuesets
             # items are concepts
@@ -180,14 +273,18 @@ def diff_object_atts(
             elif getattr(a_att, "handle"):
                 if a_att.handle == b_att.handle:
                     continue
-                diff.update_result(ent_type, entk, att, a_att, b_att)
+                diff.update_result(
+                    thing=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
+                )
             else:
                 warn(f"can't handle attribute with type {type(a_att).__name__}")
                 logging.warning(
                     f"can't handle attribute with type {type(a_att).__name__}"
                 )
         else:
-            diff.update_result(ent_type, entk, att, a_att, b_att)
+            diff.update_result(
+                thing=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
+            )
 
 
 def diff_collection_atts(
@@ -205,11 +302,11 @@ def diff_collection_atts(
         bset = set(getattr(b_ent, att))
         if aset != bset:
             diff.update_result(
-                ent_type,
-                entk,
-                att,
-                list(set(aset - bset)),
-                list(set(bset - aset)),
+                thing=ent_type,
+                entk=entk,
+                att=att,
+                a_att=list(set(aset - bset)),
+                b_att=list(set(bset - aset)),
             )
 
 
@@ -242,10 +339,33 @@ def diff_attributes(diff: Diff) -> None:
             diff_collection_atts(a_ent, b_ent, coll_atts, ent_type, entk, diff)
 
 
-def diff_models(mdl_a: Model, mdl_b: Model) -> Dict:
+def diff_objects_to_attr_dict(obj):
+    """Recursively converts bento_meta objects to attribute dictionaries"""
+    # If the object has a get_attr_dict method, call it
+    if hasattr(obj, "get_attr_dict"):
+        return obj.get_attr_dict()
+
+    # If the object is a dictionary, recursively call this function on its values
+    if isinstance(obj, dict):
+        return {key: diff_objects_to_attr_dict(value) for key, value in obj.items()}
+
+    # If the object is a list or tuple, recursively call this function on its elements
+    if isinstance(obj, (list, tuple)):
+        return type(obj)(diff_objects_to_attr_dict(elem) for elem in obj)
+
+    # Otherwise, return the object unchanged
+    return obj
+
+
+def diff_models(
+    mdl_a: Model, mdl_b: Model, objects_as_dicts=False, include_summary=False
+) -> Dict:
     """
     find the diff between two models
     populate the diff results into "sets" and keep some final stuff in result.result
+
+    objects_as_dicts: if set to True, will convert bento_meta objects to attr dicts before returning
+    include_summary: if set to True, will include summary string of diff changes
     """
     diff_ = Diff()
 
@@ -256,5 +376,10 @@ def diff_models(mdl_a: Model, mdl_b: Model) -> Dict:
     diff_attributes(diff_)
 
     logging.info("done")
-    diff_.finalize_result()
-    return diff_.result
+    diff_.finalize_result(include_summary=include_summary)
+    result = diff_.result
+
+    if objects_as_dicts:
+        result = diff_objects_to_attr_dict(result)
+
+    return result

@@ -13,11 +13,20 @@ sys.path.insert(0, "..")
 TDIR = "tests/" if os.path.exists("tests") else ""
 
 
+def sort_nested_lists(dict_with_lists: dict) -> None:
+    """helper function to sort any lists found in a nested dict"""
+    for value in dict_with_lists.values():
+        if isinstance(value, dict):
+            sort_nested_lists(value)
+        elif isinstance(value, list):
+            value.sort()
+
+
 def test_diff_of_same_yaml():
     """diff of a yml against a copy of itself better darn be empty"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-a.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {}
     assert actual == expected
 
@@ -26,15 +35,26 @@ def test_diff_of_extra_node_properties_and_terms():
     """a_b"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-b.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
+
     expected = {
-        "nodes": {"file": {"props": {"removed": None, "added": ["encryption_type"]}}},
+        "nodes": {
+            "added": None,
+            "file": {"props": {"added": ["encryption_type"], "removed": None}},
+            "removed": None,
+        },
         "props": {
             ("sample", "sample_type"): {
                 "value_set": {"removed": None, "added": ["not a tumor"]}
             },
             "removed": None,
-            "added": [("file", "encryption_type")],
+            "added": {
+                ("file", "encryption_type"): {
+                    "handle": "encryption_type",
+                    "model": "test",
+                    "value_domain": "value_set",
+                }
+            },
         },
     }
     assert actual == expected
@@ -44,10 +64,23 @@ def test_diff_of_extra_node_property():
     """a_d"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-d.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {
-        "nodes": {"diagnosis": {"props": {"removed": None, "added": ["fatal"]}}},
-        "props": {"removed": None, "added": [("diagnosis", "fatal")]},
+        "nodes": {
+            "diagnosis": {"props": {"removed": None, "added": ["fatal"]}},
+            "removed": None,
+            "added": None,
+        },
+        "props": {
+            "removed": None,
+            "added": {
+                ("diagnosis", "fatal"): {
+                    "handle": "fatal",
+                    "model": "test",
+                    "value_domain": "value_set",
+                }
+            },
+        },
     }
     assert actual == expected
 
@@ -56,11 +89,32 @@ def test_diff_of_extra_node_edge_and_property():
     """a_e"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-e.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {
-        "nodes": {"removed": None, "added": ["outcome"]},
-        "edges": {"removed": None, "added": [("end_result", "diagnosis", "outcome")]},
-        "props": {"removed": None, "added": [("outcome", "fatal")]},
+        "nodes": {
+            "removed": None,
+            "added": {"outcome": {"handle": "outcome", "model": "test"}},
+        },
+        "edges": {
+            "removed": None,
+            "added": {
+                ("end_result", "diagnosis", "outcome"): {
+                    "handle": "end_result",
+                    "model": "test",
+                    "multiplicity": "many_to_one",
+                }
+            },
+        },
+        "props": {
+            "removed": None,
+            "added": {
+                ("outcome", "fatal"): {
+                    "handle": "fatal",
+                    "model": "test",
+                    "value_domain": "value_set",
+                }
+            },
+        },
     }
     assert actual == expected
 
@@ -69,11 +123,32 @@ def test_diff_of_extra_node():
     """a_f"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-f.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {
-        "nodes": {"removed": ["diagnosis"], "added": None},
-        "edges": {"removed": [("of_case", "diagnosis", "case")], "added": None},
-        "props": {"removed": [("diagnosis", "disease")], "added": None},
+        "nodes": {
+            "removed": {"diagnosis": {"handle": "diagnosis", "model": "test"}},
+            "added": None,
+        },
+        "edges": {
+            "removed": {
+                ("of_case", "diagnosis", "case"): {
+                    "handle": "of_case",
+                    "model": "test",
+                    "multiplicity": "one_to_one",
+                }
+            },
+            "added": None,
+        },
+        "props": {
+            "removed": {
+                ("diagnosis", "disease"): {
+                    "handle": "disease",
+                    "model": "test",
+                    "value_domain": "url",
+                }
+            },
+            "added": None,
+        },
     }
     assert actual == expected
 
@@ -82,10 +157,22 @@ def test_diff_of_missing_node():
     """a_g"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-g.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {
-        "nodes": {"removed": None, "added": ["outcome"]},
-        "props": {"removed": None, "added": [("outcome", "disease")]},
+        "nodes": {
+            "removed": None,
+            "added": {"outcome": {"handle": "outcome", "model": "test"}},
+        },
+        "props": {
+            "removed": None,
+            "added": {
+                ("outcome", "disease"): {
+                    "handle": "disease",
+                    "model": "test",
+                    "value_domain": "url",
+                }
+            },
+        },
     }
     assert actual == expected
 
@@ -94,12 +181,8 @@ def test_diff_of_swapped_nodeprops():
     """a_h"""
     a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-h.yml", handle="test")
-    actual = diff_models(a.model, b.model)
-    for node_val in actual["nodes"].values():
-        node_val["props"]["removed"].sort()
-        node_val["props"]["added"].sort()
-    actual["props"]["removed"].sort()
-    actual["props"]["added"].sort()
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
+    sort_nested_lists(actual)
     expected = {
         "nodes": {
             "diagnosis": {
@@ -114,20 +197,58 @@ def test_diff_of_swapped_nodeprops():
                     "added": ["disease"],
                 }
             },
+            "added": None,
+            "removed": None,
         },
         "props": {
-            "removed": [
-                ("diagnosis", "disease"),
-                ("file", "file_name"),
-                ("file", "file_size"),
-                ("file", "md5sum"),
-            ],
-            "added": [
-                ("diagnosis", "file_name"),
-                ("diagnosis", "file_size"),
-                ("diagnosis", "md5sum"),
-                ("file", "disease"),
-            ],
+            "removed": {
+                ("file", "file_name"): {
+                    "handle": "file_name",
+                    "model": "test",
+                    "value_domain": "string",
+                },
+                ("diagnosis", "disease"): {
+                    "handle": "disease",
+                    "model": "test",
+                    "value_domain": "url",
+                },
+                ("file", "file_size"): {
+                    "handle": "file_size",
+                    "model": "test",
+                    "value_domain": "integer",
+                    "units": "Gb;Mb",
+                },
+                ("file", "md5sum"): {
+                    "handle": "md5sum",
+                    "model": "test",
+                    "value_domain": "regexp",
+                    "pattern": "^[a-f0-9]{40}",
+                },
+            },
+            "added": {
+                ("diagnosis", "file_size"): {
+                    "handle": "file_size",
+                    "model": "test",
+                    "value_domain": "integer",
+                    "units": "Gb;Mb",
+                },
+                ("diagnosis", "file_name"): {
+                    "handle": "file_name",
+                    "model": "test",
+                    "value_domain": "string",
+                },
+                ("file", "disease"): {
+                    "handle": "disease",
+                    "model": "test",
+                    "value_domain": "url",
+                },
+                ("diagnosis", "md5sum"): {
+                    "handle": "md5sum",
+                    "model": "test",
+                    "value_domain": "regexp",
+                    "pattern": "^[a-f0-9]{40}",
+                },
+            },
         },
     }
     assert actual == expected
@@ -137,12 +258,14 @@ def test_diff_where_yaml_has_extra_term():
     """c_d"""
     a = MDF(TDIR + "samples/test-model-c.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-d.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {
         "props": {
             ("diagnosis", "fatal"): {
                 "value_set": {"removed": None, "added": ["unknown"]}
-            }
+            },
+            "added": None,
+            "removed": None,
         }
     }
     assert actual == expected
@@ -152,17 +275,57 @@ def test_diff_of_assorted_changes():
     """d_e"""
     a = MDF(TDIR + "samples/test-model-d.yml", handle="test")
     b = MDF(TDIR + "samples/test-model-e.yml", handle="test")
-    actual = diff_models(a.model, b.model)
+    actual = diff_models(a.model, b.model, objects_as_dicts=True)
     expected = {
         "nodes": {
             "diagnosis": {"props": {"removed": ["fatal"], "added": None}},
             "removed": None,
-            "added": ["outcome"],
+            "added": {"outcome": {"handle": "outcome", "model": "test"}},
         },
-        "edges": {"removed": None, "added": [("end_result", "diagnosis", "outcome")]},
-        "props": {"removed": [("diagnosis", "fatal")], "added": [("outcome", "fatal")]},
+        "edges": {
+            "removed": None,
+            "added": {
+                ("end_result", "diagnosis", "outcome"): {
+                    "handle": "end_result",
+                    "model": "test",
+                    "multiplicity": "many_to_one",
+                }
+            },
+        },
+        "props": {
+            "removed": {
+                ("diagnosis", "fatal"): {
+                    "handle": "fatal",
+                    "model": "test",
+                    "value_domain": "value_set",
+                }
+            },
+            "added": {
+                ("outcome", "fatal"): {
+                    "handle": "fatal",
+                    "model": "test",
+                    "value_domain": "value_set",
+                }
+            },
+        },
     }
     assert actual == expected
+
+
+def test_diff_of_assorted_changes_summary():
+    """d_e summary only"""
+    a = MDF(TDIR + "samples/test-model-d.yml", handle="test")
+    b = MDF(TDIR + "samples/test-model-e.yml", handle="test")
+    actual = diff_models(a.model, b.model, objects_as_dicts=True, include_summary=True)
+    actual_summary = actual["summary"]
+    expected_summary = (
+        "1 node(s) added; "
+        "1 edge(s) added; "
+        "1 prop(s) removed; "
+        "1 prop(s) added; "
+        "1 node attribute(s) changed\n"
+    )
+    assert actual_summary == expected_summary
 
 
 diff = Diff()
