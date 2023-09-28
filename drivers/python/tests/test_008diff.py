@@ -2,6 +2,7 @@
 Tests for bento_mdf.diff
 """
 import os
+import re
 import sys
 
 from bento_mdf.diff import Diff, diff_models
@@ -20,6 +21,29 @@ def sort_nested_lists(dict_with_lists: dict) -> None:
             sort_nested_lists(value)
         elif isinstance(value, list):
             value.sort()
+
+
+def sort_summary_terms(summary_string: str) -> str:
+    """helper function to organize terms in summary string for testing"""
+    lines = summary_string.split("\n")
+
+    term_lines = [
+        line for line in lines if re.match(r"-\s*(Added|Removed)\s*term:", line)
+    ]
+    term_lines.sort(key=lambda x: re.search(r"term:\s*'([^']*)'", x).group(1))
+
+    sorted_lines = []
+    term_line_index = 0
+    for line in lines:
+        if re.match(r"-\s*(Added|Removed)\s*term:", line):
+            sorted_lines.append(term_lines[term_line_index])
+            term_line_index += 1
+        else:
+            sorted_lines.append(line)
+
+    sorted_summary_string = "\n".join(sorted_lines)
+
+    return sorted_summary_string
 
 
 def test_diff_of_same_yaml():
@@ -56,6 +80,20 @@ def test_diff_of_extra_node_properties_and_terms():
                 }
             },
         },
+        "terms": {
+            "removed": None,
+            "added": {
+                ("password", "test"): {"value": "password", "origin_name": "test"},
+                ("not a tumor", "test"): {
+                    "value": "not a tumor",
+                    "origin_name": "test",
+                },
+                ("certificate", "test"): {
+                    "value": "certificate",
+                    "origin_name": "test",
+                },
+            },
+        },
     }
     assert actual == expected
 
@@ -79,6 +117,17 @@ def test_diff_of_extra_node_property():
                     "model": "test",
                     "value_domain": "value_set",
                 }
+            },
+        },
+        "terms": {
+            "removed": None,
+            "added": {
+                ("non-fatal", "test"): {
+                    "value": "non-fatal",
+                    "origin_name": "test",
+                },
+                ("fatal", "test"): {"value": "fatal", "origin_name": "test"},
+                ("unknown", "test"): {"value": "unknown", "origin_name": "test"},
             },
         },
     }
@@ -113,6 +162,14 @@ def test_diff_of_extra_node_edge_and_property():
                     "model": "test",
                     "value_domain": "value_set",
                 }
+            },
+        },
+        "terms": {
+            "removed": None,
+            "added": {
+                ("non-fatal", "test"): {"value": "non-fatal", "origin_name": "test"},
+                ("unknown", "test"): {"value": "unknown", "origin_name": "test"},
+                ("fatal", "test"): {"value": "fatal", "origin_name": "test"},
             },
         },
     }
@@ -266,7 +323,11 @@ def test_diff_where_yaml_has_extra_term():
             },
             "added": None,
             "removed": None,
-        }
+        },
+        "terms": {
+            "removed": None,
+            "added": {("unknown", "test"): {"value": "unknown", "origin_name": "test"}},
+        },
     }
     assert actual == expected
 
@@ -324,8 +385,31 @@ def test_diff_of_assorted_changes_summary():
         "1 prop(s) removed; "
         "1 prop(s) added; "
         "1 node attribute(s) changed\n"
+        "- Added node: 'outcome'\n"
+        "- Added edge: 'end_result' with src: 'diagnosis' and dst: 'outcome'\n"
+        "- Removed prop: 'fatal' with parent: 'diagnosis'\n"
+        "- Added prop: 'fatal' with parent: 'outcome'"
     )
     assert actual_summary == expected_summary
+
+
+def test_diff_of_extra_node_property_summary():
+    """a_d summary only"""
+    a = MDF(TDIR + "samples/test-model-a.yml", handle="test")
+    b = MDF(TDIR + "samples/test-model-d.yml", handle="test")
+    actual = diff_models(a.model, b.model, objects_as_dicts=True, include_summary=True)
+    actual_summary = actual["summary"]
+    actual_summary_sorted = sort_summary_terms(actual_summary)
+    expected_summary = (
+        "1 prop(s) added; "
+        "3 term(s) added; "
+        "1 node attribute(s) changed\n"
+        "- Added prop: 'fatal' with parent: 'diagnosis'\n"
+        "- Added term: 'fatal' with origin: 'test'\n"
+        "- Added term: 'non-fatal' with origin: 'test'\n"
+        "- Added term: 'unknown' with origin: 'test'"
+    )
+    assert actual_summary_sorted == expected_summary
 
 
 diff = Diff()

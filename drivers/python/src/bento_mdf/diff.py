@@ -10,7 +10,7 @@ from warnings import warn
 
 from bento_meta.entity import Entity
 from bento_meta.model import Model
-from bento_meta.objects import Concept, Edge, Node, Property, ValueSet
+from bento_meta.objects import Concept, Edge, Node, Property, Term, ValueSet
 
 sys.path.append("..")
 
@@ -20,9 +20,8 @@ class Diff:
 
     def __init__(self):
         """sets holds tree of models, as it is parsed"""
-        self.sets = {"nodes": {}, "edges": {}, "props": {}}
-        # "terms": {} }
-        self.clss = {"nodes": Node, "edges": Edge, "props": Property}
+        self.sets = {"nodes": {}, "edges": {}, "props": {}, "terms": {}}
+        self.clss = {"nodes": Node, "edges": Edge, "props": Property, "terms": Term}
         """This will eventually hold the diff results"""
         self.result = {}
 
@@ -106,7 +105,17 @@ class Diff:
             return "; ".join(summary_added_removed + summary_changed)
 
         def create_detailed_summary():
-            return ""
+            detailed_summary = []
+            for ent_type, diffs in self.result.items():
+                for key in diffs:
+                    if key in ["added", "removed"]:
+                        items = get_items(ent_type, key)
+                        if not items:
+                            continue
+                        for item in items:
+                            detail = format_detail(ent_type, key, item)
+                            detailed_summary.append(detail)
+            return "\n".join(detailed_summary)
 
         def summarize_attr_changes(ent_type, diffs, ent_key):
             changed_parts = []
@@ -127,12 +136,17 @@ class Diff:
             return items
 
         def format_detail(ent_type, action, item):
-            key, val = item
-            detail = f"{action.capitalize()} {ent_type[:-1]}: '{key}'"
-            if ent_type == "edges":
-                detail += f" with src: '{key[1]}' & dst: '{key[2]}'"
+            detail = f"- {action.capitalize()} {ent_type[:-1]}: "
+            if ent_type == "nodes":
+                detail += f"'{item[0]}'"
+            elif ent_type == "edges":
+                detail += (
+                    f"'{item[0][0]}' with src: '{item[0][1]}' and dst: '{item[0][2]}'"
+                )
             elif ent_type == "props":
-                detail += f" property: '{key[1]}' of parent: '{key[0]}'"
+                detail += f"'{item[0][1]}' with parent: '{item[0][0]}'"
+            elif ent_type == "terms":
+                detail += f"'{item[0][0]}' with origin: '{item[0][1]}'"
             return detail
 
         if not self.result:
@@ -153,7 +167,7 @@ class Diff:
         for ent_type in to_remove:
             del self.result[ent_type]
 
-    def finalize_result(self, include_summary: False) -> None:
+    def finalize_result(self, include_summary=False) -> None:
         """adds info for uniq nodes, edges, props from self.sets back to self.result"""
         logging.info("finalizing result")
         for ent_type, diffs in self.sets.items():
