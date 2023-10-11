@@ -35,7 +35,9 @@ def make_nano():
 
 def to_snake_case(string: str) -> str:
     """converts given string to snake case representation"""
-    return re.sub(r"(?<!^)(?=[A-Z])", "_", string).lower()
+    string = string.replace(" ", "_")
+    string = re.sub(r"(?<=[a-z0-9])_?([A-Z])", r"_\1", string)
+    return string.lower()
 
 
 class MDF(object):

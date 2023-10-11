@@ -6,7 +6,6 @@ Provides diffing functionality for Bento models
 import logging
 import sys
 from typing import Dict, List, Optional, Tuple, Union
-from warnings import warn
 
 from bento_meta.entity import Entity
 from bento_meta.model import Model
@@ -26,22 +25,22 @@ class Diff:
         self.result = {}
 
     def update_result(
-        self, thing: str, entk: Union[str, Tuple[str, str]], att: str, a_att, b_att
+        self, ent_type: str, entk: Union[str, Tuple[str, str]], att: str, a_att, b_att
     ) -> None:
-        """Updates the diff result with the given entity key and attribute values."""
+        """
+        Updates the diff result with the given entity key and attribute values.
+
+        Called for 'changed' entities (i.e. those with differing attributes)
+        """
         logging.info(
-            f"  entering update_result with thing {thing}, entk {entk}, att {att}"
+            f"  entering update_result with thing {ent_type}, entk {entk}, att {att}"
         )
-        if thing not in self.result:
-            self.result[thing] = {}
-        if entk not in self.result[thing]:
-            self.result[thing][entk] = {}
-        if att not in self.result[thing][entk]:
-            self.result[thing][entk][att] = {}
-        cleaned_a_att = self.sanitize_empty(a_att)
-        cleaned_b_att = self.sanitize_empty(b_att)
-        self.result[thing][entk][att]["removed"] = cleaned_a_att
-        self.result[thing][entk][att]["added"] = cleaned_b_att
+        ent_type_dict = self.result.setdefault(ent_type, {"changed": {}})
+        entk_dict = ent_type_dict["changed"].setdefault(entk, {})
+        att_dict = entk_dict.setdefault(att, {})
+
+        att_dict["removed"] = self.sanitize_empty(a_att)
+        att_dict["added"] = self.sanitize_empty(b_att)
 
     def sanitize_empty_list(self, item: list) -> Optional[list]:
         """an option to turn 'a': [] to 'a': None in final result"""
@@ -61,21 +60,11 @@ class Diff:
             return self.sanitize_empty_dict(item)
         if isinstance(item, list):
             return self.sanitize_empty_list(item)
-        raise TypeError(f"Item must be a list or dict, got {type(item)}")
+        return item
 
     def valuesets_are_different(self, vs_a, vs_b):
         """see if the group of terms in each value set is different"""
-
-        # compare sets of terms
-        # a_att.terms
-        #   {'FFPE': <bento_meta.objects.Term object at 0x10..>,
-        #    'Snap Frozen': <bento_meta.objects.Term object at 0x10..>}
-        # set(a_att.terms)
-        #   {'Snap Frozen', 'FFPE'}
-        set_of_terms_in_a = set(vs_a.terms)
-        set_of_terms_in_b = set(vs_b.terms)
-
-        if set_of_terms_in_a == set_of_terms_in_b:
+        if set(vs_a.terms) == set(vs_b.terms):
             return False
         return True
 
@@ -91,6 +80,8 @@ class Diff:
             summary_added_removed = []
             summary_changed = []
             for ent_type, diffs in self.result.items():
+                ents_with_attr_changes = 0
+                attr_changes = 0
                 for key in diffs:
                     if key in ["added", "removed"]:
                         count = count_items(ent_type, key)
@@ -99,8 +90,14 @@ class Diff:
                                 f"{count} {ent_type[:-1]}(s) {key}"
                             )
                     else:
-                        changed = summarize_attr_changes(ent_type, diffs, ent_key=key)
-                        summary_changed.append(changed)
+                        ents_with_attr_changes += 1
+                        attr_changes += len(diffs[key])
+                        # return "; ".join(changed_parts)
+                if ents_with_attr_changes != 0 and attr_changes != 0:
+                    summary_changed.append(
+                        f"{attr_changes} attribute(s) changed for "
+                        f"{ents_with_attr_changes} {ent_type[:-1]}(s)"
+                    )
 
             return "; ".join(summary_added_removed + summary_changed)
 
@@ -116,12 +113,6 @@ class Diff:
                             detail = format_detail(ent_type, key, item)
                             detailed_summary.append(detail)
             return "\n".join(detailed_summary)
-
-        def summarize_attr_changes(ent_type, diffs, ent_key):
-            changed_parts = []
-            count = len(diffs[ent_key])
-            changed_parts.append(f"{count} {ent_type[:-1]} attribute(s) changed")
-            return "; ".join(changed_parts)
 
         def count_items(ent_type, action):
             items = get_items(ent_type, action)
@@ -189,8 +180,6 @@ class Diff:
             self.summarize_result()
 
 
-# TODO: separate functionality - currently diffs ents btwn the 2 models
-# as well as fetching the actual bento-meta Entities from the models?
 def diff_entities(mdl_a: Model, mdl_b: Model, diff: Diff) -> None:
     """
     Populate diff.sets with unique entities from each model.
@@ -211,7 +200,6 @@ def diff_entities(mdl_a: Model, mdl_b: Model, diff: Diff) -> None:
         ent_handles["common"] = {
             x: {"a": a_ents[x], "b": b_ents[x]} for x in set(aset & bset)
         }
-
         logging.debug(f"ok, where is {ent_type} at?")
         logging.debug(f"aset is {aset}")
         logging.debug(f"bset is {bset}")
@@ -231,16 +219,14 @@ def diff_simple_atts(
     logging.info("...simple")
 
     for att in simple_atts:
-        if getattr(a_ent, att) == getattr(b_ent, att):
-            logging.info(f"...comparing simple {getattr(a_ent, att)}")
-            logging.info(f"...comparing simple {getattr(b_ent, att)}")
+        a_att = getattr(a_ent, att)
+        b_att = getattr(b_ent, att)
+        if a_att == b_att:
+            logging.info(f"...comparing simple {a_att}")
+            logging.info(f"...comparing simple {b_att}")
             continue
         diff.update_result(
-            thing=ent_type,
-            entk=entk,
-            att=att,
-            a_att=getattr(a_ent, att),
-            b_att=getattr(b_ent, att),
+            ent_type=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
         )
 
 
@@ -253,9 +239,12 @@ def diff_object_atts(
     diff: Diff,
 ) -> None:
     """
-    try and see if the "object" type is the same?
+    Try and see if the "object" type is the same. a_att, b_att are things like
+    concept & value_set that function as containers for collections of terms.
 
-    a_att,b_att are things like "valuesets", "properties"
+    Other object attributes are generally used to define uniqueness for
+    an entity and will likely be caught by the diff_entities method as
+    added or removed rather than changed.
     """
     logging.info("...object")
     for att in obj_atts:
@@ -266,39 +255,32 @@ def diff_object_atts(
             continue
         if not a_att or not b_att:  # one is 'None'
             diff.update_result(
-                thing=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
+                ent_type=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
             )
             continue
 
-        if type(a_att) is type(b_att):
-            if isinstance(a_att, ValueSet):  # kludge for ValueSet+Terms
-                if diff.valuesets_are_different(a_att, b_att):
-                    diff.update_result(
-                        thing=ent_type,
-                        entk=entk,
-                        att=att,
-                        a_att=list(set(a_att.terms) - set(b_att.terms)),
-                        b_att=list(set(b_att.terms) - set(a_att.terms)),
-                    )
-            # items are something-other-than valuesets
-            # items are concepts
-            elif isinstance(a_att, Concept):
-                continue  # new concept nanos generated when Model loaded so can't compare???
-            elif getattr(a_att, "handle"):
-                if a_att.handle == b_att.handle:
-                    continue
-                diff.update_result(
-                    thing=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
-                )
-            else:
-                warn(f"can't handle attribute with type {type(a_att).__name__}")
-                logging.warning(
-                    f"can't handle attribute with type {type(a_att).__name__}"
-                )
-        else:
-            diff.update_result(
-                thing=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
+        # handle 'term container' objects
+        if type(a_att) is type(b_att) and isinstance(a_att, (ValueSet, Concept)):
+            if not diff.valuesets_are_different(vs_a=a_att, vs_b=b_att):
+                continue
+            diff_collection_atts(
+                a_ent=a_att,
+                b_ent=b_att,
+                coll_atts=["terms"],
+                ent_type=ent_type,
+                entk=entk,
+                diff=diff,
             )
+        elif getattr(a_att, "handle", None):
+            if a_att.handle == b_att.handle:
+                continue
+            diff.update_result(
+                ent_type=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
+            )
+        else:
+            attr_warning = f"Can't handle attribute with type {type(a_att).__name__}"
+            logging.warning(attr_warning)
+            raise AttributeError(attr_warning)
 
 
 def diff_collection_atts(
@@ -309,19 +291,31 @@ def diff_collection_atts(
     entk: Union[str, Tuple[str, str]],
     diff: Diff,
 ) -> None:
-    """try and see if the "collection" set is the same?"""
+    """
+    Try and see if the "collection" set is the same.
+
+    These are things like props, tags, & terms.
+    """
     logging.info("...collection")
     for att in coll_atts:
-        aset = set(getattr(a_ent, att))
-        bset = set(getattr(b_ent, att))
-        if aset != bset:
-            diff.update_result(
-                thing=ent_type,
-                entk=entk,
-                att=att,
-                a_att=list(set(aset - bset)),
-                b_att=list(set(bset - aset)),
-            )
+        a_coll = getattr(a_ent, att)
+        b_coll = getattr(b_ent, att)
+        if set(a_coll) == set(b_coll):
+            continue
+        removed_coll = {x: a_coll[x] for x in list(set(a_coll) - set(b_coll))}
+        added_coll = {x: b_coll[x] for x in list(set(b_coll) - set(a_coll))}
+        if att == "terms":
+            if isinstance(a_ent, ValueSet):
+                att = "value_set"
+            elif isinstance(a_ent, Concept):
+                att = "concept"
+        diff.update_result(
+            ent_type=ent_type,
+            entk=entk,
+            att=att,
+            a_att=removed_coll,
+            b_att=added_coll,
+        )
 
 
 def diff_attributes(diff: Diff) -> None:
@@ -331,26 +325,51 @@ def diff_attributes(diff: Diff) -> None:
 
     sets = diff.sets
     clss = diff.clss
+    # attributes shared by all Entity subclasses, excluding those with _ prefix
+    generic_atts = {x: y for x, y in Entity.attspec_.items() if x[0] != "_"}
 
     for ent_type, ent_handles in sets.items():
         logging.info(f"now doing ..{ent_type}")
         # cls becomes a "Node" object, "Edge" object, etc
         cls = clss[ent_type]
+        class_atts = cls.attspec_
+        ent_atts = {**generic_atts, **class_atts}
 
-        simple_atts = [x for x, y in cls.attspec_.items() if y == "simple"]
-        obj_atts = [x for x, y in cls.attspec_.items() if y == "object"]
-        coll_atts = [x for x, y in cls.attspec_.items() if y == "collection"]
+        simple_atts = [x for x, y in ent_atts.items() if y == "simple"]
+        obj_atts = [x for x, y in ent_atts.items() if y == "object"]
+        coll_atts = [x for x, y in ent_atts.items() if y == "collection"]
 
         for entk, ab_ent_dict in ent_handles["common"].items():
             logging.info(f"...common entk is {entk}")
             a_ent = ab_ent_dict["a"]
             b_ent = ab_ent_dict["b"]
 
-            diff_simple_atts(a_ent, b_ent, simple_atts, ent_type, entk, diff)
+            diff_simple_atts(
+                a_ent=a_ent,
+                b_ent=b_ent,
+                simple_atts=simple_atts,
+                ent_type=ent_type,
+                entk=entk,
+                diff=diff,
+            )
 
-            diff_object_atts(a_ent, b_ent, obj_atts, ent_type, entk, diff)
+            diff_object_atts(
+                a_ent=a_ent,
+                b_ent=b_ent,
+                obj_atts=obj_atts,
+                ent_type=ent_type,
+                entk=entk,
+                diff=diff,
+            )
 
-            diff_collection_atts(a_ent, b_ent, coll_atts, ent_type, entk, diff)
+            diff_collection_atts(
+                a_ent=a_ent,
+                b_ent=b_ent,
+                coll_atts=coll_atts,
+                ent_type=ent_type,
+                entk=entk,
+                diff=diff,
+            )
 
 
 def diff_objects_to_attr_dict(obj):
