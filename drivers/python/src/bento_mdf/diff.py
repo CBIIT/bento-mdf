@@ -242,9 +242,8 @@ def diff_object_atts(
     Try and see if the "object" type is the same. a_att, b_att are things like
     concept & value_set that function as containers for collections of terms.
 
-    Other object attributes are generally used to define uniqueness for
-    an entity and will likely be caught by the diff_entities method as
-    added or removed rather than changed.
+    Other object attributes are generally used to define uniqueness for an
+    entity and would be caught by the diff_entities method as added or removed.
     """
     logging.info("...object")
     for att in obj_atts:
