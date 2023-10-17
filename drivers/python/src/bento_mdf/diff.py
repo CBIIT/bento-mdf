@@ -25,7 +25,12 @@ class Diff:
         self.result = {}
 
     def update_result(
-        self, ent_type: str, entk: Union[str, Tuple[str, str]], att: str, a_att, b_att
+        self,
+        ent_type: str,
+        entk: Union[str, Tuple[str, str], Tuple[str, str, str]],
+        att: str,
+        a_att,
+        b_att,
     ) -> None:
         """
         Updates the diff result with the given entity key and attribute values.
@@ -212,7 +217,7 @@ def diff_simple_atts(
     b_ent: Entity,
     simple_atts: List[str],
     ent_type: str,
-    entk: Union[str, Tuple[str, str]],
+    entk: Union[str, Tuple[str, str], Tuple[str, str, str]],
     diff: Diff,
 ) -> None:
     """try and see if the simple attributes are the same"""
@@ -235,7 +240,7 @@ def diff_object_atts(
     b_ent: Entity,
     obj_atts: List[str],
     ent_type: str,
-    entk: Union[str, Tuple[str, str]],
+    entk: Union[str, Tuple[str, str], Tuple[str, str, str]],
     diff: Diff,
 ) -> None:
     """
@@ -287,7 +292,7 @@ def diff_collection_atts(
     b_ent: Entity,
     coll_atts: List[str],
     ent_type: str,
-    entk: Union[str, Tuple[str, str]],
+    entk: Union[str, Tuple[str, str], Tuple[str, str, str]],
     diff: Diff,
 ) -> None:
     """
@@ -317,26 +322,46 @@ def diff_collection_atts(
         )
 
 
+def get_ent_atts(ent_type: str, diff: Diff) -> dict:
+    """
+    Returns dictionary of object attributes by entity type,
+    including generic attributes from the Entity class
+    """
+    # cls becomes a "Node" object, "Edge" object, etc
+    cls = diff.clss[ent_type]
+    generic_atts = {x: y for x, y in Entity.attspec_.items() if x[0] != "_"}
+    class_atts = cls.attspec_
+    return {**generic_atts, **class_atts}
+
+
+def get_simple_atts(ent_atts: dict) -> List[str]:
+    """Find the simple attributes from the entity attribute spec"""
+    return [x for x, y in ent_atts.items() if y == "simple"]
+
+
+def get_object_atts(ent_atts: dict) -> List[str]:
+    """Find the simple attributes from the entity attribute spec"""
+    return [x for x, y in ent_atts.items() if y == "object"]
+
+
+def get_collection_atts(ent_atts: dict) -> List[str]:
+    """Find the simple attributes from the entity attribute spec"""
+    return [x for x, y in ent_atts.items() if y == "collection"]
+
+
 def diff_attributes(diff: Diff) -> None:
     """
     Populate diff.sets with added/removed/changed attributes for common entities.
     """
 
     sets = diff.sets
-    clss = diff.clss
-    # attributes shared by all Entity subclasses, excluding those with _ prefix
-    generic_atts = {x: y for x, y in Entity.attspec_.items() if x[0] != "_"}
 
     for ent_type, ent_handles in sets.items():
         logging.info(f"now doing ..{ent_type}")
-        # cls becomes a "Node" object, "Edge" object, etc
-        cls = clss[ent_type]
-        class_atts = cls.attspec_
-        ent_atts = {**generic_atts, **class_atts}
-
-        simple_atts = [x for x, y in ent_atts.items() if y == "simple"]
-        obj_atts = [x for x, y in ent_atts.items() if y == "object"]
-        coll_atts = [x for x, y in ent_atts.items() if y == "collection"]
+        ent_atts = get_ent_atts(ent_type=ent_type, diff=diff)
+        simple_atts = get_simple_atts(ent_atts=ent_atts)
+        obj_atts = get_object_atts(ent_atts=ent_atts)
+        coll_atts = get_collection_atts(ent_atts=ent_atts)
 
         for entk, ab_ent_dict in ent_handles["common"].items():
             logging.info(f"...common entk is {entk}")
