@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from bento_meta.entity import Entity
 from bento_meta.model import Model
-from bento_meta.objects import Concept, Edge, Node, Property, Term, ValueSet
+from bento_meta.objects import Concept, Edge, Node, Property, Tag, Term, ValueSet
 
 sys.path.append("..")
 
@@ -305,6 +305,15 @@ def diff_collection_atts(
         a_coll = getattr(a_ent, att)
         b_coll = getattr(b_ent, att)
         if set(a_coll) == set(b_coll):
+            # compare simple atts for coll atts that don't already (e.g. tags)
+            if att == "tags":
+                diff_tag_values(
+                    a_tags=a_coll,
+                    b_tags=b_coll,
+                    ent_type=ent_type,
+                    entk=entk,
+                    diff=diff,
+                )
             continue
         removed_coll = {x: a_coll[x] for x in list(set(a_coll) - set(b_coll))}
         added_coll = {x: b_coll[x] for x in list(set(b_coll) - set(a_coll))}
@@ -319,6 +328,27 @@ def diff_collection_atts(
             att=att,
             a_att=removed_coll,
             b_att=added_coll,
+        )
+
+
+def diff_tag_values(
+    a_tags: Dict[str, Tag],
+    b_tags: Dict[str, Tag],
+    ent_type: str,
+    entk: Union[str, Tuple[str, str], Tuple[str, str, str]],
+    diff: Diff,
+) -> None:
+    """diff values for tags w/ same key"""
+    for tagk, a_tag in a_tags.items():
+        b_tag = b_tags[tagk]
+        if a_tag.value == b_tag.value:
+            continue
+        diff.update_result(
+            ent_type=ent_type,
+            entk=entk,
+            att="tags",
+            a_att={tagk: a_tag},
+            b_att={tagk: b_tag},
         )
 
 
