@@ -569,7 +569,7 @@ class MDF(object):
                         {
                             "Value": tm.value,
                             "Definition": tm.origin_definition,
-                            "Origin": tm.origin,
+                            "Origin": tm.origin_name,
                             "Code": tm.origin_id,
                         }
                         for tm in node.concept.terms.values()
