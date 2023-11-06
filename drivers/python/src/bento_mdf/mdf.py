@@ -633,7 +633,7 @@ class MDF(object):
                         {
                             "Value": tm.value,
                             "Definition": tm.origin_definition,
-                            "Origin": tm.origin,
+                            "Origin": tm.origin_name,
                             "Code": tm.origin_id,
                         }
                         for tm in edge.concept.terms.values()
@@ -664,7 +664,7 @@ class MDF(object):
                         mdf["Terms"][t] = {
                             "Value": prop.terms[t].value,
                             "Definition": prop.terms[t].origin_definition,
-                            "Origin": prop.terms[t].origin,
+                            "Origin": prop.terms[t].origin_name,
                             "Code": prop.terms[t].origin_id,
                         }
             else:
@@ -687,7 +687,7 @@ class MDF(object):
                         {
                             "Value": tm.value,
                             "Definition": tm.origin_definition,
-                            "Origin": tm.origin,
+                            "Origin": tm.origin_name,
                             "Code": tm.origin_id,
                         }
                         for tm in prop.concept.terms.values()
