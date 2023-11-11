@@ -571,6 +571,7 @@ class MDF(object):
                             "Definition": tm.origin_definition,
                             "Origin": tm.origin_name,
                             "Code": tm.origin_id,
+                            "Handle": tm.handle if tm.handle else tm.value,
                         }
                         for tm in node.concept.terms.values()
                     ]
@@ -635,6 +636,7 @@ class MDF(object):
                             "Definition": tm.origin_definition,
                             "Origin": tm.origin_name,
                             "Code": tm.origin_id,
+                            "Handle": tm.handle if tm.handle else tm.value,
                         }
                         for tm in edge.concept.terms.values()
                     ]
@@ -661,11 +663,13 @@ class MDF(object):
                     # if t in mdf["Terms"]:
                     #    self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
                     if t not in mdf["Terms"]:
+                        pt = prop.terms[t]
                         mdf["Terms"][t] = {
-                            "Value": prop.terms[t].value,
-                            "Definition": prop.terms[t].origin_definition,
-                            "Origin": prop.terms[t].origin_name,
-                            "Code": prop.terms[t].origin_id,
+                            "Value": pt.value,
+                            "Definition": pt.origin_definition,
+                            "Origin": pt.origin_name,
+                            "Code": pt.origin_id,
+                            "Handle": pt.handle if pt.handle else pt.value
                         }
             else:
                 mdf_prop["Type"] = self.calc_prop_type(prop)
