@@ -36,10 +36,10 @@ PROP_KEY = (PROP_HANDLE_1, NODE_HANDLE_2)
 PROP_HANDLE_2 = "id"
 TERM_VALUE_1 = "Lung"
 TERM_ORIGIN_1 = "NCIt"
-TERM_KEY = (TERM_VALUE_1, TERM_ORIGIN_1)
+TERM_KEY_1 = (TERM_VALUE_1, TERM_ORIGIN_1)
 TERM_VALUE_2 = "Kidney"
 TERM_ORIGIN_2 = "NCIm"
-TERM_KEY = (TERM_VALUE_2, TERM_ORIGIN_2)
+TERM_KEY_2 = (TERM_VALUE_2, TERM_ORIGIN_2)
 
 
 class TestDiffEntities:
@@ -125,25 +125,25 @@ class TestDiffEntities:
     def test_add_term(self):
         mdl_a = Model(handle=TEST_HANDLE)
         mdl_b = Model(handle=TEST_HANDLE)
-        mdl_b.terms[TERM_KEY] = self.term
+        mdl_b.terms[TERM_KEY_1] = self.term
         diff = Diff()
 
         diff_entities(mdl_a=mdl_a, mdl_b=mdl_b, diff=diff)
 
         actual = diff.sets[TERMS]
-        expected = {"added": {TERM_KEY: self.term}, "common": {}, "removed": {}}
+        expected = {"added": {TERM_KEY_1: self.term}, "common": {}, "removed": {}}
         assert actual == expected
 
     def test_remove_term(self):
         mdl_a = Model(handle=TEST_HANDLE)
         mdl_b = Model(handle=TEST_HANDLE)
-        mdl_a.terms[TERM_KEY] = self.term
+        mdl_a.terms[TERM_KEY_1] = self.term
         diff = Diff()
 
         diff_entities(mdl_a=mdl_a, mdl_b=mdl_b, diff=diff)
 
         actual = diff.sets[TERMS]
-        expected = {"added": {}, "common": {}, "removed": {TERM_KEY: self.term}}
+        expected = {"added": {}, "common": {}, "removed": {TERM_KEY_1: self.term}}
         assert actual == expected
 
 
@@ -402,14 +402,14 @@ class TestDiffSimpleAtts:
             b_ent=b_ent,
             simple_atts=self.TERM_SIMPLE_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None}
                     }
                 }
@@ -427,14 +427,14 @@ class TestDiffSimpleAtts:
             b_ent=b_ent,
             simple_atts=self.TERM_SIMPLE_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1}
                     }
                 }
@@ -452,14 +452,14 @@ class TestDiffSimpleAtts:
             b_ent=b_ent,
             simple_atts=self.TERM_SIMPLE_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.SIMP_ATT: {
                             "added": self.SIMP_ATT_2,
                             "removed": self.SIMP_ATT_1,
@@ -509,11 +509,16 @@ class TestDiffObjectAtts:
             NODES: {
                 "changed": {
                     NODE_HANDLE_1: {
-                        self.OBJ_ATT_C: {"added": self.OBJ_ATT_C2, "removed": None}
+                        self.OBJ_ATT_C: {
+                            "added": {self.TERM_2.value: self.TERM_2},
+                            "removed": None,
+                        }
                     }
                 }
             }
         }
+        print(actual)
+        print(expected)
         assert actual == expected
 
     def test_remove_concept_from_node(self):
@@ -534,14 +539,17 @@ class TestDiffObjectAtts:
             NODES: {
                 "changed": {
                     NODE_HANDLE_1: {
-                        self.OBJ_ATT_C: {"added": None, "removed": self.OBJ_ATT_C1}
+                        self.OBJ_ATT_C: {
+                            "added": None,
+                            "removed": {self.TERM_1.value: self.TERM_1},
+                        }
                     }
                 }
             }
         }
         assert actual == expected
 
-    def test_change_concept_terms_of_node(self):
+    def test_change_concept_of_node(self):
         diff = Diff()
         a_ent = Node({"handle": NODE_HANDLE_1, self.OBJ_ATT_C: self.OBJ_ATT_C1})
         b_ent = Node({"handle": NODE_HANDLE_1, self.OBJ_ATT_C: self.OBJ_ATT_C2})
@@ -587,7 +595,10 @@ class TestDiffObjectAtts:
             EDGES: {
                 "changed": {
                     EDGE_KEY: {
-                        self.OBJ_ATT_C: {"added": self.OBJ_ATT_C2, "removed": None}
+                        self.OBJ_ATT_C: {
+                            "added": {self.TERM_2.value: self.TERM_2},
+                            "removed": None,
+                        }
                     }
                 }
             }
@@ -612,14 +623,17 @@ class TestDiffObjectAtts:
             EDGES: {
                 "changed": {
                     EDGE_KEY: {
-                        self.OBJ_ATT_C: {"added": None, "removed": self.OBJ_ATT_C1}
+                        self.OBJ_ATT_C: {
+                            "added": None,
+                            "removed": {self.TERM_1.value: self.TERM_1},
+                        }
                     }
                 }
             }
         }
         assert actual == expected
 
-    def test_change_concept_terms_of_edge(self):
+    def test_change_concept_of_edge(self):
         diff = Diff()
         a_ent = Edge({"handle": EDGE_HANDLE, self.OBJ_ATT_C: self.OBJ_ATT_C1})
         b_ent = Edge({"handle": EDGE_HANDLE, self.OBJ_ATT_C: self.OBJ_ATT_C2})
@@ -665,7 +679,10 @@ class TestDiffObjectAtts:
             PROPS: {
                 "changed": {
                     PROP_KEY: {
-                        self.OBJ_ATT_V: {"added": self.OBJ_ATT_V2, "removed": None}
+                        self.OBJ_ATT_V: {
+                            "added": {self.TERM_2.value: self.TERM_2},
+                            "removed": None,
+                        }
                     }
                 }
             }
@@ -690,14 +707,17 @@ class TestDiffObjectAtts:
             PROPS: {
                 "changed": {
                     PROP_KEY: {
-                        self.OBJ_ATT_V: {"added": None, "removed": self.OBJ_ATT_V1}
+                        self.OBJ_ATT_V: {
+                            "added": None,
+                            "removed": {self.TERM_1.value: self.TERM_1},
+                        }
                     }
                 }
             }
         }
         assert actual == expected
 
-    def test_change_value_set_terms_of_prop(self):
+    def test_change_value_set_of_prop(self):
         diff = Diff()
         a_ent = Property({"handle": PROP_HANDLE_1, self.OBJ_ATT_V: self.OBJ_ATT_V1})
         b_ent = Property({"handle": PROP_HANDLE_1, self.OBJ_ATT_V: self.OBJ_ATT_V2})
@@ -735,15 +755,18 @@ class TestDiffObjectAtts:
             b_ent=b_ent,
             obj_atts=self.TERM_OBJECT_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
-                        self.OBJ_ATT_C: {"added": self.OBJ_ATT_C2, "removed": None}
+                    TERM_KEY_1: {
+                        self.OBJ_ATT_C: {
+                            "added": {self.TERM_2.value: self.TERM_2},
+                            "removed": None,
+                        }
                     }
                 }
             }
@@ -760,22 +783,25 @@ class TestDiffObjectAtts:
             b_ent=b_ent,
             obj_atts=self.TERM_OBJECT_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
-                        self.OBJ_ATT_C: {"added": None, "removed": self.OBJ_ATT_C1}
+                    TERM_KEY_1: {
+                        self.OBJ_ATT_C: {
+                            "added": None,
+                            "removed": {self.TERM_1.value: self.TERM_1},
+                        }
                     }
                 }
             }
         }
         assert actual == expected
 
-    def test_change_concept_terms_of_term(self):
+    def test_change_concept_of_term(self):
         diff = Diff()
         a_ent = Term({"value": TERM_VALUE_1, self.OBJ_ATT_C: self.OBJ_ATT_C1})
         b_ent = Term({"value": TERM_VALUE_1, self.OBJ_ATT_C: self.OBJ_ATT_C2})
@@ -785,14 +811,14 @@ class TestDiffObjectAtts:
             b_ent=b_ent,
             obj_atts=self.TERM_OBJECT_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": {self.TERM_1.value: self.TERM_1},
@@ -1146,14 +1172,14 @@ class TestDiffCollectionAtts:
             b_ent=b_ent,
             coll_atts=self.TERM_COLL_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.COLL_ATT_T: {
                             "added": {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
                             "removed": None,
@@ -1179,14 +1205,14 @@ class TestDiffCollectionAtts:
             b_ent=b_ent,
             coll_atts=self.TERM_COLL_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.COLL_ATT_T: {
                             "added": None,
                             "removed": {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
@@ -1217,14 +1243,14 @@ class TestDiffCollectionAtts:
             b_ent=b_ent,
             coll_atts=self.TERM_COLL_ATTS,
             ent_type=TERMS,
-            entk=TERM_KEY,
+            entk=TERM_KEY_1,
             diff=diff,
         )
         actual = diff.result
         expected = {
             TERMS: {
                 "changed": {
-                    TERM_KEY: {
+                    TERM_KEY_1: {
                         self.COLL_ATT_T: {
                             "added": {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
                             "removed": {self.COLL_ATT_T1.key: self.COLL_ATT_T1},

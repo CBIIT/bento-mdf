@@ -49,7 +49,7 @@ class MDF(object):
         _commit=None,
         mdf_schema=None,
         raiseError=False,
-        logger=logging.getLogger(__name__)
+        logger=logging.getLogger(__name__),
     ):
         """Create a :class:`Model` from MDF YAML files/Write a :class:`Model` to YAML
         :param str|file|url *yaml_files: MDF filenames or file objects,
@@ -330,7 +330,11 @@ class MDF(object):
             if "NanoID" in ypdef and ypdef["NanoID"]:
                 prop.nanoid = ypdef["NanoID"]
             if "Type" in ypdef:
-                self.calc_value_domain(ypdef["Type"], prop)
+                typedef = ypdef["Type"]
+                if "Enum" in typedef:
+                    self.calc_value_domain(typedef["Enum"], prop)
+                else:
+                    self.calc_value_domain(typedef, prop)
             elif "Enum" in ypdef:
                 self.calc_value_domain(ypdef["Enum"], prop)
             else:
@@ -669,7 +673,7 @@ class MDF(object):
                             "Definition": pt.origin_definition,
                             "Origin": pt.origin_name,
                             "Code": pt.origin_id,
-                            "Handle": pt.handle if pt.handle else pt.value
+                            "Handle": pt.handle if pt.handle else pt.value,
                         }
             else:
                 mdf_prop["Type"] = self.calc_prop_type(prop)

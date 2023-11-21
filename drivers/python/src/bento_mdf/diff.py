@@ -257,13 +257,27 @@ def diff_object_atts(
 
         if a_att == b_att:  # only if both 'None' *or* is same object
             continue
-        if not a_att or not b_att:  # one is 'None'
-            diff.update_result(
-                ent_type=ent_type, entk=entk, att=att, a_att=a_att, b_att=b_att
-            )
-            continue
-
         # handle 'term container' objects
+        if not a_att and isinstance(b_att, (ValueSet, Concept)):
+            a_att = Concept() if att == "concept" else ValueSet()
+            diff_collection_atts(
+                a_ent=a_att,
+                b_ent=b_att,
+                coll_atts=["terms"],
+                ent_type=ent_type,
+                entk=entk,
+                diff=diff,
+            )
+        if not b_att and isinstance(a_att, (ValueSet, Concept)):
+            b_att = Concept() if att == "concept" else ValueSet()
+            diff_collection_atts(
+                a_ent=a_att,
+                b_ent=b_att,
+                coll_atts=["terms"],
+                ent_type=ent_type,
+                entk=entk,
+                diff=diff,
+            )
         if type(a_att) is type(b_att) and isinstance(a_att, (ValueSet, Concept)):
             if not diff.valuesets_are_different(vs_a=a_att, vs_b=b_att):
                 continue
