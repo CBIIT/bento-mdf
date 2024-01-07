@@ -5,38 +5,122 @@ type: object
 properties:
   Source:
     type: string
+    desc: |
+      The short name, code, or abbreviation of the model whose properties and
+      terms are being mapped.
   Models:
     type: object
+    desc: |
+      Defining attributes of the models being mapped, including the
+      short names or codes designating the model targets in Props and Terms.
     additionalProperties: # target model handle(s)
-      type: object
-      properties:
-        anyOf:
-          Version:
-            type: string
-          VersionDate:
-            type: string
-            format: date
-          URI:
-            $ref: "./mdf-schema.yaml#/defs/definitionName"
+       $ref: "#/defs/modelSpec"
   Props:
     type: object
+    desc: |
+      For the source model properties (the keys), define the target
+      model properties that are mapped (via the values).
     additionalProperties: # source node handle(s)
+      $ref: "#/defs/source_nodeSpec" 
+  Terms:
+    type: object
+    desc: |
+      Source model terms (for example, acceptable values for
+      source model properties), are given as the object keys, and
+      mapped target model terms are mapped via the values.
+    additionalProperties:  # source term handles
+      $ref: "#/defs/source_nodeSpec"
+required: 
+  - Source 
+  - Models 
+  - Props 
+
+defs:
+  modelSpec:
+    $id: "#modelSpec"
+    type: object
+    desc: |
+      Specification for a model with the short name (given as the key
+      in the Model: section).
+    properties:
+      anyOf:
+        Version:
+          type: string
+          desc: |
+            Version string of the model.
+        VersionDate:
+          type: string
+          desc: |
+            Release date or similar for this model version.
+          format: date
+        URI:
+          desc: |
+            An appropriate link to this model (and version); e.g., a
+            GitHub release.
+          $ref: "./mdf-schema.yaml#/defs/definitionName"
+
+  source_nodeSpec:
+    $id: "#source_nodeSpec"
+    desc: |
+      The keys of this specification are the source model nodes
+      (having properties to be mapped). The properties of a node
+      are specified in the values.
+    additionalProperties: # source prop handle(s)
+      $ref: "#/defs/source_propSpec"
+    
+  source_propSpec:
+    $id: "#source_propSpec"
+    desc: |
+      The keys of this specification are the source model properties
+      of the specified nodes. The values contain the properties of the
+      target models that map to this source property.
+    additionalProperties: # target model handle(s)
+      $ref: "#/defs/target_modelSpec"
+      
+  target_modelSpec:
+    $id: "#target_modelSpec"
+    desc: |
+      The keys of this specification are the target model short names,
+      defined in the Models: section, for the models that have
+      properties that map to the source. The value of a key is an
+      array of objects specifying these target properties
+      properties. That is, more than one target property in a given
+      target model can be mapped to the same source property, by
+      adding elements to this array.
+    additionalProperties: # target prop handle(s)
+      $ref: "#/defs/target_propSpec"
+
+  target_propSpec:
+    $id: "#target_propSpec"
+    desc: |
+      This specification must be an array of objects (could be a
+      single-member array) with one key/value pair each. The key
+      is the target property mapped, and its value describes the
+      target property's location (node or namespace) in the target
+      model.
+    type: array
+    items:
       type: object
-      additionalProperites: # source prop handle(s)
+      additionalProperties: # target property handles
         type: object
-        additionalProperties: # target model handle(s)
-          type: object
-          additionalProperties: # target prop handle(s)
-            type: array
-            items:
-              type: object
-              properties:
-                anyOf:
-                  Constant:
-                    type: boolean
-                  Parents:
-                    oneOf:
-                      - type: string
-                      - type: array
-                        items:
-                          type: string
+        desc: >-
+          Parents: indicates the target mode node in which the property occurs.
+          Constant: is a boolean - if true, then the string given
+          in the key is the value that should be given for the
+          property in the source model context. That is, the target
+          model does not require a corresponding property, since that
+          infomation in the target context is invariable. E.g., if the
+          target model describes only human studies, but the source model
+          has a property "Species", then the mapping for the target would
+          look like { "Homo sapiens" : { "Constant" : true } }.
+        properties: 
+          anyOf:
+            Constant:
+              type: boolean
+            Parents:
+              oneOf:
+                - type: string
+                -
+                  type: array
+                  items:
+                    type: string
