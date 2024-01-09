@@ -9,7 +9,8 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from bento_meta.entity import Entity
 from bento_meta.model import Model
-from bento_meta.objects import Concept, Edge, Node, Property, Tag, Term, ValueSet
+from bento_meta.objects import (Concept, Edge, Node, Property, Tag, Term,
+                                ValueSet)
 
 sys.path.append("..")
 
@@ -87,7 +88,7 @@ class Diff:
             for ent_type, diffs in self.result.items():
                 ents_with_attr_changes = 0
                 attr_changes = 0
-                for key in diffs:
+                for key, diff in diffs.items():
                     if key in ["added", "removed"]:
                         count = count_items(ent_type, key)
                         if count > 0:
@@ -95,9 +96,8 @@ class Diff:
                                 f"{count} {ent_type[:-1]}(s) {key}"
                             )
                     else:
-                        ents_with_attr_changes += 1
-                        attr_changes += len(diffs[key])
-                        # return "; ".join(changed_parts)
+                        ents_with_attr_changes += len(diffs[key])
+                        attr_changes += sum(len(d) for d in diff.values())
                 if ents_with_attr_changes != 0 and attr_changes != 0:
                     summary_changed.append(
                         f"{attr_changes} attribute(s) changed for "
