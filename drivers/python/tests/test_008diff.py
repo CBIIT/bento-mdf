@@ -23,6 +23,7 @@ TEST_MODEL_E = MDF(TDIR + "samples/test-model-e.yml", handle=TEST_HANDLE)
 TEST_MODEL_F = MDF(TDIR + "samples/test-model-f.yml", handle=TEST_HANDLE)
 TEST_MODEL_G = MDF(TDIR + "samples/test-model-g.yml", handle=TEST_HANDLE)
 TEST_MODEL_H = MDF(TDIR + "samples/test-model-h.yml", handle=TEST_HANDLE)
+TEST_MODEL_I = MDF(TDIR + "samples/test-model-i.yml", handle=TEST_HANDLE)
 
 
 # tests for other changes
@@ -524,6 +525,19 @@ class TestDiffSummaries:
             "- Added term: 'non-fatal' with origin: 'test'\n"
             "- Added term: 'unknown' with origin: 'test'"
         )
+        assert actual_summary_sorted == expected_summary
+
+    def test_diff_of_multiple_attr_changes_summary(self):
+        """a_i summary only"""
+        actual = diff_models(
+            TEST_MODEL_A.model,
+            TEST_MODEL_I.model,
+            objects_as_dicts=True,
+            include_summary=True,
+        )
+        actual_summary = actual["summary"]
+        actual_summary_sorted = self.sort_summary_terms(actual_summary)
+        expected_summary = "4 attribute(s) changed for 3 prop(s)\n"
         assert actual_summary_sorted == expected_summary
 
 

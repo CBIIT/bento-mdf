@@ -517,8 +517,6 @@ class TestDiffObjectAtts:
                 }
             }
         }
-        print(actual)
-        print(expected)
         assert actual == expected
 
     def test_remove_concept_from_node(self):
