@@ -114,13 +114,12 @@ defs:
           has a property "Species", then the mapping for the target would
           look like { "Homo sapiens" : { "Constant" : true } }.
         properties: 
-          anyOf:
-            Constant:
-              type: boolean
-            Parents:
-              oneOf:
-                - type: string
-                -
-                  type: array
-                  items:
-                    type: string
+          Constant:
+            type: boolean
+          Parents:
+            oneOf:
+              - type: string
+              -
+                type: array
+                items:
+                  type: string

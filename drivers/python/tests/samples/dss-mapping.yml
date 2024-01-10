@@ -1,0 +1,624 @@
+Source: DSS  
+Models:
+  C2M2:
+    VersionDate: '2022-04-01'
+  CDS:
+    VersionDate: '2022-04-01'
+  CTDC:
+    VersionDate: '2022-04-01'
+  GDC:
+    VersionDate: '2022-04-01'
+  HTAN:
+    VersionDate: '2022-04-01'
+  ICDC:
+    VersionDate: '2022-04-01'
+  IDC:
+    VersionDate: '2022-04-01'
+  PDC:
+    VersionDate: '2022-04-01'
+  mCODE:
+    VersionDate: '2022-04-01'
+Props:
+    administrative:
+        data_file_checksum_type:
+          C2M2:
+            - md5:
+                Constant: true
+            - sha256:
+                Constant: true
+          CDS:
+            - md5sum:
+                Constant: true
+          CTDC:
+            - md5sum:
+                Constant: true
+          GDC:
+            - md5sum:
+                Constant: true
+          ICDC:
+            - md5sum:
+                Constant: true
+          IDC:
+            - md5:
+                Constant: true
+          PDC:
+            - md5sum:
+                Constant: true
+            - sha1:
+                Constant: true
+        data_file_checksum_value:
+          C2M2:
+            - md5:
+                Parents: file
+            - sha256:
+                Parents: C2M2
+          CDS:
+            - md5sum:
+                Parents: file
+          CTDC:
+            - md5sum:
+                Parents: file
+          GDC:
+            - md5sum:
+                Parents: TBD
+          ICDC:
+            - md5sum:
+                Parents: file
+          IDC:
+            - instance_hash:
+                Parents: TBD
+          PDC:
+            - md5sum:
+                Parents: file
+            - sha1:
+                Parents: file
+        data_file_description:
+          CDS:
+            - file_description:
+                Parents: file
+          CTDC:
+            - file_description:
+                Parents: file
+          ICDC:
+            - file_description:
+                Parents: file
+        data_file_format:
+          C2M2:
+            - file_format:
+                Parents: TBD
+          CDS:
+            - file_types_and_format:
+                Parents: study
+          CTDC:
+            - file_format:
+                Parents: file
+          GDC:
+            - data_format:
+                Parents: aggregated_somatic_mutation
+            - data_format:
+                Parents: aligned_reads
+            - data_format:
+                Parents: aligned_reads_index
+            - data_format:
+                Parents: analysis_metadata
+            - data_format:
+                Parents: annotated_somatic_mutation
+            - data_format:
+                Parents: archive
+            - data_format:
+                Parents: biospecimen_supplement
+            - data_format:
+                Parents: clinical_supplement
+            - data_format:
+                Parents: copy_number_auxiliary_file
+            - data_format:
+                Parents: copy_number_estimate
+            - data_format:
+                Parents: copy_number_variation_workflow
+            - data_format:
+                Parents: experiment_metadata
+            - data_format:
+                Parents: file
+            - data_format:
+                Parents: filtered_copy_number_segment
+            - data_format:
+                Parents: gene_expression
+            - data_format:
+                Parents: masked_methylation_array
+            - data_format:
+                Parents: masked_somatic_mutation
+            - data_format:
+                Parents: methylation_beta_value
+            - data_format:
+                Parents: mirna_expression
+            - data_format:
+                Parents: pathology_report
+            - data_format:
+                Parents: protein_expression
+            - data_format:
+                Parents: raw_methylation_array
+            - data_format:
+                Parents: run_metadata
+            - data_format:
+                Parents: secondary_expression_analysis
+            - data_format:
+                Parents: simple_germline_variation
+            - data_format:
+                Parents: simple_somatic_mutation
+            - data_format:
+                Parents: slide_image
+            - data_format:
+                Parents: somatic_mutation_index
+            - data_format:
+                Parents: structural_variation
+            - data_format:
+                Parents: submitted_aligned_reads
+            - data_format:
+                Parents: submitted_genomic_profile
+            - data_format:
+                Parents: submitted_genotyping_array
+            - data_format:
+                Parents: submitted_methylation_beta_value
+            - data_format:
+                Parents: submitted_tangent_copy_number
+            - data_format:
+                Parents: submitted_unaligned_reads
+          ICDC:
+            - file_format:
+                Parents: file
+          IDC:
+            - DICOM:
+                Constant: true
+          PDC:
+            - file_format:
+                Parents: file
+        data_file_name:
+          C2M2:
+            - filename:
+                Parents: TBD
+          GDC:
+            - file_name:
+                Parents: TBD
+          ICDC:
+            - file_name:
+                Parents: file
+          IDC:
+            - file_name:
+                Parents: TBD
+          PDC:
+            - file_name:
+                Parents: file
+        data_file_size:
+          C2M2:
+            - size_in_bytes:
+                Parents: TBD
+          CDS:
+            - file_size:
+                Parents: file
+          CTDC:
+            - file_size:
+                Parents: file
+          GDC:
+            - file_size:
+                Parents: TBD
+          ICDC:
+            - file_size:
+                Parents: file
+          IDC:
+            - file_size:
+                Parents: TBD
+          PDC:
+            - file_size:
+                Parents: file
+        principal_investigator_first_name:
+          ICDC:
+            - pi_first_name:
+                Parents: principal_investigator
+        principal_investigator_last_name:
+          CTDC:
+            - principal_investigators:
+                Parents: clinical_trial
+          ICDC:
+            - pi_middle_initial:
+                Parents: principal_investigator
+        principal_investigator_middle_name:
+          ICDC:
+            - pi_last_name:
+                Parents: principal_investigator
+        program_name:
+          CDS:
+            - finding_source_program_name:
+                Parents: Funding Information
+          GDC:
+            - name:
+                Parents: program
+          ICDC:
+            - program_name:
+                Parents: program
+          IDC:
+            - Program:
+                Parents: TCIA
+            - ClinicalTrialSponsorName:
+                Parents: ClinicalTrialSubject
+          PDC:
+            - name:
+                Parents: Program
+        program_short_name:
+          ICDC:
+            - program_acronym:
+                Parents: program
+          IDC:
+            - Program:
+                Parents: TCIA
+          PDC:
+            - program_shortname:
+                Parents: Program
+        project_name:
+          GDC:
+            - name:
+                Parents: project
+          PDC:
+            - name:
+                Parents: Project
+        study_name:
+          CTDC:
+            - clinical_trial_long_name:
+                Parents: clinical_trial
+          ICDC:
+            - clinical_study_name:
+                Parents: study
+          IDC:
+            - ClinicalTrialProtocolName:
+                Parents: Clinical Trial Subject
+          PDC:
+            - submitter_id_name:
+                Parents: Study
+        study_short_name:
+          CTDC:
+            - clinical_trial_short_name:
+                Parents: clinical_trial
+          IDC:
+            - ClinicalTrialProtocolID:
+                Parents: Clinical Trial Subject
+            - ClinicalTrialProtocolID:
+                Parents: Clinical Trial Study.Consent for Clinical Trial Use Sequence
+          PDC:
+            - study_short_name:
+                Parents: Study
+    demographics:
+        ncbi_taxonomy_id:
+          C2M2:
+            - taxonomy_id:
+                Parents: subject_role_taxonomy
+          IDC:
+            - PatientSpeciesCodeSequence:
+                Parents: DICOM
+          PDC:
+            - taxon:
+                Parents: Case
+        subject_age_at_diagnosis:
+          CDS:
+            - age_at_diagnosis:
+                Parents: diagnosis
+          GDC:
+            - age_at_diagnosis:
+                Parents: diagnosis
+          HTAN:
+            - age_at_diagnosis:
+                Parents: Diagnosis
+          PDC:
+            - age_at_diagnosis:
+                Parents: diagnosis
+        subject_race:
+          C2M2:
+            - race:
+                Parents: subject_race
+          CDS:
+            - race:
+                Parents: participant
+          CTDC:
+            - race:
+                Parents: case
+          GDC:
+            - race:
+                Parents: demographic
+          HTAN:
+            - Race:
+                Parents: Demographics
+          IDC:
+            - EthnicGroup:
+                Parents: PatientModule
+          PDC:
+            - race:
+                Parents: Demographic
+        subject_reported_ethnicity:
+          C2M2:
+            - ethnicity:
+                Parents: subject
+          CDS:
+            - ethnicity:
+                Parents: participant
+          CTDC:
+            - ethnicity:
+                Parents: case
+          GDC:
+            - ethnicity:
+                Parents: demographic
+          HTAN:
+            - Ethnicity:
+                Parents: Demographics
+          PDC:
+            - ethnicity:
+                Parents: Demographic
+    diagnosis:
+        icd_10_cm_disease_code:
+          C2M2:
+            - id:
+                Parents: disease
+          GDC:
+            - icd_10_code:
+                Parents: diagnosis
+          HTAN:
+            - PrimaryDiagnosis:
+                Parents: Diagnosis
+          PDC:
+            - icd_10_code:
+                Constant:
+                  - Diagnosis
+            - primary_site: 
+                Parents: Case 
+          mCODE:
+            - code:
+                Parents: primary_cancer_condition_profile
+            - primary_site:
+                Parents: case
+            - Body Site: 
+                Parents: Primary Cancer Condition Profile
+          ICDC:
+            - primary_disease_site:
+                Parents: Diagnosis
+        tumor_grade:
+          CDS:
+            - tumor_grade:
+                Parents: diagnosis
+          GDC:
+            - tumor_grade:
+                Parents: diagnosis
+          HTAN:
+            - tumor_grade:
+                Parents: Diagnosis
+          ICDC:
+            - histological_grade:
+                Parents: diagnosis
+          PDC:
+            - tumor_grade:
+                Parents: Diagnosis
+    molecular:
+        hgnc_gene_identifier:
+          C2M2:
+            - name:
+                Parents: Gene
+          CTDC:
+            - gene:
+                Parents: indel_variant
+            - gene:
+                Parents: delins_variant
+            - gene:
+                Parents: copy_number_variant
+            - gene:
+                Parents: svn_variant
+            - gene1:
+                Parents: gene_fusion_variant
+            - gene2:
+                Parents: gene_fusion_variant
+            - ihc_test_gene:
+                Parents: ihc_assay_report
+          GDC:
+            - gene_symbol:
+                Parents: molecular_test
+            - second-gene_symbol:
+                Parents: molecular_test
+          HTAN:
+            - gene_symbol:
+                Parents: MolecularTest
+            - second_gene_symbol:
+                Parents: MolecularTest
+          PDC:
+            - gene_name:
+                Parents: Gene
+    specimen:
+        days_from_diagnosis_to_specimen_collection:
+          GDC:
+            - days_to_collection:
+                Parents: sample
+        days_from_first_subject_visit_to_specimen_collection:
+          GDC:
+            - days_to_collection:
+                Parents: sample
+        days_from_first_treatment_to_specimen_collection:
+          GDC:
+            - days_to_collection:
+                Parents: Sample
+        days_from_initial_genomic_sequencing_to_specimen_collection:
+          GDC:
+            - days_to_collection:
+                Parents: sample
+        days_from_recurrence_to_specimen_collection:
+          GDC:
+            - days_to_collection:
+                Parents: sample
+        days_from_specimen_collection_to_initial_pathologic_diagnosis:
+          PDC:
+            - days_to_collection:
+                Parents: Sample
+        icd_o_3_morphology_code:
+          CDS:
+            - morphology:
+                Parents: diagnosis
+          GDC:
+            - morphology:
+                Parents: diagnosis
+          HTAN:
+            -  Morphology:
+                Parents: Diagnosis
+          PDC:
+            - morphology:
+                Parents: Diagnosis
+          mCODE:
+            - histology_morphology_behavior:
+                Parents: primary_cancer_condition_profile
+        specimen_longest_dimension:
+          GDC:
+            - longest_dimension:
+                Parents: sample
+          ICDC:
+            - length_of_tumor:
+                Parents: sample
+          PDC:
+            - longest_dimension:
+                Parents: Sample
+        specimen_shortest_dimension:
+          GDC:
+            - shortest_dimension:
+                Parents: sample
+          ICDC:
+            - width_of_tumor:
+                Parents: sample
+          PDC:
+            - shortest_dimension:
+                Parents: Sample
+        uberon_specimen_anatomic_site_identifier:
+          C2M2:
+            - anatomy:
+                Parents: biosample
+          CDS:
+            - sample_anatomic_site:
+                Parents: sample
+          GDC:
+            - biospecimen_anatomic_site:
+                Parents: sample
+          ICDC:
+            - sample_site:
+                Parents: sample
+          PDC:
+            - biospecimen_anatomic_site:
+                Parents: Sample
+          mCODE:
+            - Body Site:
+                Parents: Genomic Specimen Profile.Collection
+    treatment:
+        dicom_modality_type:
+          CDS:
+            - modality:
+                Parents: Imaging-Specific Information
+          GDC:
+            - imaging_type:
+                Parents: follow_up
+          ICDC:
+            - image_type_included:
+                Parents: image_collection
+          IDC:
+            - Modality:
+                Parents: DICOM
+          PDC:
+            - imaging_type:
+                Parents: Follow-Up
+        environmental_exposure_type:
+          GDC:
+            - exposure_type:
+                Parents: exposure
+          PDC:
+            - exposure_type:
+                Parents: Exposure
+Terms:
+    Tumor Grade:
+        G1:
+          GDC:
+            - Grade 1:
+                parents: tumor_grade
+          ICDC:
+            - '1':
+                parents: tumor_grade
+        G2:
+          GDC:
+            - Grade 2:
+                parents: tumor_grade
+          ICDC:
+            - '2':
+                parents: tumor_grade
+        G3:
+          GDC:
+            - Grade 3:
+                parents: tumor_grade
+          ICDC:
+            - '3':
+                parents: tumor_grade
+        G4:
+          GDC:
+            - Grade 4:
+                parents: tumor_grade
+          ICDC:
+            - '4':
+                parents: tumor_grade
+        GB:
+          GDC:
+            - Grade B:
+                parents: tumor_grade
+        GX:
+          GDC:
+            - Grade X:
+                parents: tumor_grade
+        High Grade:
+          GDC:
+            - High Grade:
+                parents: tumor_grade
+          ICDC:
+            - High:
+                parents: tumor_grade
+        Intermediate Grade:
+          GDC:
+            - Intermediate Grade:
+                parents: tumor_grade
+          ICDC:
+            - Medium:
+                parents: tumor_grade
+        Low Grade:
+          GDC:
+            - Low Grade:
+                parents: tumor_grade
+          ICDC:
+            - Low:
+                parents: tumor_grade
+        Not Applicable:
+          ICDC:
+            - Not Applicable:
+                parents: tumor_grade
+        Not Reported:
+          GDC:
+            - Not Reported:
+                parents: tumor_grade
+          ICDC:
+            - Unknown:
+                parents: tumor_grade
+        Uberon Specimen Anatomic Site Identifier:
+          Bladder:
+            GDC:
+              - Bladder:
+                  parents: biospecimen_anatomic_site
+            ICDC:
+              - Bladder:
+                  parents: sample_site
+        Lymph Node(s) Popliteal:
+          GDC:
+            - Lymph Node(s) Popliteal:
+                parents: biospecimen_anatomic_site
+          ICDC:
+            - Lymph Node, Popliteal:
+                parents: sample_site
+        Thyroid Gland:
+          GDC:
+            - Thyroid:
+                parents: biospecimen_anatomic_site
+          ICDC:
+            - Thyroid Gland:
+                parents: sample_site
