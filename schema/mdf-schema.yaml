@@ -66,6 +66,12 @@ properties:
       This is a human-readable short name for the model described in the MDF, that
       should also be understood as a token that can be used to extract the model
       from a Metamodel Database
+  Version:
+    type: string
+    desc: |
+      This is a human-readable version string (e.g., v1.7.2) for the model described
+      in the MDF. Best practice is to keep it in sync with a git tag for which a
+      GitHub release has been made.
   URI:
     $ref: "#/defs/url"
     desc: |

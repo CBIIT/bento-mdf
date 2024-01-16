@@ -67,12 +67,13 @@ Top level keys that describe the model itself include:
 
 	Handle: MyModel 
 	URI: "https://sts.ctos-data-team.org/model/MyModel"
+    Version: v1.7.2
 
 The `Handle` value is intended to be a short, human-readable moniker 
 for the model described in the document. It should be easy to compute 
 with, e.g., contain no spaces and not start with a numeral. 
 
-The `URI` value If present, this should be a resolving URL that can 
+The `URI` value, if present, should be a resolving URL that can 
 provide further detailed information about the model described in the 
 MDF instance. Ideally, it should be the base URL for a terminology 
 server (like the Simple Terminology Server), that can be concatenated 
@@ -82,6 +83,11 @@ In particular, an enumerated value set can be included "by reference"
 in the MDF, using a path.  Joining the URL value and the path value 
 with a backslash should create a url that can return the actual list 
 of enumerated values. 
+
+The `Version` value, if present, should be a human-readable version
+string (e.g., v1.7.2) for the model described in the MDF. Best
+practice is to keep it in sync with a git tag for which a GitHub
+release has been made.
 
 ### Nodes
 
@@ -274,17 +280,32 @@ relationships.
 
 ### Multiple input YAML files and "overlays"
 
-The [specification](./spec) allows graphs to be defined over multiple input YAML files. The structured information in the files are merged together to produce one input structure internally. This allows a user to, for example, keep Node definitions in one file, Relationships in another, and Property definitions in yet another. Each of these objects has a separate top-level key, and will be merged into the single internal object without any "collisions".
+The [specification](./spec) allows graphs to be defined over multiple
+input YAML files. The structured information in the files are merged
+together to produce one input structure internally. This allows a user
+to, for example, keep Node definitions in one file, Relationships in
+another, and Property definitions in yet another. Each of these
+objects has a separate top-level key, and will be merged into the
+single internal object without any "collisions".
 
-[Compliant](./spec) drivers and tools enable merging YAML files into a single object according to specific rules. These allow the user to "overlay" desired changes onto a base model file, without having to resort to multiple versions of a base model. The first pair of files is merged, the next file is merged into that result, and so on to the end of the input files.  For example, using [./drivers/Perl/make-model](model-tool):
+[Compliant](./spec) drivers and tools enable merging YAML files into a
+single object according to specific rules. These allow the user to
+"overlay" desired changes onto a base model file, without having to
+resort to multiple versions of a base model. The first pair of files
+is merged, the next file is merged into that result, and so on to the
+end of the input files.  For example, using
+[./drivers/Perl/make-model](model-tool):
 
     model-tool -g graph.svg icdc-model.yml temp-changes.yml
 
-would create a graphic of nodes and edges defined in `icdc-model.yml`, as modified by changes specified in `temp-changes.yml`.
+would create a graphic of nodes and edges defined in `icdc-model.yml`,
+as modified by changes specified in `temp-changes.yml`.
 
 #### Adding elements
 
-As indicated above, if independent sets of keys at a given level of the YAML structure are present in the input files, the merged structure will possess all the keys and their contents:
+As indicated above, if independent sets of keys at a given level of
+the YAML structure are present in the input files, the merged
+structure will possess all the keys and their contents:
 
 File 1:
 
@@ -314,11 +335,16 @@ yields
         Props:
           - new_prop
 
-Note that by default, the overlay keys and values are added; original array elements are not replaced. Array elements remain unique: if both files have an element named `foo`, only one `foo` element will be present in the merged array.
+Note that by default, the overlay keys and values are added; original
+array elements are not replaced. Array elements remain unique: if both
+files have an element named `foo`, only one `foo` element will be
+present in the merged array.
 
 #### Deleting/replacing elements
 
-To indicate that an overlay should remove a key and its contents, or an array element, that are present in an earlier file, prefix the key/element with a forward slash `/`
+To indicate that an overlay should remove a key and its contents, or
+an array element, that are present in an earlier file, prefix the
+key/element with a forward slash `/`
 
 File 1:
 
@@ -353,12 +379,13 @@ yields
 #### Tagging Entities
 
 A `Tags` entry can be added to any object (i.e., thing that accepts
-key:value pairs), except a `Tags` entry, in the MDF. This is a way to associate
-metainformation with an entity that can be read later by a downstream
-custom processor. A `Tags` entry value is a json object (dictionary, hash)
-containing a set of keys with _scalar_ values.
+key:value pairs), except a `Tags` entry, in the MDF. This is a way to
+associate metainformation with an entity that can be read later by a
+downstream custom processor. A `Tags` entry value is a json object
+(dictionary, hash) containing a set of keys with _scalar_ values.
 
-For example, one may markup a set of nodes to be rendered in a certain color:
+For example, one may markup a set of nodes to be rendered in a certain
+color:
 
     dog:
       Props:
@@ -373,18 +400,27 @@ For example, one may markup a set of nodes to be rendered in a certain color:
 
 ## Model Description Format - Mappings
 
-MDF-Map is an extension of MDF that allows a user to provide a simple, human-readable description of cross-model mappings between two or more models.
+MDF-Map is an extension of MDF that allows a user to provide a simple,
+human-readable description of cross-model mappings between two or more
+models.
 
 	Source: MyModel 
 	URI: "https://sts.ctos-data-team.org/model/MyModel"
 
 ### Source
-The `Source` value is intended to be a short, human-readable name that represents the entity performing or asserting the cross-model mappings such as the CRDC Data Standards Service (DSS) or Cancer Data Aggregator (CDA).
+
+The `Source` value is intended to be a short, human-readable name that
+represents the entity performing or asserting the cross-model mappings
+such as the CRDC Data Standards Service (DSS) or Cancer Data
+Aggregator (CDA).
 
     Source: MappingSource
 
 ### Models
-The `Models` top-level key points to an object containing descriptions of each target model that the source maps to such as Integrated Canine Data Commons (ICDC). Model descriptions look like:
+
+The `Models` top-level key points to an object containing descriptions
+of each target model that the source maps to such as Integrated Canine
+Data Commons (ICDC). Model descriptions look like:
 
     <targetmodel1> :
         Version: <string|number|...>
@@ -396,12 +432,17 @@ The `Version` key refers to the version of the model being mapped to.
 
 The `VersionDate` key refers to the date of the model.
 
-The `URI` key refers to a resolving URL that can provide more information about the model being mapped. If the model is stored in MDF, this could reference a GitHub release or commit for the mapped version of the model.
+The `URI` key refers to a resolving URL that can provide more
+information about the model being mapped. If the model is stored in
+MDF, this could reference a GitHub release or commit for the mapped
+version of the model.
 
 At least one of these keys should be present for each model.
 
 ### Props
-The `Props` top-level key refers to mappings between source and target property names/handles given as strings. Property mappings look like: 
+
+The `Props` top-level key refers to mappings between source and target
+property names/handles given as strings. Property mappings look like:
 
     <sourcenode1> :
         <sourceprop1> :
@@ -411,8 +452,19 @@ The `Props` top-level key refers to mappings between source and target property 
                 - <targetprop2> :
                     Constant: <true|false>
 
-The mapping source properties are grouped by source node/endpoint/domain. Each property then has an object where the keys are target model handles (e.g. ICDC) and the values are arrays of the target model's properties that map to that source property.
+The mapping source properties are grouped by source
+node/endpoint/domain. Each property then has an object where the keys
+are target model handles (e.g. ICDC) and the values are arrays of the
+target model's properties that map to that source property.
 
-The `Parents` key refers to a node or series of nodes that the target property is a child of. Multiple nodes may be provided in a dot notation such as `parentnode1.parentnode2.childprop` to indicate a nested structure. If the target property is a root-level property, `Parents` is omitted.
+The `Parents` key refers to a node or series of nodes that the target
+property is a child of. Multiple nodes may be provided in a dot
+notation such as `parentnode1.parentnode2.childprop` to indicate a
+nested structure. If the target property is a root-level property,
+`Parents` is omitted.
 
-The `Constant` key is a boolean value that indicates the source property maps to a single constant value in the target model. For example, a property with the handle "File Format" might always map to the constant "DICOM" in the Imaging Data Commons. The default value is false.
+The `Constant` key is a boolean value that indicates the source
+property maps to a single constant value in the target model. For
+example, a property with the handle "File Format" might always map to
+the constant "DICOM" in the Imaging Data Commons. The default value is
+false.
