@@ -253,10 +253,32 @@ have an external semantic representation in some framework. For
 example, a `participant` Node may need to be associated with a precise
 definition of "participant" as a person who is receiving medical care
 (e.g., NCIt Patient concept [C16960](
-https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&version=22.03d&ns=ncit&code=C16960&key=n93267819&b=1&n=null)). 
-To record this, any Node, Relationship, or PropDefinition specification may
-also include a `Term` key, with subkeys `Value`, `Origin`, etc.,
-as in the previous paragraph.
+https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&version=22.03d&ns=ncit&code=C16960&key=n93267819&b=1&n=null)).
+
+To record this, any Node, Relationship, or PropDefinition
+specification may also include a `Term` key, followed by _list_ of
+key:value objects with keys `Value`, `Origin`, etc., as in the
+previous paragraph. Each object in the list describes a semantic
+element (term, concept, etc.) that should be identified with the
+containing Node, Relationship, or Property.
+
+In the example below, the property "inversion time" is associated with
+two relevant entities from other resources, caDSR and DICOM:
+
+    PropDefns:
+	  ...
+      inversion_time:
+        Desc: |
+		  A measurement of the time between the inversion and excitation pulses
+		  in an inversion recovery pulse sequence.
+        Term:
+          - Origin: caDSR
+            Code: '14644131'
+            Value: Imaging Technique Inversion Time Float Number
+          - Origin: DICOM
+            Code: '0018,0082'
+            Value: inversion_time
+        Type: string
 
 ### Universal Properties
 
