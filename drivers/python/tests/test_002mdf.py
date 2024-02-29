@@ -274,7 +274,7 @@ def test_write_mdf_nested_terms_tags():
     term_1.concept = concept
     model.add_terms(prop, term_1)
     mdf = MDF(handle="test", model=model)
-    mdf_dict = mdf.write_mdf(file="C:/Users/nelso/Desktop/test_write_mdf.yml")
+    mdf_dict = mdf.write_mdf()
     actual = mdf_dict.get("Terms")
     expected = {
         'test_term_1': {
