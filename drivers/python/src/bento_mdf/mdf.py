@@ -13,12 +13,13 @@ import re
 import sys
 from collections import ChainMap
 from tempfile import TemporaryFile
+from typing import Dict
 from urllib.parse import unquote
 
 import requests
 import yaml
 from bento_mdf.validator import MDFValidator
-from bento_meta.entity import ArgError
+from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from nanoid import generate
@@ -537,6 +538,35 @@ class MDF(object):
                 prop.value_domain = Property.default("value_domain")
             return {"value_domain": Property.default("value_domain")}
 
+    def add_entity_tags_to_mdf(self, entity: Entity, mdf_entity: Dict):
+        """If entity has tags property, add them to its MDF representation"""
+        if not entity.tags:
+            return
+        mdf_entity["Tags"] = {}
+        for t in entity.tags:
+            mdf_entity["Tags"][t] = entity.tags[t].value
+
+    def add_entity_concept_to_mdf(self, entity: Entity, mdf_entity: Dict):
+        """If entity has concept property, add its terms to MDF"""
+        if not entity.concept:
+            return
+        if not entity.concept.terms:
+            self.logger.warning(
+                f"{entity.get_label().capitalize} "
+                f"'{entity.handle}' has associated concept but with no terms defined"
+            )
+        else:
+            mdf_entity["Term"] = [
+                {
+                    "Value": tm.value,
+                    "Definition": tm.origin_definition,
+                    "Origin": tm.origin_name,
+                    "Code": tm.origin_id,
+                    "Handle": tm.handle if tm.handle else tm.value,
+                }
+                for tm in entity.concept.terms.values()
+            ]
+
     def write_mdf(self, model=None, file=None):
         """
         Write a :class:`Model` to a model description file (MDF)
@@ -557,30 +587,10 @@ class MDF(object):
             node = model.nodes[nd]
             mdf_node = {}
             mdf["Nodes"][nd] = mdf_node
-            if node.tags:
-                mdf_node["Tags"] = {}
-                for t in node.tags:
-                    mdf_node["Tags"][t] = node.tags[t].value
-            if node.concept:
-                if not node.concept.terms:
-                    self.logger.warning(
-                        "Node '{}' has associated concept but with no terms defined".format(
-                            node.handle
-                        )
-                    )
-                else:
-                    mdf_node["Term"] = [
-                        {
-                            "Value": tm.value,
-                            "Definition": tm.origin_definition,
-                            "Origin": tm.origin_name,
-                            "Code": tm.origin_id,
-                            "Handle": tm.handle if tm.handle else tm.value,
-                        }
-                        for tm in node.concept.terms.values()
-                    ]
+            self.add_entity_tags_to_mdf(entity=node, mdf_entity=mdf_node)
+            self.add_entity_concept_to_mdf(entity=node, mdf_entity=mdf_node)
 
-            mdf_node["Props"] = [prop for prop in sorted(node.props)]
+            mdf_node["Props"] = list(sorted(node.props))
 
             if node.nanoid:
                 mdf_node["NanoID"] = node.nanoid
@@ -609,10 +619,7 @@ class MDF(object):
             else:
                 if mdf_edge["Mul"] != edge.multiplicity:
                     ends["Mul"] = edge.multiplicity
-            if edge.tags:
-                mdf_edge["Tags"] = {}
-                for t in edge.tags:
-                    mdf_edge["Tags"][t] = edge.tags[t].value
+            self.add_entity_tags_to_mdf(entity=edge, mdf_entity=mdf_edge)
             if edge.is_required:
                 ends["Req"] = True
             if edge.props:
@@ -626,24 +633,7 @@ class MDF(object):
                     mdf_edge["Desc"] = edge.desc
                 else:
                     ends["Desc"] = edge.desc
-            if edge.concept:
-                if not edge.concept.terms:
-                    self.logger.warning(
-                        "Edge '{}' has associated concept but with no terms defined".format(
-                            node.handle
-                        )
-                    )
-                else:
-                    mdf_edge["Term"] = [
-                        {
-                            "Value": tm.value,
-                            "Definition": tm.origin_definition,
-                            "Origin": tm.origin_name,
-                            "Code": tm.origin_id,
-                            "Handle": tm.handle if tm.handle else tm.value,
-                        }
-                        for tm in edge.concept.terms.values()
-                    ]
+            self.add_entity_concept_to_mdf(entity=edge, mdf_entity=mdf_edge)
         prnames = []
         props = {}
         for pr in model.props:
@@ -657,24 +647,28 @@ class MDF(object):
             prop = props[prname]
             mdf_prop = {}
             mdf["PropDefinitions"][prname] = mdf_prop
-            if prop.tags:
-                mdf_prop["Tags"] = {}
-                for t in prop.tags:
-                    mdf_prop["Tags"][t] = prop.tags[t].value
+            self.add_entity_tags_to_mdf(entity=prop, mdf_entity=mdf_prop)
             if prop.value_domain == "value_set":
                 mdf_prop["Enum"] = self.calc_prop_type(prop)
                 for t in prop.terms:
                     # if t in mdf["Terms"]:
                     #    self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
-                    if t not in mdf["Terms"]:
-                        pt = prop.terms[t]
-                        mdf["Terms"][t] = {
+                    if t in mdf["Terms"]:
+                        continue
+                    pt = prop.terms[t]
+                    mdf_pt = {}
+                    self.add_entity_concept_to_mdf(entity=pt, mdf_entity=mdf_pt)
+                    self.add_entity_tags_to_mdf(entity=pt, mdf_entity=mdf_pt)
+                    mdf["Terms"][t] = {
+                        **mdf_pt,
+                        **{
                             "Value": pt.value,
                             "Definition": pt.origin_definition,
                             "Origin": pt.origin_name,
                             "Code": pt.origin_id,
                             "Handle": pt.handle if pt.handle else pt.value,
-                        }
+                        },
+                    }
             else:
                 mdf_prop["Type"] = self.calc_prop_type(prop)
             if prop.is_required:
@@ -683,23 +677,7 @@ class MDF(object):
                 mdf_prop["NanoID"] = prop.nanoid
             if prop.desc:
                 mdf_prop["Desc"] = prop.desc
-            if prop.concept:
-                if not prop.concept.terms:
-                    self.logger.warning(
-                        "Property '{}' has associated concept but with no terms defined".format(
-                            node.handle
-                        )
-                    )
-                else:
-                    mdf_prop["Term"] = [
-                        {
-                            "Value": tm.value,
-                            "Definition": tm.origin_definition,
-                            "Origin": tm.origin_name,
-                            "Code": tm.origin_id,
-                        }
-                        for tm in prop.concept.terms.values()
-                    ]
+            self.add_entity_concept_to_mdf(entity=prop, mdf_entity=mdf_prop)
         if file:
             fh = file
             if isinstance(file, str):
