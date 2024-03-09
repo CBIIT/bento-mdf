@@ -502,11 +502,14 @@ defs:
           Text definition for the term, ideally as provided by the authority
           given in the Origin field.
         type: string
+      Tags:
+        $ref: "#/defs/tagsSpec"
       nanoid:
         $ref: "#/defs/nanoid"
     required:
       - Value
       - Origin
+      - Version
       
       
         
