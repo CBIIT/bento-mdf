@@ -497,19 +497,18 @@ defs:
         description: |
           Version of this term according to the authority given in the Origin field.
         type: string
+      Tags:
+        $ref: "#/defs/tagsSpec"
       Definition:
         description: |
           Text definition for the term, ideally as provided by the authority
           given in the Origin field.
         type: string
-      Tags:
-        $ref: "#/defs/tagsSpec"
       nanoid:
         $ref: "#/defs/nanoid"
     required:
       - Value
       - Origin
-      - Version
       
       
         
