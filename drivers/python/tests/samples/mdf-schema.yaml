@@ -225,11 +225,7 @@ defs:
       - item_type
   kvType:
     type: object
-    properties:
-      key:
-        type: string
-        value:
-          type: string
+
   tagsSpec:
     $id: "#tagsSpec"
     type: array
@@ -358,4 +354,3 @@ defs:
         $ref: "#/defs/tagsSpec"
     required:
       - Type
-      
