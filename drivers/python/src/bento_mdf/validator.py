@@ -10,7 +10,7 @@ from yaml.constructor import ConstructorError
 from yaml.nodes import MappingNode, SequenceNode
 from yaml.parser import ParserError, ScannerError
 
-MDFSCHEMA_URL = "https://github.com/CBIIT/bento-mdf/raw/master/schema/mdf-schema.yaml"
+MDFSCHEMA_URL = "https://github.com/CBIIT/bento-mdf/raw/main/schema/mdf-schema.yaml"
 
 
 def construct_mapping(self, node, deep=False):
