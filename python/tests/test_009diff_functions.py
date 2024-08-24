@@ -1,6 +1,8 @@
 """
 Tests for bento_mdf.diff
 """
+
+
 from bento_mdf.diff import (
     Diff,
     diff_collection_atts,

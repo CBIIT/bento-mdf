@@ -18,7 +18,8 @@ from urllib.parse import unquote
 
 import requests
 import yaml
-from bento_mdf.validator import MDFValidator
+from .convert import to_snake_case, spec_to_entity
+from ..validator import MDFValidator
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
@@ -32,13 +33,6 @@ def make_nano():
     return generate(
         size=6, alphabet="abcdefghijkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ0123456789"
     )
-
-
-def to_snake_case(string: str) -> str:
-    """converts given string to snake case representation"""
-    string = string.replace(" ", "_")
-    string = re.sub(r"(?<=[a-z0-9])_?([A-Z])", r"_\1", string)
-    return string.lower()
 
 
 class MDF(object):
@@ -64,7 +58,7 @@ class MDF(object):
             raise ArgError("arg model= must be a Model instance")
 
         self.files = yaml_files
-        self.schema = {}
+        self.mdf = {}
         self.mdf_schema = mdf_schema
         self._model = model
         self._commit = _commit
@@ -120,7 +114,7 @@ class MDF(object):
 
         v = MDFValidator(self.mdf_schema, *vargs, raiseError=True)
         self.mdf_schema = v.load_and_validate_schema()
-        self.schema = v.load_and_validate_yaml()
+        self.mdf = v.load_and_validate_yaml()
 
     def create_model(self, raiseError=False):
         """Create :class:`Model` instance from loaded YAML
@@ -128,47 +122,54 @@ class MDF(object):
         Note: This is brittle, since the syntax of MDF is hard-coded
         into this method."""
         success = True
-        if not self.schema.keys():
-            raise ValueError("attribute 'schema' not set - are yamls loaded?")
+        if not self.mdf.keys():
+            raise ValueError("attribute 'mdf' not set - are yamls loaded?")
         if self.handle:
             self._model = Model(handle=self.handle)
-        elif self.schema.get("Handle"):
-            self.handle = self.schema["Handle"]
-            self._model = Model(handle=self.schema["Handle"])
+        elif self.mdf.get("Handle"):
+            self.handle = self.mdf["Handle"]
+            self._model = Model(handle=self.mdf["Handle"])
         else:
             self.logger.error("Model handle not present in MDF nor provided in args")
             success = False
 
-        ynodes = self.schema["Nodes"]
-        yedges = self.schema["Relationships"]
-        ypropdefs = self.schema["PropDefinitions"]
-        yunps = self.schema.get("UniversalNodeProperties")
-        yurps = self.schema.get("UniversalRelationshipProperties")
-        yterms = self.schema.get("Terms")
+        ynodes = self.mdf["Nodes"]
+        yedges = self.mdf["Relationships"]
+        ypropdefs = self.mdf["PropDefinitions"]
+        yterms = self.mdf.get("Terms")
+        yunps = self.mdf.get("UniversalNodeProperties")
+        yurps = self.mdf.get("UniversalRelationshipProperties")
+
 
         # create terms first, if any -- properties depend on these
-        if yterms:
-            yterms = yterms.as_dict()
+        if "Terms" in self.mdf:
+            yterms = self.mdf["Terms"].as_dict()
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
                 self.create_or_merge_term_from_mdf(ytm, t_hdl)
 
         # create nodes
-        for n in ynodes:
-            yn = ynodes[n]
-            init = {"handle": n, "model": self.handle, "_commit": self._commit}
-            if "Desc" in yn and yn["Desc"]:
-                init["desc"] = yn["Desc"]
-            if "NanoID" in yn and yn["NanoID"]:
-                init["nanoid"] = yn["NanoID"]
-            node = self._model.add_node(init)
-            if "Tags" in yn:
-                for t in yn["Tags"]:
-                    node.tags[t] = Tag(
-                        {"key": t, "value": yn["Tags"][t], "_commit": self._commit}
-                    )
-            if "Term" in yn:
-                self.annotate_entity_from_mdf(node, yn["Term"])
+        for n in self.mdf["Nodes"]:
+            spec = self.mdf["Nodes"][n]
+            node = self._model.add_node(
+                spec_to_entity(n, spec, 
+                               {"model": self.handle, "_commit": self._commit},
+                               Node, self._model)
+            )
+            # yn = ynodes[n]
+            # init = {"handle": n, "model": self.handle, "_commit": self._commit}
+            # if "Desc" in yn and yn["Desc"]:
+            #     init["desc"] = yn["Desc"]
+            # if "NanoID" in yn and yn["NanoID"]:
+            #     init["nanoid"] = yn["NanoID"]
+            # node = self._model.add_node(init)
+            # if "Tags" in yn:
+            #     for t in yn["Tags"]:
+            #         node.tags[t] = Tag(
+            #             {"key": t, "value": yn["Tags"][t], "_commit": self._commit}
+            #         )
+            if "Term" in spec:
+                self.annotate_entity_from_mdf(node, spec["Term"])
 
         # create edges (relationships)
         for e in yedges:
@@ -373,7 +374,7 @@ class MDF(object):
         return self._props[(init["model"], init["handle"])]
 
     def create_or_merge_term_from_mdf(self, ytm, t_hdl=None):
-        if not "Value" in ytm:
+        if "Value" not in ytm:
             self.logger.error(
                 "Term specs must have a Value key and a non-null string value"
             )

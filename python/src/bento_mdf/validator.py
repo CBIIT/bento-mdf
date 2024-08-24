@@ -5,12 +5,13 @@ import delfick_project.option_merge as om
 import requests
 import yaml
 from jsonschema import Draft6Validator as d6
-from jsonschema import RefResolutionError, SchemaError, ValidationError, validate
+from jsonschema import SchemaError, ValidationError, validate
+from referencing.exceptions import Unresolvable
 from yaml.constructor import ConstructorError
 from yaml.nodes import MappingNode, SequenceNode
 from yaml.parser import ParserError, ScannerError
 
-MDFSCHEMA_URL = "https://github.com/CBIIT/bento-mdf/raw/master/schema/mdf-schema.yaml"
+MDFSCHEMA_URL = "https://github.com/CBIIT/bento-mdf/raw/main/schema/mdf-schema.yaml"
 
 
 def construct_mapping(self, node, deep=False):
@@ -219,7 +220,7 @@ class MDFValidator:
                 if self.raiseError:
                     raise ce
                 return
-            except RefResolutionError as re:
+            except Unresolvable as re:
                 self.logger.error(re)
                 if self.raiseError:
                     raise re

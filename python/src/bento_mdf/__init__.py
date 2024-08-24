@@ -1,3 +1,5 @@
 # bento_mdf
-from . import mdf, diff, validator
+
+from . import diff, validator
+from .mdf import MDF
 

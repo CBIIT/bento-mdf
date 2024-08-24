@@ -9,9 +9,6 @@ from bento_mdf.diff import Diff, diff_models
 from bento_mdf.mdf import MDF
 from bento_meta.objects import Property, Term, ValueSet
 
-sys.path.insert(0, ".")
-sys.path.insert(0, "..")
-
 # constants
 TDIR = "tests/" if os.path.exists("tests") else ""
 TEST_HANDLE = "test"

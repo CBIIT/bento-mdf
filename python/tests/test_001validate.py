@@ -3,7 +3,6 @@ import sys
 
 import pytest
 
-sys.path.insert(0, ".")
 from bento_mdf.validator import MDFValidator
 from jsonschema import SchemaError, ValidationError
 from yaml.constructor import ConstructorError

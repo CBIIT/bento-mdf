@@ -10,9 +10,6 @@ from bento_meta.model import Model
 from bento_meta.objects import Concept, Node, Property, Tag, Term, ValueSet
 from yaml import Loader as yloader
 
-sys.path.insert(0, ".")
-sys.path.insert(0, "../src")
-
 TDIR = "tests/" if os.path.exists("tests") else ""
 
 def test_class():
@@ -29,7 +26,7 @@ def test_load_yaml():
         "{}samples/ctdc_model_properties_file.yaml".format(TDIR),
     ]
     m.load_yaml(verify=False)
-    assert m.schema["Nodes"]
+    assert m.mdf["Nodes"]
 
 
 def test_load_yaml_url():
