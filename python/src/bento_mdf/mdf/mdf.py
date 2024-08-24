@@ -150,31 +150,19 @@ class MDF(object):
 
         # create nodes
         for n in self.mdf["Nodes"]:
-            spec = self.mdf["Nodes"][n]
+            spec = self.mdf["Nodes"][n].as_dict()
             node = self._model.add_node(
                 spec_to_entity(n, spec, 
                                {"model": self.handle, "_commit": self._commit},
                                Node, self._model)
             )
-            # yn = ynodes[n]
-            # init = {"handle": n, "model": self.handle, "_commit": self._commit}
-            # if "Desc" in yn and yn["Desc"]:
-            #     init["desc"] = yn["Desc"]
-            # if "NanoID" in yn and yn["NanoID"]:
-            #     init["nanoid"] = yn["NanoID"]
-            # node = self._model.add_node(init)
-            # if "Tags" in yn:
-            #     for t in yn["Tags"]:
-            #         node.tags[t] = Tag(
-            #             {"key": t, "value": yn["Tags"][t], "_commit": self._commit}
-            #         )
             if "Term" in spec:
                 self.annotate_entity_from_mdf(node, spec["Term"])
 
         # create edges (relationships)
-        for e in yedges:
-            ye = yedges[e]
-            for ends in ye["Ends"]:
+        for e in self.mdf["Relationships"]:
+            spec = self.mdf["Relationships"][e].as_dict()
+            for ends in spec["Ends"]:
                 if ends["Src"] not in self._model.nodes:
                     self.logger.warning(
                         "No node '{src}' defined for edge "
@@ -196,8 +184,8 @@ class MDF(object):
                     "model": self.handle,
                     "src": self._model.nodes[ends["Src"]],
                     "dst": self._model.nodes[ends["Dst"]],
-                    "multiplicity": ends.get("Mul") or ye.get("Mul"),
-                    "desc": ends.get("Desc") or ye.get("Desc"),
+                    "multiplicity": ends.get("Mul") or spec.get("Mul"),
+                    "desc": ends.get("Desc") or spec.get("Desc"),
                     "_commit": self._commit,
                 }
                 if not init["multiplicity"]:
@@ -223,17 +211,23 @@ class MDF(object):
                             mult=init["multiplicity"],
                         )
                     )
-                edge = self._model.add_edge(init)
-                Tags = ye.get("Tags") or ends.get("Tags")
-                if Tags:
-                    # tags = CollValue({}, owner=edge, owner_key="tags")
-                    for t in Tags:
-                        edge.tags[t] = Tag(
-                            {"key": t, "value": Tags[t], "_commit": self._commit}
-                        )
-                yterm = ends.get("Term") or ye.get("Term")
-                if yterm:
-                    self.annotate_entity_from_mdf(edge, yterm)
+                # if tags are set in the Ends entry, these will be attached
+                # to the Edge, _rather than_ tags set in the "edge key" or spec
+                # level
+                spec["Tags"] = ends.get("Tags") or spec.get("Tags")
+                edge = self._model.add_edge(
+                    spec_to_entity(e, spec, init,
+                                   Edge, self._model)
+                )
+                # if Tags:
+                #     # tags = CollValue({}, owner=edge, owner_key="tags")
+                #     for t in Tags:
+                #         edge.tags[t] = Tag(
+                #             {"key": t, "value": Tags[t], "_commit": self._commit}
+                #         )
+                term = ends.get("Term") or spec.get("Term")
+                if term:
+                    self.annotate_entity_from_mdf(edge, term)
 
         # create properties
         propnames = {}

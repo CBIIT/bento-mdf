@@ -57,7 +57,7 @@ def spec_to_entity(hdl, spec, init, entCls, model=None):
         init["handle"] = hdl
     ent = entCls(init)
     process[entCls](init, ent)
-    if "Tags" in spec:
+    if "Tags" in spec and spec["Tags"]:
         for t in spec["Tags"]:
             ent.tags[t] = spec_to_entity(
                 "", {}, {"key":t, "value": spec["Tags"][t],
