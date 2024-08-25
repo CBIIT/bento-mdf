@@ -115,6 +115,7 @@ class MDF(object):
         v = MDFValidator(self.mdf_schema, *vargs, raiseError=True)
         self.mdf_schema = v.load_and_validate_schema()
         self.mdf = v.load_and_validate_yaml()
+        self.mdf = self.mdf.as_dict()
 
     def create_model(self, raiseError=False):
         """Create :class:`Model` instance from loaded YAML
@@ -133,8 +134,6 @@ class MDF(object):
             self.logger.error("Model handle not present in MDF nor provided in args")
             success = False
 
-        ynodes = self.mdf["Nodes"]
-        yedges = self.mdf["Relationships"]
         ypropdefs = self.mdf["PropDefinitions"]
         yterms = self.mdf.get("Terms")
         yunps = self.mdf.get("UniversalNodeProperties")
@@ -143,14 +142,14 @@ class MDF(object):
 
         # create terms first, if any -- properties depend on these
         if "Terms" in self.mdf:
-            yterms = self.mdf["Terms"].as_dict()
+            yterms = self.mdf["Terms"]
             for t_hdl in tqdm(yterms):
                 ytm = yterms[t_hdl]
                 self.create_or_merge_term_from_mdf(ytm, t_hdl)
 
         # create nodes
         for n in self.mdf["Nodes"]:
-            spec = self.mdf["Nodes"][n].as_dict()
+            spec = self.mdf["Nodes"][n]
             node = self._model.add_node(
                 spec_to_entity(n, spec, 
                                {"model": self.handle, "_commit": self._commit},
@@ -161,7 +160,7 @@ class MDF(object):
 
         # create edges (relationships)
         for e in self.mdf["Relationships"]:
-            spec = self.mdf["Relationships"][e].as_dict()
+            spec = self.mdf["Relationships"][e]
             for ends in spec["Ends"]:
                 if ends["Src"] not in self._model.nodes:
                     self.logger.warning(
@@ -219,12 +218,6 @@ class MDF(object):
                     spec_to_entity(e, spec, init,
                                    Edge, self._model)
                 )
-                # if Tags:
-                #     # tags = CollValue({}, owner=edge, owner_key="tags")
-                #     for t in Tags:
-                #         edge.tags[t] = Tag(
-                #             {"key": t, "value": Tags[t], "_commit": self._commit}
-                #         )
                 term = ends.get("Term") or spec.get("Term")
                 if term:
                     self.annotate_entity_from_mdf(edge, term)

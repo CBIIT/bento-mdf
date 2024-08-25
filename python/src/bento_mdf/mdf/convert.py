@@ -41,6 +41,17 @@ mdf_to_meta = {
     "Version": "origin_version",
 }
 
+# scalar types - shall match mdf_schema["defs"]["simpleType"]["enum"]
+simple_types = [
+    "number",
+    "integer",
+    "string",
+    "datetime",
+    "url",
+    "boolean",
+    "TBD",
+]
+
 # "declare"
 process = {}
 
@@ -67,23 +78,28 @@ def spec_to_entity(hdl, spec, init, entCls, model=None):
 
 
 def process_node(spec, node, model=None):
+    # noop
     return node
 
 
-def process_prop(spec, prop, model=None):
-    return prop
-
-
 def process_reln(spec, edge, model=None):
+    #noop
     return edge
 
 
 def process_term(spec, term, model=None):
+    #noop
     return term
 
 
 def process_tag(spec, tag, model=None):
+    #noop
     return tag
+
+
+def process_prop(spec, prop, model=None):
+    
+    return prop
 
 
 process = {
@@ -93,3 +109,26 @@ process = {
     Term: process_term,
     Tag: process_tag,
 }
+
+def typespec_to_value_domain(spec, prop):
+    # simple type
+    if isinstance(spec, str):
+        return {"value_domain": spec}
+    # 
+    elif isinstance(spec, dict):
+        # regex type
+        if spec.get("pattern"):
+            return {"value_domain": "regexp",
+                    "pattern": spec["pattern"]}
+        # numberWithUnits type
+        if spec.get("units"):
+            return {"value_domain": spec["value_type"],
+                    "units": ";".join(spec["units"])}
+        # list type
+        if spec.get("item_type"):
+            return {"value_domain": "list",
+                    "item_domain": typespec_to_value_domain(spec["item_type"])}
+    elif isinstance(spec, list):
+        # do not implement union type for now
+        # assume a value_set, as a list of term handles or a single url/path
+            
