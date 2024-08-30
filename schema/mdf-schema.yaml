@@ -114,8 +114,7 @@ defs:
   url:
     $id: "#url"
     type: string
-    pattern: |
-      ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
+    pattern: ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
   path:
     $id: "#path"
     type: string
@@ -124,8 +123,7 @@ defs:
       base url of a terminology service endpoint. The expected response from
       the server is a simple array of acceptable values as strings (possibly
       embedded somewhere in a response structure).
-    pattern: |
-      /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
+    pattern: /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
   regex:
     $id: "#regex"
     type: object
@@ -247,7 +245,6 @@ defs:
               - type: string
               - type: number
               - type: boolean
-              
   nodeSpec:
     $id: "#nodeSpec"
     type: object
@@ -290,7 +287,6 @@ defs:
         description: |
           Human-readable description of the relationship.
         type: string
-        
       Mul:
         # here, the "default" multiplicity for all Src->Dst pairs
         type: string
@@ -438,7 +434,6 @@ defs:
               readability. Either one of Type or Enum may be present in a property definition,
               but not both.
             $ref: "#/defs/enumType"
-
       Tags:
         $ref: "#/defs/tagsSpec"
       Term:

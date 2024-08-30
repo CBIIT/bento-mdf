@@ -1,0 +1,45 @@
+Handle: CRDC
+URI: https://datacommons.cancer.gov/
+Version: v1.0.0
+Nodes:
+  diagnosis:
+    Props:
+      - diagnosis_id
+      - diagnosis
+      - case_type
+    Desc: Properties that describe a participant's disease(s).
+    Tags:
+      Category: clinical
+      Class: primary
+      number: 1
+      cool: true
+    Term:
+      - Origin: caDSR
+        Code: "7058670"
+        Value: Diagnosis
+        Version: "1.00"
+      - Origin: UFP
+        Value: Disease or Disorder Diagnosis
+      - Origin: NBA
+        Code: "23"
+        Value: Disorder Diagnosis
+        Version: "2.00"
+        Handle: disorder_diagnosis
+        Desc: Term used by NBA to describe a diagnosis of a disorder.
+        Tags:
+          category: clinical
+        Definition: A diagnosis of a disorder.
+        nanoid: jordan
+    nanoid: abc123
+  file:
+    Props: null
+    # tags array should be valid by schema but fails validation
+    # Tags:
+    #   - deprecated
+    #   - test
+  participant:
+    Props:
+      - participant_id
+    Tags:
+      Template: "Yes"
+Relationships: {}
