@@ -120,12 +120,14 @@ defs:
     $id: "#path"
     type: string
     description: |
-      The 'path' is intended to describe a string that can be appended to the
+      The \'path\' is intended to describe a string that can be appended to the
       base url of a terminology service endpoint. The expected response from
       the server is a simple array of acceptable values as strings (possibly
       embedded somewhere in a response structure).
+      A path must start with a forward slash. If the base url ends with a forward slash,
+      the concatenation should replace two consecutive forward slashes with one.
     pattern: |
-      /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
+      /^[/][A-Za-z0-9_][A-Za-z0-9._-~]*(?:[/&?][A-Za-z0-9_][A-Za-z0-9._-~=%]*)*/
   regex:
     $id: "#regex"
     type: object

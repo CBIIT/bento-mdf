@@ -7,7 +7,6 @@ Model Description Format into a :class:`bento_meta.model.Model` object, and
 writing the opposite way.
 
 """
-import json
 import logging
 import re
 import sys
@@ -120,9 +119,22 @@ class MDF(object):
 
     def create_model(self, raiseError=False):
         """Create :class:`Model` instance from loaded YAML
+
+        Handling enumerated acceptable values ("value sets"):
+        
+        If the input MDF does not have a Terms: section, the strings listed under
+        an Enum: key are interpreted as literal Term values (i.e., the expected data),
+        and the Origin of each Term is set as the model handle (i.e.,the model is itself
+        the authority defining the acceptable values)
+
+        However, if the input MDF contains a Terms: section, then each string of an Enum:
+        array is first treated as a Term handle, and is used to look up a corresponding Term
+        in the the Terms: section. If found, the definition in the Terms: section is used.
+        If no referenced Term is found, then the string is treated
+        as a literal Term value with the model as origin, as in the previous paragraph.
+        
         :param boolean raiseError: Raise if MDF errors found
-        Note: This is brittle, since the syntax of MDF is hard-coded
-        into this method."""
+        Note: This is brittle, since the syntax of MDF is hard-coded into this method."""
         success = True
         if not self.mdf.keys():
             raise ValueError("attribute 'mdf' not set - are yamls loaded?")
@@ -143,7 +155,7 @@ class MDF(object):
             self.logger.error("Model handle not present in MDF nor provided in args")
             success = False
         ypropdefs = self.mdf["PropDefinitions"]
-        yterms = self.mdf.get("Terms")
+        # yterms = self.mdf.get("Terms")
         yunps = self.mdf.get("UniversalNodeProperties")
         yurps = self.mdf.get("UniversalRelationshipProperties")
 
@@ -164,7 +176,7 @@ class MDF(object):
                 term = spec_to_entity(t_hdl, spec,
                                       {"_commit": self._commit},
                                       Term)
-                self._terms[(term.handle, term.origin_name)] = term
+                self._terms[term.handle] = term
 
         # create nodes
         for n in self.mdf["Nodes"]:
@@ -172,7 +184,7 @@ class MDF(object):
             node = self._model.add_node(
                 spec_to_entity(n, spec, 
                                {"model": self.handle, "_commit": self._commit},
-                               Node, self._model)
+                               Node)
             )
             if "Term" in spec:
                 self.annotate_entity_from_mdf(node, spec["Term"])
@@ -234,8 +246,7 @@ class MDF(object):
                 # level
                 spec["Tags"] = ends.get("Tags") or spec.get("Tags")
                 edge = self._model.add_edge(
-                    spec_to_entity(e, spec, init,
-                                   Edge, self._model)
+                    spec_to_entity(e, spec, init, Edge)
                 )
                 term = ends.get("Term") or spec.get("Term")
                 if term:
@@ -245,7 +256,7 @@ class MDF(object):
         propnames = {}
         for ent in ChainMap(self._model.nodes, self._model.edges).values():
             if isinstance(ent, Node):
-                pnames = ynodes[ent.handle]["Props"]
+                pnames = self.mdf["Nodes"][ent.handle]["Props"]
                 if yunps:  # universal node props
                     pnames.extend(yunps["mayHave"] if yunps.get("mayHave") else [])
                     pnames.extend(yunps["mustHave"] if yunps.get("mustHave") else [])
@@ -257,7 +268,7 @@ class MDF(object):
                 (hdl, src, dst) = ent.triplet
                 ends = [
                     e
-                    for e in yedges[hdl]["Ends"]
+                    for e in self.mdf["Relationships"][hdl]["Ends"]
                     if e["Src"] == src and e["Dst"] == dst
                 ]
                 if len(ends) > 1:
@@ -269,7 +280,7 @@ class MDF(object):
 
                 # note the end-specified props _replace_ the edge-specified props,
                 # they are not merged:
-                pnames = end.get("Props") or yedges[hdl].get("Props")
+                pnames = end.get("Props") or self.mdf["Relationships"][hdl].get("Props")
                 if yurps:  # universal relationship props
                     pnames.extend(yurps["mayHave"] if yurps.get("mayHave") else [])
                     pnames.extend(yurps["mustHave"] if yurps.get("mustHave") else [])
@@ -325,6 +336,9 @@ class MDF(object):
             )
         if raiseError and not success:
             raise RuntimeError("MDF errors found; see log output.")
+
+        # now add the terms collected in self._terms to the model (self._model)...
+        
         return self._model
 
     def create_or_merge_prop_from_mdf(self, spec, p_hdl, force_create):
@@ -333,7 +347,9 @@ class MDF(object):
         prop = spec_to_entity(
             p_hdl, spec,
             {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
-            Property, self._model)
+            Property)
+        if (prop.value_set and prop.value_set._commit == "dummy") {
+        }
         if "Term" in spec:
             self.annotate_entity_from_mdf(prop, spec["Term"])
         if force_create:
@@ -355,8 +371,7 @@ class MDF(object):
                 spec["Origin"] = self.handle
             term = spec_to_entity(None, spec,
                                   {"_commit": self._commit},
-                                  Term
-                                  )
+                                  Term)
             # merge or record term
             if not self._terms.get((term.handle, term.origin_name)):
                 self._terms[(term.handle, term.origin_name)] = term
@@ -368,179 +383,3 @@ class MDF(object):
                 if not ent.concept._commit:
                     ent.concept._commit = self._commit
 
-    def add_entity_tags_to_mdf(self, entity: Entity, mdf_entity: Dict):
-        """If entity has tags property, add them to its MDF representation"""
-        if not entity.tags:
-            return
-        mdf_entity["Tags"] = {}
-        for t in entity.tags:
-            mdf_entity["Tags"][t] = entity.tags[t].value
-
-    def write_mdf(self, model=None, file=None):
-        """
-        Write a :class:`Model` to a model description file (MDF)
-        :param :class:`Model` model: Model to convert (if None, use the model attribute of the MDF object)
-        :param str|file file: File name or object to write to (default is None; just return the MDF as dict)
-        :returns: MDF as dict
-        """
-        if not model:
-            model = self.model
-        mdf = {
-            "Nodes": {},
-            "Relationships": {},
-            "PropDefinitions": {},
-            "Terms": {},
-            "Handle": model.handle,
-        }
-        for nd in sorted(model.nodes):
-            node = model.nodes[nd]
-            mdf_node = {}
-            mdf["Nodes"][nd] = mdf_node
-            self.add_entity_tags_to_mdf(entity=node, mdf_entity=mdf_node)
-            self.add_entity_concept_to_mdf(entity=node, mdf_entity=mdf_node)
-
-            mdf_node["Props"] = list(sorted(node.props))
-
-            if node.nanoid:
-                mdf_node["NanoID"] = node.nanoid
-            if node.desc:
-                mdf_node["Desc"] = node.desc
-        # write props only in Ends object (no default set of properties)
-        # MDF - if props are defined above the Ends object, this is the default set of properties
-        # for any fully qualified edge without explicit properties. But if there are explict
-        # properties applied to a fully qualified edge (i.e., in the Ends object), these are
-        # the only properties for that edge.
-        for rl in sorted(model.edges):
-            edge = model.edges[rl]
-            mdf_edge = {}
-            ends = {}
-            if edge.handle in mdf["Relationships"]:
-                mdf_edge = mdf["Relationships"][edge.handle]
-            else:
-                mdf["Relationships"][edge.handle] = mdf_edge
-            ends = {"Src": edge.src.handle, "Dst": edge.dst.handle}
-            if "Ends" in mdf_edge:
-                mdf_edge["Ends"].append(ends)
-            else:
-                mdf_edge["Ends"] = [ends]
-            if "Mul" not in mdf_edge:
-                mdf_edge["Mul"] = edge.multiplicity or Edge.default("multiplicity")
-            else:
-                if mdf_edge["Mul"] != edge.multiplicity:
-                    ends["Mul"] = edge.multiplicity
-            self.add_entity_tags_to_mdf(entity=edge, mdf_entity=mdf_edge)
-            if edge.is_required:
-                ends["Req"] = True
-            if edge.props:
-                ends["Props"] = sorted(list(set(edge.props)))
-            else:
-                ends["Props"] = None
-            if edge.nanoid:
-                ends["NanoID"] = edge.nanoid
-            if edge.desc:
-                if not mdf_edge.get("Desc"):
-                    mdf_edge["Desc"] = edge.desc
-                else:
-                    ends["Desc"] = edge.desc
-            self.add_entity_concept_to_mdf(entity=edge, mdf_entity=mdf_edge)
-        prnames = []
-        props = {}
-        for pr in model.props:
-            prname = pr[len(pr) - 1]
-            prnames.append(prname)
-            # if props.get(prname):
-            #    self.logger.warning("Property name collision at {}".format(pr))
-            if not prname in props:
-                props[prname] = model.props[pr]
-        for prname in sorted(prnames):
-            prop = props[prname]
-            mdf_prop = {}
-            mdf["PropDefinitions"][prname] = mdf_prop
-            self.add_entity_tags_to_mdf(entity=prop, mdf_entity=mdf_prop)
-            if prop.value_domain == "value_set":
-                mdf_prop["Enum"] = self.calc_prop_type(prop)
-                for t in prop.terms:
-                    # if t in mdf["Terms"]:
-                    #    self.logger.warning("Term collision at {} (property {})".format(t, prop.handle))
-                    if t in mdf["Terms"]:
-                        continue
-                    pt = prop.terms[t]
-                    mdf_pt = {}
-                    self.add_entity_concept_to_mdf(entity=pt, mdf_entity=mdf_pt)
-                    self.add_entity_tags_to_mdf(entity=pt, mdf_entity=mdf_pt)
-                    mdf["Terms"][t] = {
-                        **mdf_pt,
-                        **{
-                            "Value": pt.value,
-                            "Definition": pt.origin_definition,
-                            "Origin": pt.origin_name,
-                            "Code": pt.origin_id,
-                            "Handle": pt.handle if pt.handle else pt.value,
-                        },
-                    }
-            else:
-                mdf_prop["Type"] = self.calc_prop_type(prop)
-            if prop.is_required:
-                mdf_prop["Req"] = True
-            if prop.nanoid:
-                mdf_prop["NanoID"] = prop.nanoid
-            if prop.desc:
-                mdf_prop["Desc"] = prop.desc
-            self.add_entity_concept_to_mdf(entity=prop, mdf_entity=mdf_prop)
-        if file:
-            fh = file
-            if isinstance(file, str):
-                fh = open(file, "w")
-            yaml.dump(mdf, stream=fh, indent=4)
-
-        return mdf
-
-    def calc_prop_type(self, prop):
-        if not prop.value_domain:
-            return Property.default("value_domain")
-        if prop.value_domain == "regexp":
-            if not prop.pattern:
-                self.logger.warning(
-                    "Property {} has 'regexp' value domain, but no pattern specified".format(
-                        prop.handle
-                    )
-                )
-                return {"pattern": "^.*$"}
-            else:
-                return {"pattern": prop.pattern}
-        if prop.units:
-            return {"value_type": prop.value_domain, "units": prop.units.split(";")}
-        if prop.value_domain == "value_set":
-            if not prop.value_set:
-                self.logger.warning(
-                    "Property {} has 'value_set' value domain, but value_set attribute is None".format(
-                        prop.handle
-                    )
-                )
-                return "string"
-            values = []
-            for trm in sorted(prop.terms):
-                values.append(trm)
-            return values
-        # otherwise
-        return prop.value_domain
-    def add_entity_concept_to_mdf(self, entity: Entity, mdf_entity: Dict):
-        """If entity has concept property, add its terms to MDF"""
-        if not entity.concept:
-            return
-        if not entity.concept.terms:
-            self.logger.warning(
-                f"{entity.get_label().capitalize} "
-                f"'{entity.handle}' has associated concept but with no terms defined"
-            )
-        else:
-            mdf_entity["Term"] = [
-                {
-                    "Value": tm.value,
-                    "Definition": tm.origin_definition,
-                    "Origin": tm.origin_name,
-                    "Code": tm.origin_id,
-                    "Handle": tm.handle if tm.handle else tm.value,
-                }
-                for tm in entity.concept.terms.values()
-            ]

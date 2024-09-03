@@ -22,7 +22,7 @@ def to_snake_case(string: str) -> str:
 mdf_to_meta = {
     "Handle": "handle",
     "Nodes": None,
-    "Relationships": Node,
+    "Relationships": None,
     "PropDefinitions": None,
     "UniversalNodeProperties": None,
     "UniversalRelationshipProperites": None,
@@ -62,8 +62,8 @@ process = {}
 # hdl: handle, spec: MDF specifier object (from YAML)
 # init: additional (bento-meta) attributes,
 # entCls: bento-meta entity class (bareword)
-# model: bento-meta model object
-def spec_to_entity(hdl, spec, init, entCls, model=None):
+
+def spec_to_entity(hdl, spec, init, entCls):
     for k in spec:
         if k in mdf_to_meta and mdf_to_meta[k] != None:
             init[mdf_to_meta[k]] = spec[k]
@@ -71,7 +71,7 @@ def spec_to_entity(hdl, spec, init, entCls, model=None):
         init["handle"] = hdl
     # init now contains (translated) spec keys and its original keys
     ent = entCls(init)
-    process[entCls](init, ent)
+    info = process[entCls](init, ent)
     if "Tags" in spec and spec["Tags"]:
         for t in spec["Tags"]:
             ent.tags[t] = spec_to_entity(
@@ -81,43 +81,52 @@ def spec_to_entity(hdl, spec, init, entCls, model=None):
     return ent
 
 
-def process_node(spec, node, model=None):
+def process_node(spec, node):
     # noop
-    return node
+    return
 
 
-def process_reln(spec, edge, model=None):
+def process_reln(spec, edge):
     #noop
-    return edge
+    return
 
 
-def process_term(spec, term, model=None):
+def process_term(spec, term):
     if not term.handle:
         term.handle = to_snake_case(term.value)
-    term.definition = unquote(term, definition)
-    return term
+    if spec.get("definition"):
+        term.definition = unquote(term, spec["definition"])
+    return
 
 
-def process_tag(spec, tag, model=None):
+def process_tag(spec, tag):
     #noop
-    return tag
+    return
 
 
-def process_prop(spec, prop, model=None):
-    tspec = spec.get("Type") or spec.get("Enum")
-    domain_spec = typespec_to_domain_spec(tspec)
+def process_prop(spec, prop):
+    ty_spec = spec.get("Enum") or spec.get("Type")
+    domain_spec = typespec_to_domain_spec(ty_spec)
     if domain_spec["value_domain"] != "value_set":
         for attr in domain_spec:
             prop[attr] = domain_spec[attr]
     else: # is "value_set"
         if domain_spec.get("url"):
-            prop.value_set = ValueSet({"url": domain_spec["url"]})
+            prop.value_set = ValueSet({"url": domain_spec["url"],
+                                       "_commit": prop._commit})
         elif domain_spec.get("value_set"):
-            for tm in domain_spec["value_set"]:
-                
+            # create 'dummy' ValueSet to hold Enum terms,
+            # but merge them with any Terms section terms in mdf.py
+            prop.value_set = ValueSet({"_commit":"dummy"})
+            for tm_init in domain_spec["value_set"]:
+                tm_init["origin_name"] = prop.model
+                term = spec_to_entity(None,
+                                      {"_commit": prop._commit},
+                                      tm_init, Term)
+                prop.value_set.terms[term.handle] = term
         else:
             raise RuntimeError("Can't evaluate value_set spec {domain_spec}")
-    return prop
+    return
 
 
 process = {
@@ -163,7 +172,7 @@ def typespec_to_domain_spec(spec):
             for tm in spec:
                 if isinstance(tm, bool):
                     tm = "True" if tm else "False"; # stringify any booleans
-                vs.append({ "handle": tm, "value": tm})
+                vs.append({"handle": tm, "value": tm})
                 return {"value_domain": "value_set",
                         "value_set": vs}
     # unknown - default domain
