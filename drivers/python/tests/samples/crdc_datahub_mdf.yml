@@ -1,6 +1,8 @@
 Handle: CRDC
 URI: https://datacommons.cancer.gov/
 Version: v1.0.0
+Tags:
+  Model: Sample
 Nodes:
   diagnosis:
     Props:
@@ -32,14 +34,393 @@ Nodes:
         nanoid: jordan
     nanoid: abc123
   file:
-    Props: null
-    # tags array should be valid by schema but fails validation
-    # Tags:
-    #   - deprecated
-    #   - test
+    Props:
+      - file_size
+      - list_of_strings
+      - list_of_integers
+      - list_of_numbers
+      - list_of_datetimes
+      - list_of_urls
+      - list_of_booleans
+      - list_of_TBDs
+    Term:
+      - Origin: CRDC
+        Value: file
   participant:
     Props:
       - participant_id
+      - height
+      - weight
+      - age_at_first_diagnosis
+      - race
+      - participant_bmis
     Tags:
       Template: "Yes"
-Relationships: {}
+  study:
+    Props:
+      - study_data_types
+      - experimental_strategy_and_data_subtype
+      - study_payments
+      - adult_or_childhood_study
+  sample:
+    Props:
+      - sample_weight
+      - sample_length
+      - sample_id
+      - sample_type
+      - sample_tumor_status
+      - anatomic_site
+      - collection_method
+  placeholder:
+    Props: null
+Relationships:
+  of_participant:
+    Mul: many_to_one
+    Ends:
+      - Src: diagnosis
+        Dst: participant
+      - Src: file
+        Dst: participant
+        Mul: one_to_one
+      - Src: study
+        Dst: participant
+        Mul: many_to_many
+        Tags:
+          Display: false
+    Desc: A participant can have many diagnoses.
+    Props:
+      - of_participant_id
+      - of_participant_type
+    Tags:
+      Reltag: test
+    Term:
+      - Origin: caDSR
+        Code: '2953639'
+        Value: Of participant
+        Version: '1.00'
+  of_diagnosis:
+    Mul: one_to_many
+    Ends:
+      - Src: participant
+        Dst: diagnosis
+    Props: null
+  of_file:
+    Mul: many_to_many
+    Ends:
+      - Src: participant
+        Dst: file
+    Props:
+      - of_file_id
+    nanoid: "111222"
+UniversalNodeProperties:
+  mustHave:
+    - id
+    - date
+  mayHave:
+    - transaction_id
+    - transaction_date
+UniversalRelationshipProperties:
+  mustHave:
+    - id
+  mayHave:
+    - transaction_id
+PropDefinitions:
+  id:
+    Type: string
+    Req: true
+  date:
+    Type: datetime
+    Req: Yes
+  transaction_id:
+    Type: url
+    Nul: true
+    Req: false
+  transaction_date:
+    Type: datetime
+    Key: false
+    Req: No
+  diagnosis_id:
+    Type: number
+    Desc: A unique identifier for a diagnosis.
+    Src: CRDC
+    Key: true
+    Nul: false
+  diagnosis:
+    Enum: [https:/icdo3.org/diagnosis_codes_and_terms/123]
+    Req: Preferred
+    Strict: false
+  participant_id:
+    Type: string
+  case_type:
+    Type: TBD
+  of_participant_id:
+    Type: boolean
+  of_participant_type:
+    Enum:
+      - a_participant_type
+    Deprecated: false
+  of_file_id:
+    Enum:
+      - C:/path/to/file/id.txt
+    Deprecated: true
+  height:
+    Type:
+      value_type: number
+      units:
+        - cm
+  weight:
+    Type:
+      value_type: number
+      units: [mg, kg, lbs, stone]
+      Term:
+        - Origin: CRDC
+          Code: 'weight123'
+          Value: Weight
+          Handle: weight
+  file_size:
+    Type:
+      value_type: integer
+      units:
+        - https://www.every_file_size_unit.com/bytesandstuff
+    Term:
+      - Origin: CRDC
+        Code: 'file123'
+        Value: File Size
+      - Origin: caDSR
+        Code: '11479876'
+        Value: Electronic Data File Size Integer
+        Version: '1.00'
+    Tags:
+      include_units: true
+    nanoid: nanoid
+  age_at_first_diagnosis:
+    Type:
+      value_type: integer
+      units: 
+        - years
+        - months
+        - days
+    Term:
+      - Origin: CRDC
+        Value: Age at First Diagnosis (years)
+      - Origin: caDSR
+        Value: Age at First Diagnosis in Years
+      - Origin: CCDI
+        Value: age at first diagnosis
+    Tags:
+      include_units: true
+      pref_units: days
+  race:
+    Enum:
+      - "American Indian or Alaska Native"
+      - "Asian"
+      - "Black or African American"
+      - "Hispanic or Latino"
+      - "Native Hawaiian or other Pacific Islander"
+      - "Not Allowed to Collect"
+      - "Not Reported"
+      - "Unknown"
+      - "White"
+    Strict: true
+    Term:
+      - Origin: caDSR
+        Code: '2192199'
+        Value: Race Category Text
+        Version: '1.00'
+  sample_weight:
+    Type:
+      value_type: number
+      units:
+        - pattern: ^\\d+(mg|kg|g)$
+          flavor: Perl
+        - pattern: ^\\d+(lbs|stone)$
+  sample_length:
+    Type:
+      value_type: number
+      units:
+        - path/to/sample/length/units/
+  sample_id:
+    Type:
+      pattern: ^[A-Z]{2,5}-\d{4,8}(_[A-Z\d]{2,4})?$
+      flavor: JS
+  sample_type:
+    Type:
+      https://sample_types.com/api/v1/
+  sample_tumor_status:
+    Type:
+      - Normal
+      - Peritumoral
+      - Tumor
+  anatomic_site:
+    Type:
+      - https://anatomic_sites.gov/uberon/
+  collection_method:
+    Type:
+      - path/to/collection/methods
+  list_of_strings:
+    Type:
+      value_type: list
+      item_type: string
+  list_of_integers:
+    Type:
+      value_type: list
+      item_type: integer
+  list_of_numbers:
+    Type:
+      value_type: list
+      item_type: number
+  list_of_datetimes:
+    Type:
+      value_type: list
+      item_type: datetime
+  list_of_urls:
+    Type:
+      value_type: list
+      item_type: url
+  list_of_booleans:
+    Type:
+      value_type: list
+      item_type: boolean
+  list_of_TBDs:
+    Type:
+      value_type: list
+      item_type: TBD
+  study_data_types:
+    Type:
+      value_type: list
+      item_type:
+        - Genomic
+        - Imaging
+        - Clinical
+  experimental_strategy_and_data_subtype:
+    Type:
+      value_type: list
+      item_type:
+        - http://research.activity/experimental/method/type/1
+  participant_bmis:
+    Type:
+      value_type: list
+      item_type:
+        value_type: integer
+        units: [kg, lbs, stone]
+  study_payments:
+    Type:
+      value_type: list
+      item_type:
+        value_type: number
+        units: [$, dollars, USD]
+  adult_or_childhood_study:
+    Enum:
+      - Adult
+      - Pediatric
+    Tags:
+      display_color: blue
+Terms:
+  american_indian_or_alaska_native:
+    Origin: caDSR
+    Definition: A person having origins in any of the original peoples of North and
+      South America (including Central America) and who maintains tribal affiliation
+      or community attachment. (OMB)
+    Code: '2572232'
+    Version: '1'
+    Value: 'American Indian or Alaska Native'
+    Handle: american_indian_or_alaska_native
+    Desc: A person with origins in any of the original peoples of the Americas.
+    nanoid: '125722'
+  asian:
+    Origin: caDSR
+    Definition: A person having origins in any of the original peoples of the Far
+      East, Southeast Asia, or the Indian subcontinent, including for example, Cambodia,
+      China, India, Japan, Korea, Malaysia, Pakistan, the Philippine Islands, Thailand,
+      and Vietnam. (OMB)
+    Code: '2572233'
+    Version: '1'
+    Value: Asian
+  black_or_african_american:
+    Origin: caDSR
+    Definition: A person having origins in any of the Black racial groups of Africa.
+      Terms such as \"Haitian\" or \"Negro\" can be used in addition to \"Black or
+      African American\". (OMB)
+    Code: '2572313'
+    Version: '1'
+    Value: 'Black or African American'
+  hispanic_or_latino:
+    Origin: caDSR
+    Definition: A person of Cuban, Mexican, Puerto Rican, South or Central American,
+      or other Spanish culture or origin, regardless of race. The term, \"Spanish
+      origin,\" can be used in addition to \"Hispanic or Latino.\" (OMB)
+    Code: '2581176'
+    Version: '1'
+    Value: Hispanic or Latino
+  native_hawaiian_or_other_pacific_islander:
+    Origin: caDSR
+    Definition: Denotes a person having origins in any of the original peoples of
+      Hawaii, Guam, Samoa, or other Pacific Islands. The term covers particularly
+      people who identify themselves as part-Hawaiian, Native Hawaiian, Guamanian
+      or Chamorro, Carolinian, Samoan, Chuukese (Trukese), Fijian, Kosraean, Melanesian,
+      Micronesian, Northern Mariana Islander, Palauan, Papua New Guinean, Pohnpeian,
+      Polynesian, Solomon Islander, Tahitian, Tokelauan, Tongan, Yapese, or Pacific
+      Islander, not specified.
+    Code: '2572235'
+    Version: '1'
+    Value: Native Hawaiian or Other Pacific Islander
+  not_allowed_to_collect:
+    Origin: caDSR
+    Definition: An indicator that specifies that a collection event was not permitted.
+    Code: '6662191'
+    Version: '1'
+    Value: Not Allowed To Collect
+  not_reported:
+    Origin: NCIt
+    Value: Not Reported
+  unknown:
+    Origin: caDSR
+    Definition: Not known, not observed, not recorded, or refused.
+    Code: '4266671'
+    Version: '1'
+    Value: Unknown
+    Tags:
+      display: grey_out
+  white:
+    Origin: caDSR
+    Definition: Denotes person with European, Middle Eastern, or North African ancestral
+      origin who identifies, or is identified, as White.
+    Code: '2572236'
+    Version: '1'
+    Value: White
+  normal:
+    Origin: caDSR
+    Value: Normal Tissue
+  peritumoral:
+    Origin: caDSR
+    Definition: Located in tissues surrounding a tumor.
+    Code: '4633527'
+    Version: '1'
+    Value: Peritumoral
+  tumor:
+    Origin: caDSR
+    Definition: A benign or malignant tissue growth resulting from uncontrolled cell
+      proliferation. Benign neoplastic cells resemble normal cells without exhibiting
+      significant cytologic atypia, while malignant cells exhibit overt signs such
+      as dysplastic features, atypical mitotic figures, necrosis, nuclear pleomorphism,
+      and anaplasia. Representative examples of benign neoplasms include papillomas,
+      cystadenomas, and lipomas; malignant neoplasms include carcinomas, sarcomas,
+      lymphomas, and leukemias.
+    Code: '3071117'
+    Version: '1'
+    Value: Neoplasm
+  genomic:
+    Origin: NWM
+    Value: Genomic Data
+  imaging:
+    Origin: NWM
+    Value: Imaging Data
+  clinical:
+    Origin: NWM
+    Value: Clinical Data
+  Adult:
+    Origin: MAJ
+    Value: Adult Study
+  Pediatric:
+    Origin: MAJ
+    Value: Pediatric Study
