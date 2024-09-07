@@ -109,8 +109,9 @@ def process_prop(spec, prop):
     domain_spec = typespec_to_domain_spec(ty_spec)
     if domain_spec["value_domain"] != "value_set":
         for attr in domain_spec:
-            prop[attr] = domain_spec[attr]
+            prop.__setattr__(attr, domain_spec[attr])
     else: # is "value_set"
+        prop.value_domain = "value_set"
         if domain_spec.get("url"):
             prop.value_set = ValueSet({"url": domain_spec["url"],
                                        "_commit": prop._commit})
@@ -173,8 +174,8 @@ def typespec_to_domain_spec(spec):
                 if isinstance(tm, bool):
                     tm = "True" if tm else "False"; # stringify any booleans
                 vs.append({"handle": tm, "value": tm})
-                return {"value_domain": "value_set",
-                        "value_set": vs}
+            return {"value_domain": "value_set",
+                    "value_set": vs}
     # unknown - default domain
     else:
         return {"value_domain": Property.default("value_domain")}

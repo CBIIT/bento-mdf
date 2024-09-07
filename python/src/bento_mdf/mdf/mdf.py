@@ -15,15 +15,14 @@ from tempfile import TemporaryFile
 from typing import Dict
 
 import requests
-import yaml
-from .convert import to_snake_case, spec_to_entity
+from .convert import spec_to_entity
 from ..validator import MDFValidator
-from bento_meta.entity import ArgError, Entity
+from bento_meta.entity import ArgError
 from bento_meta.model import Model
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from nanoid import generate
 from tqdm import tqdm
-
+from pdb import set_trace
 sys.path.extend([".", ".."])
 
 
@@ -343,19 +342,33 @@ class MDF(object):
 
     def create_or_merge_prop_from_mdf(self, spec, p_hdl, force_create):
         if not force_create and (self.handle, p_hdl) in self._props:
-            return
-        prop = spec_to_entity(
-            p_hdl, spec,
-            {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
-            Property)
-        if (prop.value_set and prop.value_set._commit == "dummy") {
-        }
-        if "Term" in spec:
-            self.annotate_entity_from_mdf(prop, spec["Term"])
-        if force_create:
-            return prop
-        self._props[(prop.model, prop.handle)] = prop
-        return self._props[(prop.model, prop.handle)]
+            pass
+        else:
+            prop = spec_to_entity(
+                p_hdl, spec,
+                {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
+                Property)
+
+            if (prop.value_set and prop.value_set._commit == "dummy"):
+                terms = []
+                # merge terms references in enums into terms defined
+                # in a separate Terms: section
+                for t in prop.value_set.terms:
+                    if self._terms.get(t):
+                        terms.append(self._terms[t])
+                    else:
+                        terms.append(prop.value_set.terms[t])
+                # allow bento_meta.model machinery to create
+                # the actual value_set object and store
+                # terms in Model object:
+                self._model.add_terms(prop, terms)
+            
+            if "Term" in spec:
+                self.annotate_entity_from_mdf(prop, spec["Term"])
+            if force_create:
+                return prop
+            self._props[(prop.model, prop.handle)] = prop
+        return self._props[(self.handle, p_hdl)]
 
     def annotate_entity_from_mdf(self, ent, yterm_list):
         for spec in yterm_list:
