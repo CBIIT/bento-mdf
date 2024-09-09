@@ -106,6 +106,9 @@ def process_tag(spec, tag):
 
 def process_prop(spec, prop):
     ty_spec = spec.get("Enum") or spec.get("Type")
+    # kludge to process deprecated {"Type": {"Enum": [...]}} construct:
+    if isinstance(ty_spec, dict) and "Enum" in ty_spec:
+        ty_spec = ty_spec["Enum"]
     domain_spec = typespec_to_domain_spec(ty_spec)
     if domain_spec["value_domain"] != "value_set":
         for attr in domain_spec:

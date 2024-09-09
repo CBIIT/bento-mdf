@@ -59,6 +59,7 @@ class MDF(object):
         self.mdf_schema = mdf_schema
         self._model = model
         self._commit = _commit
+        self._annotations = {}
         self._terms = {}
         self._props = {}
         self.version = None
@@ -153,7 +154,7 @@ class MDF(object):
         else:
             self.logger.error("Model handle not present in MDF nor provided in args")
             success = False
-        ypropdefs = self.mdf["PropDefinitions"]
+        # ypropdefs = self.mdf["PropDefinitions"]
         # yterms = self.mdf.get("Terms")
         yunps = self.mdf.get("UniversalNodeProperties")
         yurps = self.mdf.get("UniversalRelationshipProperties")
@@ -299,20 +300,21 @@ class MDF(object):
                     prop_of[p].append(ent)
                 else:
                     prop_of[p] = [ent]
-        defns_for = set(ypropdefs.keys())
+        propdefs = self.mdf["PropDefinitions"]                    
+        defns_for = set(propdefs.keys())
         for pname in prop_of:
             for ent in prop_of[pname]:
                 force = False
                 # see if a qualified name is defined in propdefs:
                 key = ent.handle + "." + pname
-                ypdef = ypropdefs.get(key)
-                if ypdef:
+                spec = propdefs.get(key)
+                if spec:
                     # force creation of new prop for a explicitly qualified MDF property
                     force = True
                 else:
                     key = pname
-                    ypdef = ypropdefs.get(pname)
-                if not ypdef:
+                    spec = propdefs.get(pname)
+                if not spec:
                     self.logger.warning(
                         "property '{pname}' does not have a corresponding "
                         "propdef for entity '{handle}'".format(
@@ -324,7 +326,7 @@ class MDF(object):
                     if key in defns_for:
                         defns_for.remove(key)
                 prop = self.create_or_merge_prop_from_mdf(
-                    ypdef, p_hdl=pname, force_create=force
+                    spec, p_hdl=pname, force_create=force
                 )
                 self._model.add_prop(ent, prop)
                 ent.props[prop.handle] = prop
@@ -348,7 +350,6 @@ class MDF(object):
                 p_hdl, spec,
                 {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
                 Property)
-
             if (prop.value_set and prop.value_set._commit == "dummy"):
                 terms = []
                 # merge terms references in enums into terms defined
@@ -386,10 +387,10 @@ class MDF(object):
                                   {"_commit": self._commit},
                                   Term)
             # merge or record term
-            if not self._terms.get((term.handle, term.origin_name)):
-                self._terms[(term.handle, term.origin_name)] = term
+            if not self._annotations.get((term.handle, term.origin_name)):
+                self._annotations[(term.handle, term.origin_name)] = term
             else:
-                term = self._terms[(term.handle, term.origin_name)]
+                term = self._annotations[(term.handle, term.origin_name)]
 
             self._model.annotate(ent, term)
             if self._commit:
