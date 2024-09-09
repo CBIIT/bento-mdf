@@ -43,6 +43,7 @@ Nodes:
       - list_of_urls
       - list_of_booleans
       - list_of_TBDs
+      - file_id
     Term:
       - Origin: CRDC
         Value: file
@@ -62,6 +63,7 @@ Nodes:
       - experimental_strategy_and_data_subtype
       - study_payments
       - adult_or_childhood_study
+      - study_id
   sample:
     Props:
       - sample_weight
@@ -151,6 +153,7 @@ PropDefinitions:
     Strict: false
   participant_id:
     Type: string
+    Key: true
   case_type:
     Type: TBD
   of_participant_id:
@@ -243,6 +246,7 @@ PropDefinitions:
     Type:
       pattern: ^[A-Z]{2,5}-\d{4,8}(_[A-Z\d]{2,4})?$
       flavor: JS
+    Key: true
   sample_type:
     Type:
       https://sample_types.com/api/v1/
@@ -315,6 +319,12 @@ PropDefinitions:
       - Pediatric
     Tags:
       display_color: blue
+  file_id:
+    Type: string
+    Key: true
+  study_id:
+    Type: string
+    Key: true
 Terms:
   american_indian_or_alaska_native:
     Origin: caDSR
