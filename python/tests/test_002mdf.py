@@ -1,59 +1,57 @@
-"""Tests for bento_mdf.mdf"""
-import os.path
-import sys
+"""Tests for bento_mdf.mdf."""
+
+from pathlib import Path
 
 import pytest
-import yaml
 from bento_mdf.mdf import MDF
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
-from bento_meta.objects import Concept, Node, Property, Tag, Term, ValueSet
-from yaml import Loader as yloader
-from pdb import set_trace
+from bento_meta.objects import ValueSet
 
-TDIR = "tests/" if os.path.exists("tests") else ""
+TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
+CTDC_MODEL_FILE = TDIR / "samples" / "ctdc_model_file.yaml"
+CTDC_MODEL_PROPS_FILE = TDIR / "samples" / "ctdc_model_properties_file.yaml"
+ICDC_MODEL_URL = "https://cbiit.github.io/icdc-model-tool/model-desc/icdc-model.yml"
+ICDC_PROPS_URL = (
+    "https://cbiit.github.io/icdc-model-tool/model-desc/icdc-model-props.yml"
+)
+TEST_MODEL_FILE = TDIR / "samples" / "test-model.yml"
+TEST_MODEL_QUAL_PROPS_FILE = TDIR / "samples" / "test-model-qual-props.yml"
+TEST_MODEL_TERMS_A = TDIR / "samples" / "test-model-with-terms-a.yml"
 
-def test_class():
+
+def test_class() -> None:
     m = MDF(handle="test")
     assert isinstance(m, MDF)
     with pytest.raises(ArgError, match="arg model= must"):
         MDF(model="boog")
 
 
-def test_load_yaml():
+def test_load_yaml() -> None:
     m = MDF(handle="test")
-    m.files = [
-        "{}samples/ctdc_model_file.yaml".format(TDIR),
-        "{}samples/ctdc_model_properties_file.yaml".format(TDIR),
-    ]
+    m.files = [CTDC_MODEL_FILE, CTDC_MODEL_PROPS_FILE]
     m.load_yaml(verify=False)
     assert m.mdf["Nodes"]
 
 
-def test_load_yaml_url():
+def test_load_yaml_url() -> None:
     m = MDF(handle="ICDC")
-    m.files = [
-        "https://cbiit.github.io/icdc-model-tool/model-desc/icdc-model.yml",
-        "https://cbiit.github.io/icdc-model-tool/model-desc/icdc-model-props.yml",
-    ]
+    m.files = [ICDC_MODEL_URL, ICDC_PROPS_URL]
     m.load_yaml()
     m.create_model()
     assert m.model
 
 
-def test_create_model():
+def test_create_model() -> None:
     m = MDF(handle="test")
-    m.files = [
-        "{}samples/ctdc_model_file.yaml".format(TDIR),
-        "{}samples/ctdc_model_properties_file.yaml".format(TDIR),
-    ]
+    m.files = [CTDC_MODEL_FILE, CTDC_MODEL_PROPS_FILE]
     m.load_yaml()
     m.create_model()
     assert m.model
 
 
-def test_created_model():
-    m = MDF("{}samples/test-model.yml".format(TDIR), handle="test")
+def test_created_model() -> None:
+    m = MDF(TEST_MODEL_FILE, handle="test")
     assert isinstance(m.model, Model)
     assert set([x.handle for x in m.model.nodes.values()]) == {
         "case",
@@ -140,9 +138,9 @@ def test_created_model():
     assert m.model.nodes["case"].concept.terms[("subject", "caDSR")]
 
 
-def test_create_model_qual_props():
+def test_create_model_qual_props() -> None:
     m = MDF(handle="test")
-    m.files = ["{}samples/test-model-qual-props.yml".format(TDIR)]
+    m.files = [TEST_MODEL_QUAL_PROPS_FILE]
     m.load_yaml()
     m.create_model()
     assert m.model.nodes["case"].props["disease"].value_domain == "string"
@@ -153,9 +151,9 @@ def test_create_model_qual_props():
     )
 
 
-def test_create_model_with_terms_section():
+def test_create_model_with_terms_section() -> None:
     m = MDF(handle="test")
-    m.files = ["{}samples/test-model-with-terms.yml".format(TDIR)]
+    m.files = [TEST_MODEL_TERMS_A]
     m.load_yaml()
     m.create_model()
     assert m._terms["normal"].origin_name == "Fred"
@@ -173,19 +171,3 @@ def test_create_model_with_terms_section():
     assert (
         m.model.nodes["sample"].props["sample_type"].terms["tumor"].origin_id == 10084
     )
-
-# union type deprecated
-# def test_create_model_union_type():
-#     m = MDF(handle="test")
-#     m.files = ["{}samples/test-model-union-type.yml".format(TDIR)]
-#     m.load_yaml()
-#     m.create_model()
-#     assert m.model
-#     assert m.model.nodes["case"].props["disease"].value_domain == "union"
-#     assert type(m.model.nodes["case"].props["disease"].value_types) == list
-#     assert {
-#         x["value_domain"] for x in m.model.nodes["case"].props["disease"].value_types
-#     } == {"string", "url"}
-#     assert m.model.nodes["sample"].props["sample_type"].value_domain == "union"
-#     vt = m.model.nodes["sample"].props["sample_type"].value_types
-#     assert {t.value for t in vt[1]["value_set"]} == {"normal", "tumor"}
