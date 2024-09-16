@@ -33,7 +33,7 @@ include = ["logs/log.ini"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-bento-meta = ">=0.2.6"
+bento-meta = ">=0.2.7"
 jsonschema = "^4.17.3"
 pyyaml = ">=6.0.1"
 delfick-project = "^0.7.9"
