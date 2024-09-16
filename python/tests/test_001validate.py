@@ -1,52 +1,52 @@
-import os
-import sys
+from pathlib import Path
 
 import pytest
-
 from bento_mdf.validator import MDFValidator
 from jsonschema import SchemaError, ValidationError
 from yaml.constructor import ConstructorError
 from yaml.parser import ParserError
 
-tdir = "tests/" if os.path.exists("tests") else ""
+tdir = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 
-test_schema_file = tdir + "samples/mdf-schema.yaml"
-test_latest_schema = "../../schema/mdf-schema.yaml"
+
+test_schema_file = tdir / "samples" / "mdf-schema.yaml"
+test_latest_schema = tdir.parents[1] / "schema/mdf-schema.yaml"
 test_mdf_files = [
-    tdir + "samples/ctdc_model_file.yaml",
-    tdir + "samples/ctdc_model_properties_file.yaml",
+    tdir / "samples" / "ctdc_model_file.yaml",
+    tdir / "samples" / "ctdc_model_properties_file.yaml",
 ]
-test_schema_bad = tdir + "samples/mdf-bad-schema.yaml"
-test_yaml_bad = tdir + "samples/ctdc_model_bad.yaml"
-test_yaml_with_keydup = tdir + "samples/ctdc_model_keydup.yaml"
-test_yaml_with_eltdup = tdir + "samples/ctdc_model_eltdup.yaml"
+test_schema_bad = tdir / "samples" / "mdf-bad-schema.yaml"
+test_yaml_bad = tdir / "samples" / "ctdc_model_bad.yaml"
+test_yaml_with_keydup = tdir / "samples/ctdc_model_keydup.yaml"
+test_yaml_with_eltdup = tdir / "samples/ctdc_model_eltdup.yaml"
 test_mdf_files_invalid_wrt_schema = [
-    tdir + "samples/ctdc_model_file_invalid.yaml",
-    tdir + "samples/ctdc_model_properties_file.yaml",
+    tdir / "samples" / "ctdc_model_file_invalid.yaml",
+    tdir / "samples" / "ctdc_model_properties_file.yaml",
 ]
 test_list_type_files = [
-    tdir + "samples/ctdc_model_file.yaml",
-    tdir + "samples/list-type-test.yaml",
+    tdir / "samples" / "ctdc_model_file.yaml",
+    tdir / "samples" / "list-type-test.yaml",
 ]
 test_enum_kw_files = [
-    tdir + "samples/ctdc_model_file.yaml",
-    tdir + "samples/ctdc_model_properties_enum_kw.yaml",
+    tdir / "samples" / "ctdc_model_file.yaml",
+    tdir / "samples" / "ctdc_model_properties_enum_kw.yaml",
 ]
 test_enum_and_type_kw_files = [
-    tdir + "samples/ctdc_model_file.yaml",
-    tdir + "samples/ctdc_model_properties_enum_and_type_kw.yaml",
+    tdir / "samples" / "ctdc_model_file.yaml",
+    tdir / "samples" / "ctdc_model_properties_enum_and_type_kw.yaml",
 ]
+crdc_dh_file = tdir / "samples" / "crdc_datahub_mdf.yml"
 
 
-def test_with_all_File_args():
-    sch = open(test_schema_file, "r")
-    mdf0 = open(test_mdf_files[0], "r")
-    mdf1 = open(test_mdf_files[1], "r")
+def test_with_all_file_args():
+    sch = test_schema_file.open()
+    mdf0 = test_mdf_files[0].open()
+    mdf1 = test_mdf_files[1].open()
     assert MDFValidator(sch, mdf0, mdf1)
 
 
 def test_with_all_str_args():
-    assert MDFValidator(test_schema_file, *test_mdf_files)
+    assert MDFValidator(str(test_schema_file), *[str(f) for f in test_mdf_files])
 
 
 def test_with_remote_schema():
@@ -57,33 +57,34 @@ def test_with_remote_schema():
 
 
 def test_bad_yaml():
-    v = MDFValidator(test_schema_file, test_yaml_bad, raiseError=True)
+    v = MDFValidator(test_schema_file, test_yaml_bad, raise_error=True)
     with pytest.raises(ParserError):
         v.load_and_validate_yaml()
 
 
 def test_keydup_yaml():
-    v = MDFValidator(test_schema_file, test_yaml_with_keydup, raiseError=True)
+    v = MDFValidator(test_schema_file, test_yaml_with_keydup, raise_error=True)
     with pytest.raises(ConstructorError):
         v.load_and_validate_yaml()
 
 
 def test_eltdup_yaml():
-    v = MDFValidator(test_schema_file, test_yaml_with_eltdup, raiseError=True)
+    v = MDFValidator(test_schema_file, test_yaml_with_eltdup, raise_error=True)
     with pytest.raises(ConstructorError):
         v.load_and_validate_yaml()
 
 
 def test_bad_schema():
-    # pytest.skip()
-    v = MDFValidator(test_schema_bad, raiseError=True)
+    v = MDFValidator(test_schema_bad, raise_error=True)
     with pytest.raises(SchemaError):
         v.load_and_validate_schema()
 
 
 def test_instance_not_valid_wrt_schema():
     v = MDFValidator(
-        test_schema_file, *test_mdf_files_invalid_wrt_schema, raiseError=True
+        test_schema_file,
+        *test_mdf_files_invalid_wrt_schema,
+        raise_error=True,
     )
     assert v.load_and_validate_schema()
     assert v.load_and_validate_yaml()
@@ -108,9 +109,14 @@ def test_enum_vs_type_kw():
 
 
 def test_enum_and_type_kw():
-    v = MDFValidator(test_latest_schema, *test_enum_and_type_kw_files, raiseError=True)
+    v = MDFValidator(test_latest_schema, *test_enum_and_type_kw_files, raise_error=True)
     assert v
     assert v.load_and_validate_schema()
     assert v.load_and_validate_yaml()
     with pytest.raises(ValidationError):
         v.validate_instance_with_schema()
+
+
+@pytest.mark.skip("TODO")
+def test_validate_crdc_model():
+    v = MDFValidator(test_latest_schema, crdc_dh_file)
