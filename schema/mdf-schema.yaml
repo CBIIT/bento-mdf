@@ -280,7 +280,7 @@ defs:
         items:
           $ref: "#/defs/termSpec"
         uniqueItems: true
-      nanoid:
+      NanoID:
         $ref: "#/defs/nanoid"
     required:
       - Props
@@ -349,7 +349,7 @@ defs:
         items:
           $ref: "#/defs/termSpec"
         uniqueItems: true
-      nanoid:
+      NanoID:
         $ref: "#/defs/nanoid"
     required:
       - Props
@@ -453,7 +453,7 @@ defs:
         items:
           $ref: "#/defs/termSpec"
         uniqueItems: true
-      nanoid: 
+      NanoID: 
         $ref: "#/defs/nanoid"
     oneOf:
       -
@@ -506,7 +506,7 @@ defs:
           Text definition for the term, ideally as provided by the authority
           given in the Origin field.
         type: string
-      nanoid:
+      NanoID:
         $ref: "#/defs/nanoid"
     required:
       - Value
