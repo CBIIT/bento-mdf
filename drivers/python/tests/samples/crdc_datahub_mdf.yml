@@ -93,6 +93,7 @@ Relationships:
     Props:
       - of_participant_id
       - of_participant_type
+      - of_file_id
     Tags:
       Reltag: test
     Term:
@@ -103,16 +104,9 @@ Relationships:
   of_diagnosis:
     Mul: one_to_many
     Ends:
-      - Src: participant
+      - Src: file
         Dst: diagnosis
     Props: null
-  of_file:
-    Mul: many_to_many
-    Ends:
-      - Src: participant
-        Dst: file
-    Props:
-      - of_file_id
     nanoid: "111222"
 UniversalNodeProperties:
   mustHave:
