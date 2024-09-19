@@ -114,8 +114,7 @@ defs:
   url:
     $id: "#url"
     type: string
-    pattern: |
-      ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
+    pattern: ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
   path:
     $id: "#path"
     type: string
@@ -124,8 +123,7 @@ defs:
       base url of a terminology service endpoint. The expected response from
       the server is a simple array of acceptable values as strings (possibly
       embedded somewhere in a response structure).
-    pattern: |
-      /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
+    pattern: /?[A-Za-z0-9_][A-Za-z0-9._-~]*(?:/[A-Za-z0-9_][A-Za-z0-9._-~]*)*
   regex:
     $id: "#regex"
     type: object
@@ -197,18 +195,6 @@ defs:
     required:
       - value_type
       - units
-  unionType:
-    $id: "#unionType"
-    description: |
-      A unionType is an array of other types, at least one of which the
-      associated value must comply with. Analogous to the Union in Avro
-      (https://avro.apache.org/docs/current/spec.html#Unions)
-    type: array
-    items:
-      anyOf:
-        - $ref: "#/defs/simpleType"
-        - $ref: "#/defs/enumType"
-        - $ref: "#/defs/numberWithUnits"
   listType:
     $id: "#listType"
     type: object
@@ -237,17 +223,12 @@ defs:
       - item_type
   tagsSpec:
     $id: "#tagsSpec"
-    oneOf:
-        - type: array
-          items: string
-          uniqueItems: true
-        - type: object
-          additionalProperties:
-            oneOf:
-              - type: string
-              - type: number
-              - type: boolean
-              
+    type: object
+    additionalProperties:
+      oneOf:
+        - type: string
+        - type: number
+        - type: boolean
   nodeSpec:
     $id: "#nodeSpec"
     type: object
@@ -290,7 +271,6 @@ defs:
         description: |
           Human-readable description of the relationship.
         type: string
-        
       Mul:
         # here, the "default" multiplicity for all Src->Dst pairs
         type: string
@@ -353,7 +333,7 @@ defs:
       - Props
       - Mul
       - Ends
-  propSpec:
+  propSpec: 
     $id: "#propSpec"
     type: object
     properties:
@@ -429,16 +409,13 @@ defs:
                 $ref: "#/defs/enumType"
               -
                 $ref: "#/defs/listType"
-              -
-                $ref: "#/defs/unionType"
         -
           Enum:
             description: |
               Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
               readability. Either one of Type or Enum may be present in a property definition,
               but not both.
-            $ref: "#/defs/enumType"
-
+            $ref: "#/defs/enumType" 
       Tags:
         $ref: "#/defs/tagsSpec"
       Term:
@@ -509,8 +486,3 @@ defs:
     required:
       - Value
       - Origin
-      
-      
-        
-          
-      
