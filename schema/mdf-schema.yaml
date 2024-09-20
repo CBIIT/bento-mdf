@@ -485,8 +485,6 @@ defs:
         type: string
       NanoID:
         $ref: "#/defs/nanoid"
-      Tags:
-        $ref: "#/defs/tagsSpec"
     required:
       - Value
       - Origin
