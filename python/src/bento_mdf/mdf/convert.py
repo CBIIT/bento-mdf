@@ -128,11 +128,18 @@ def process_prop(spec: dict, prop: Property) -> None:
     if isinstance(ty_spec, dict) and "Enum" in ty_spec:
         ty_spec = ty_spec["Enum"]
     domain_spec = typespec_to_domain_spec(ty_spec)
-    if domain_spec["value_domain"] != "value_set":
+    if (
+        domain_spec["value_domain"] != "value_set"
+        and domain_spec.get("item_domain") != "value_set"
+    ):
         for attr in domain_spec:
             prop.__setattr__(attr, domain_spec[attr])
-    else:  # is "value_set"
-        prop.value_domain = "value_set"
+    else:  # is "value_set" or "list" with item_domain "value_set"
+        if domain_spec["value_domain"] == "list":
+            prop.value_domain = "list"
+            prop.item_domain = "value_set"
+        else:
+            prop.value_domain = "value_set"
         if domain_spec.get("url"):
             prop.value_set = ValueSet(
                 {"url": domain_spec["url"], "_commit": prop._commit},
@@ -148,6 +155,16 @@ def process_prop(spec: dict, prop: Property) -> None:
         else:
             msg = f"Can't evaluate value_set spec {domain_spec}"
             raise RuntimeError(msg)
+    # set default values for unprovided attrs
+    # prop_attrs_with_defaults = {
+    #     "is_strict": True,
+    #     "is_key": False,
+    #     "is_nullable": False,
+    #     "is_required": False,
+    # }
+    # for attr, default in prop_attrs_with_defaults.items():
+    #     if not getattr(prop, attr):
+    #         setattr(prop, attr, default)
 
 
 process = {
@@ -163,24 +180,33 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
     # simple type
     if isinstance(spec, str):
         return {"value_domain": spec}
-    elif isinstance(spec, dict):
+    if isinstance(spec, dict):
         # regex type
         if spec.get("pattern"):
+            # TODO: add regex flavor attribute to bento-meta Property entity?
             return {"value_domain": "regexp", "pattern": spec["pattern"]}
         # numberWithUnits type
         if spec.get("units"):
-            return {
-                "value_domain": spec["value_type"],
-                "units": ";".join(spec["units"]),
-            }
+            domain_spec = {"value_domain": spec["value_type"]}
+            if isinstance(spec["units"][0], dict) and spec["units"][0].get("pattern"):
+                item_domain_spec = typespec_to_domain_spec(spec["units"][0])
+                domain_spec["units"] = item_domain_spec["value_domain"]
+                domain_spec["pattern"] = item_domain_spec["pattern"]
+            else:
+                domain_spec["units"] = ";".join(spec["units"])
+            return domain_spec
         # list type
         if spec.get("item_type"):
-            return {
-                "value_domain": "list",
-                "item_domain": typespec_to_domain_spec(spec["item_type"]),
-            }
+            domain_spec = {"value_domain": "list"}
+            item_domain_spec = typespec_to_domain_spec(spec["item_type"])
+            domain_spec["item_domain"] = item_domain_spec["value_domain"]
+            for key in ("units", "value_set", "url"):
+                if key not in item_domain_spec:
+                    continue
+                domain_spec[key] = item_domain_spec[key]
+            return domain_spec
     # enum type
-    elif isinstance(spec, list):
+    if isinstance(spec, list):
         # do not implement union type for now
         # assume a value_set, as a list of term handles or a single url/path
         # don't merge terms here, but in process_prop
@@ -195,13 +221,11 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
             )
         ):
             return {"value_domain": "value_set", "url": spec[0]}
-        else:
-            vs = []
-            for tm in spec:
-                if isinstance(tm, bool):
-                    tm = "True" if tm else "False"  # stringify any booleans
-                vs.append({"handle": tm, "value": tm})
-            return {"value_domain": "value_set", "value_set": vs}
+        vs = []
+        for tm in spec:
+            if isinstance(tm, bool):
+                tm = "True" if tm else "False"  # stringify any booleans
+            vs.append({"handle": tm, "value": tm})
+        return {"value_domain": "value_set", "value_set": vs}
     # unknown - default domain
-    else:
-        return {"value_domain": Property.default("value_domain")}
+    return {"value_domain": Property.default("value_domain")}

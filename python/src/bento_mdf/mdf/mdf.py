@@ -291,7 +291,7 @@ class MDF:
         propnames = {}
         for ent in ChainMap(self.model.nodes, self.model.edges).values():
             if isinstance(ent, Node):
-                pnames = self.mdf["Nodes"][ent.handle]["Props"]
+                pnames = self.mdf["Nodes"][ent.handle]["Props"] or []
                 if yunps:  # universal node props
                     pnames.extend(yunps["mayHave"] if yunps.get("mayHave") else [])
                     pnames.extend(yunps["mustHave"] if yunps.get("mustHave") else [])
@@ -317,7 +317,11 @@ class MDF:
 
                 # note the end-specified props _replace_ the edge-specified props,
                 # they are not merged:
-                pnames = end.get("Props") or self.mdf["Relationships"][hdl].get("Props")
+                pnames = (
+                    end.get("Props")
+                    or self.mdf["Relationships"][hdl].get("Props")
+                    or []
+                )
                 if yurps:  # universal relationship props
                     pnames.extend(yurps["mayHave"] if yurps.get("mayHave") else [])
                     pnames.extend(yurps["mustHave"] if yurps.get("mustHave") else [])
@@ -402,7 +406,13 @@ class MDF:
                 # allow bento_meta.model machinery to create
                 # the actual value_set object and store
                 # terms in Model object:
-                self.model.add_terms(prop, *terms)
+                if prop.value_domain == "list" and prop.item_domain == "value_set":
+                    # kludge so Model.add_terms works with list type props with val sets
+                    prop.value_domain = "value_set"
+                    self.model.add_terms(prop, *terms)
+                    prop.value_domain = "list"
+                else:
+                    self.model.add_terms(prop, *terms)
 
             if "Term" in spec:
                 self.annotate_entity_from_mdf(prop, spec["Term"])

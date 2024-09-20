@@ -18,6 +18,7 @@ ICDC_PROPS_URL = (
 TEST_MODEL_FILE = TDIR / "samples" / "test-model.yml"
 TEST_MODEL_QUAL_PROPS_FILE = TDIR / "samples" / "test-model-qual-props.yml"
 TEST_MODEL_TERMS_A = TDIR / "samples" / "test-model-with-terms-a.yml"
+CRDC_MODEL_FILE = TDIR / "samples" / "crdc_datahub_mdf.yml"
 
 
 def test_class() -> None:
@@ -171,3 +172,12 @@ def test_create_model_with_terms_section() -> None:
     assert (
         m.model.nodes["sample"].props["sample_type"].terms["tumor"].origin_id == 10084
     )
+
+
+class TestDataHubModel:
+    """Tests for parts of the CRDC DataHub sample model."""
+
+    def test_create_dh_model(self) -> None:
+        """Test creating the CRDC model."""
+        m = MDF(CRDC_MODEL_FILE)
+        assert m.model
