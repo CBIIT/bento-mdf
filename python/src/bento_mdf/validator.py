@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from io import TextIOWrapper
+from io import BufferedRandom, TextIOWrapper
 from pathlib import Path
 from tempfile import _TemporaryFileWrapper
 from typing import TYPE_CHECKING
@@ -144,7 +144,7 @@ class MDFValidator:
 
     def update_instance_from_yaml_file(
         self,
-        file: TextIOWrapper | _TemporaryFileWrapper,
+        file: TextIOWrapper | _TemporaryFileWrapper | BufferedRandom,
     ) -> None:
         """Update self.instance with the contents of the YAML file object."""
         inst_yaml = yaml.load(file, Loader=self.yloader)  # noqa: S506
@@ -152,7 +152,12 @@ class MDFValidator:
 
     def load_yaml_from_inst_file(
         self,
-        inst_file: str | Path | TextIOWrapper | _TemporaryFileWrapper | None,
+        inst_file: str
+        | Path
+        | TextIOWrapper
+        | _TemporaryFileWrapper
+        | BufferedRandom
+        | None,
     ) -> None:
         """Load the YAML instance from files."""
         # inst_file is a file path
@@ -160,7 +165,10 @@ class MDFValidator:
             with Path(inst_file).open() as f:
                 self.update_instance_from_yaml_file(f)
         # inst_file is a file object
-        elif isinstance(inst_file, (TextIOWrapper, _TemporaryFileWrapper)):
+        elif isinstance(
+            inst_file,
+            (TextIOWrapper, _TemporaryFileWrapper, BufferedRandom),
+        ):
             self.update_instance_from_yaml_file(inst_file)
         else:
             self.logger.error(
