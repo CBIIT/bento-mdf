@@ -156,15 +156,15 @@ def process_prop(spec: dict, prop: Property) -> None:
             msg = f"Can't evaluate value_set spec {domain_spec}"
             raise RuntimeError(msg)
     # set default values for unprovided attrs
-    # prop_attrs_with_defaults = {
-    #     "is_strict": True,
-    #     "is_key": False,
-    #     "is_nullable": False,
-    #     "is_required": False,
-    # }
-    # for attr, default in prop_attrs_with_defaults.items():
-    #     if not getattr(prop, attr):
-    #         setattr(prop, attr, default)
+    prop_attrs_with_defaults = {
+        "is_strict": True,
+        "is_key": False,
+        "is_nullable": False,
+        "is_required": False,
+    }
+    for attr, default in prop_attrs_with_defaults.items():
+        if getattr(prop, attr) is None:
+            setattr(prop, attr, default)
 
 
 process = {

@@ -35,9 +35,9 @@ TEST_MODEL_TERMS_C = MDF(
 
 # tests for other changes
 class TestDiffs:
-    """Tests for various changes between models"""
+    """Tests for various changes between models."""
 
-    def test_diff_of_same_yaml(self):
+    def test_diff_of_same_yaml(self) -> None:
         """Diff of a yml against a copy of itself better darn be empty."""
         actual = diff_models(
             TEST_MODEL_A.model,
@@ -47,8 +47,8 @@ class TestDiffs:
         expected = {}
         assert actual == expected
 
-    def test_diff_of_extra_node_properties_and_terms(self):
-        """a_b"""
+    def test_diff_of_extra_node_properties_and_terms(self) -> None:
+        """a_b."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_B.model,
@@ -66,6 +66,10 @@ class TestDiffs:
                                     "handle": "encryption_type",
                                     "model": "test",
                                     "value_domain": "value_set",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                             "removed": None,
@@ -95,6 +99,10 @@ class TestDiffs:
                         "handle": "encryption_type",
                         "model": "test",
                         "value_domain": "value_set",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
             },
@@ -121,8 +129,8 @@ class TestDiffs:
         }
         assert actual == expected
 
-    def test_diff_of_extra_node_property(self):
-        """a_d"""
+    def test_diff_of_extra_node_property(self) -> None:
+        """a_d."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_D.model,
@@ -139,6 +147,10 @@ class TestDiffs:
                                     "handle": "fatal",
                                     "model": "test",
                                     "value_domain": "value_set",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                         },
@@ -154,6 +166,10 @@ class TestDiffs:
                         "handle": "fatal",
                         "model": "test",
                         "value_domain": "value_set",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
             },
@@ -180,8 +196,8 @@ class TestDiffs:
         }
         assert actual == expected
 
-    def test_diff_of_extra_node_edge_and_property(self):
-        """a_e"""
+    def test_diff_of_extra_node_edge_and_property(self) -> None:
+        """a_e."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_E.model,
@@ -209,6 +225,10 @@ class TestDiffs:
                         "handle": "fatal",
                         "model": "test",
                         "value_domain": "value_set",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
             },
@@ -235,8 +255,8 @@ class TestDiffs:
         }
         assert actual == expected
 
-    def test_diff_of_extra_node(self):
-        """a_f"""
+    def test_diff_of_extra_node(self) -> None:
+        """a_f."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_F.model,
@@ -263,6 +283,10 @@ class TestDiffs:
                         "handle": "disease",
                         "model": "test",
                         "value_domain": "url",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
                 "added": None,
@@ -270,8 +294,8 @@ class TestDiffs:
         }
         assert actual == expected
 
-    def test_diff_of_missing_node(self):
-        """a_g"""
+    def test_diff_of_missing_node(self) -> None:
+        """a_g."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_G.model,
@@ -289,14 +313,18 @@ class TestDiffs:
                         "handle": "disease",
                         "model": "test",
                         "value_domain": "url",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
             },
         }
         assert actual == expected
 
-    def test_diff_of_swapped_nodeprops(self):
-        """a_h"""
+    def test_diff_of_swapped_nodeprops(self) -> None:
+        """a_h."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_H.model,
@@ -312,6 +340,10 @@ class TestDiffs:
                                     "handle": "disease",
                                     "model": "test",
                                     "value_domain": "url",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                             "added": {
@@ -320,17 +352,29 @@ class TestDiffs:
                                     "model": "test",
                                     "value_domain": "integer",
                                     "units": "Gb;Mb",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                                 "file_name": {
                                     "handle": "file_name",
                                     "model": "test",
                                     "value_domain": "string",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                                 "md5sum": {
                                     "handle": "md5sum",
                                     "model": "test",
                                     "value_domain": "regexp",
                                     "pattern": "^[a-f0-9]{40}",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                         },
@@ -343,17 +387,29 @@ class TestDiffs:
                                     "model": "test",
                                     "value_domain": "integer",
                                     "units": "Gb;Mb",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                                 "file_name": {
                                     "handle": "file_name",
                                     "model": "test",
                                     "value_domain": "string",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                                 "md5sum": {
                                     "handle": "md5sum",
                                     "model": "test",
                                     "value_domain": "regexp",
                                     "pattern": "^[a-f0-9]{40}",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                             "added": {
@@ -361,6 +417,10 @@ class TestDiffs:
                                     "handle": "disease",
                                     "model": "test",
                                     "value_domain": "url",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                         },
@@ -375,23 +435,39 @@ class TestDiffs:
                         "handle": "file_name",
                         "model": "test",
                         "value_domain": "string",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                     ("diagnosis", "disease"): {
                         "handle": "disease",
                         "model": "test",
                         "value_domain": "url",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                     ("file", "file_size"): {
                         "handle": "file_size",
                         "model": "test",
                         "value_domain": "integer",
                         "units": "Gb;Mb",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                     ("file", "md5sum"): {
                         "handle": "md5sum",
                         "model": "test",
                         "value_domain": "regexp",
                         "pattern": "^[a-f0-9]{40}",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
                 "added": {
@@ -400,30 +476,46 @@ class TestDiffs:
                         "model": "test",
                         "value_domain": "integer",
                         "units": "Gb;Mb",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                     ("diagnosis", "file_name"): {
                         "handle": "file_name",
                         "model": "test",
                         "value_domain": "string",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                     ("file", "disease"): {
                         "handle": "disease",
                         "model": "test",
                         "value_domain": "url",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                     ("diagnosis", "md5sum"): {
                         "handle": "md5sum",
                         "model": "test",
                         "value_domain": "regexp",
                         "pattern": "^[a-f0-9]{40}",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
             },
         }
         assert actual == expected
 
-    def test_diff_where_yaml_has_extra_term(self):
-        """c_d"""
+    def test_diff_where_yaml_has_extra_term(self) -> None:
+        """c_d."""
         actual = diff_models(
             TEST_MODEL_C.model,
             TEST_MODEL_D.model,
@@ -461,8 +553,8 @@ class TestDiffs:
         }
         assert actual == expected
 
-    def test_diff_of_assorted_changes(self):
-        """d_e"""
+    def test_diff_of_assorted_changes(self) -> None:
+        """d_e."""
         actual = diff_models(
             TEST_MODEL_D.model,
             TEST_MODEL_E.model,
@@ -478,6 +570,10 @@ class TestDiffs:
                                     "handle": "fatal",
                                     "model": "test",
                                     "value_domain": "value_set",
+                                    "is_strict": "True",
+                                    "is_required": "False",
+                                    "is_key": "False",
+                                    "is_nullable": "False",
                                 },
                             },
                             "added": None,
@@ -503,6 +599,10 @@ class TestDiffs:
                         "handle": "fatal",
                         "model": "test",
                         "value_domain": "value_set",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
                 "added": {
@@ -510,6 +610,10 @@ class TestDiffs:
                         "handle": "fatal",
                         "model": "test",
                         "value_domain": "value_set",
+                        "is_strict": "True",
+                        "is_required": "False",
+                        "is_key": "False",
+                        "is_nullable": "False",
                     },
                 },
             },
@@ -564,8 +668,8 @@ class TestDiffSummaries:
         )
         assert actual_summary == expected_summary
 
-    def test_diff_of_extra_node_property_summary(self):
-        """a_d summary only"""
+    def test_diff_of_extra_node_property_summary(self) -> None:
+        """a_d summary only."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_D.model,
@@ -585,8 +689,8 @@ class TestDiffSummaries:
         )
         assert actual_summary_sorted == expected_summary
 
-    def test_diff_of_multiple_attr_changes_summary(self):
-        """a_i summary only"""
+    def test_diff_of_multiple_attr_changes_summary(self) -> None:
+        """a_i summary only."""
         actual = diff_models(
             TEST_MODEL_A.model,
             TEST_MODEL_I.model,
@@ -595,7 +699,7 @@ class TestDiffSummaries:
         )
         actual_summary = actual["summary"]
         actual_summary_sorted = self.sort_summary_terms(actual_summary)
-        expected_summary = "7 attribute(s) changed for 3 prop(s)\n"
+        expected_summary = "6 attribute(s) changed for 3 prop(s)\n"
         assert actual_summary_sorted == expected_summary
 
     def test_diff_summary_term_annotation(self) -> None:

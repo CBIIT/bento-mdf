@@ -311,7 +311,12 @@ def diff_objects_to_attr_dict(
     """Recursively convert bento_meta objects to attribute dictionaries."""
     # If the object has a get_attr_dict method, call it
     if hasattr(obj, "get_attr_dict") and isinstance(obj, Entity):
-        return obj.get_attr_dict()
+        # kludge: add False" attr values to entity attr dict until fixed in bento-meta
+        attr_dict = obj.get_attr_dict()
+        for att in type(obj).attspec:
+            if att not in attr_dict and getattr(obj, att) is False:
+                attr_dict[att] = "False"
+        return attr_dict
 
     # If the object is a dictionary, recursively call this function on its values
     if isinstance(obj, dict):

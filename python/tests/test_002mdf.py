@@ -177,7 +177,50 @@ def test_create_model_with_terms_section() -> None:
 class TestDataHubModel:
     """Tests for parts of the CRDC DataHub sample model."""
 
+    m = MDF(CRDC_MODEL_FILE)
+
     def test_create_dh_model(self) -> None:
         """Test creating the CRDC model."""
-        m = MDF(CRDC_MODEL_FILE)
-        assert m.model
+        assert self.m.model
+
+    def test_property_is_key(self) -> None:
+        """Test "is_key" attribute set on Property from "Key" object in MDF."""
+        assert self.m.model.props[("diagnosis", "diagnosis_id")].is_key is True
+        assert self.m.model.props[("diagnosis", "transaction_date")].is_key is False
+
+    def test_property_is_key_default(self) -> None:
+        """Test "is_key" attribute set to False when "Key" not present in MDF."""
+        assert self.m.model.props[("diagnosis", "diagnosis")].is_key is False
+
+    def test_list_property_with_enum(self) -> None:
+        """Test attributes of a list-type Property and Enum item_domain."""
+        p = self.m.model.props[("study", "study_data_types")]
+        assert p.value_domain == "list"
+        assert p.item_domain == "value_set"
+        assert p.values == ["Genomic", "Imaging", "Clinical"]  # noqa: PD011
+        assert list(p.terms.keys()) == ["Genomic", "Imaging", "Clinical"]
+
+    def test_property_is_strict(self) -> None:
+        """Test "is_strict" attribute set on Property from "Strict" object in MDF."""
+        assert self.m.model.props[("diagnosis", "diagnosis")].is_strict is False
+        assert self.m.model.props[("participant", "race")].is_strict is True
+
+    def test_property_is_strict_default(self) -> None:
+        """Test "is_strict" attribute set to False when "Strict" not present in MDF."""
+        assert (
+            self.m.model.props[("study", "adult_or_childhood_study")].is_strict is True
+        )
+
+    def test_property_is_required(self) -> None:
+        """Test "is_required" attribute set on Property from "Req" object in MDF."""
+        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == "Preferred"
+        assert self.m.model.props[("diagnosis", "id")].is_required is True
+        assert self.m.model.props[("diagnosis", "date")].is_required is True
+        assert self.m.model.props[("diagnosis", "transaction_id")].is_required is False
+        assert (
+            self.m.model.props[("diagnosis", "transaction_date")].is_required is False
+        )
+
+    def test_property_is_required_default(self) -> None:
+        """Test "is_required" attribute set to False when "Req" not present in MDF."""
+        assert self.m.model.props[("diagnosis", "diagnosis_id")].is_required is False
