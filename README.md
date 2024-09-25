@@ -15,24 +15,26 @@ The Bento framework is currently used in the following projects;
 
 * The [Bento standard model](https://github.com/CBIIT/bento-model)
 * The [Integrated Canine Data Commons](https://caninecommons.cancer.gov)
-* The [Clinical Trials Data Commons](https://github.com/CBIIT/ctdc-model)
+* The [Clinical and Translational Data Commons](https://clinical.datacommons.cancer.gov/#/)
+* The [Childhood Cancer Data Initiative](https://clinicalcommons.ccdi.cancer.gov/)
+* The [Cancer Data Service](https://dataservice.datacommons.cancer.gov/#/home)
 
 ## Drivers and Tools
 
 Language drivers and other tools that want to comply with the Bento
 framework should observe the latest [specification](./spec).
 
-[bento_mdf](./drivers/python/) is a reference driver that validates
+[bento_mdf](./python/) is a reference driver that validates
 and loads MDF into a [bento-meta](https://github.com/CBIIT/bento-meta)
 python object model.
 
-[make-model](./drivers/Perl/make-model/README.md) is a reference
+[make-model](./tools/make-model/README.md) is a reference
 driver and tool written in [Perl](https://www.perl.org/).
 
 ### Validator
 
 A simple command line validator `test-mdf.py` is included in 
-[bento_mdf](./drivers/python). Install it like so:
+[bento_mdf](./python). Install it like so:
 
     $ pip install bento-mdf
 
@@ -164,6 +166,9 @@ descriptions of each property. Property descriptions look like:
         #    - here
         Nul: <true|false> # is property nullable?
         Req: <true|false> # is property required?
+        Key: <true|false> # is property a unique identifier?
+        Strict: <true|false> # is property type/enum strict?
+        Deprecated: <true|false> # is property deprecated?
 
 Either the `Type` or the `Enum` key should be present. If Enum key is
 present, the `Type` key will be ignored.
@@ -202,7 +207,6 @@ requires a Type specification for that data. MDF recognizes the following types:
 | Number with units | `{ "value_type":<integer\|number>, "units": [ <string>, ... ]` | Units is an array of acceptable unit abbreviations (e.g. `["ul","nl"]`) |
 | Pattern match | `{ "pattern":<regexp> }` | Acceptable data is a string matching the `pattern` regular expression |
 | Acceptable value list | `[ <string>, ... ]` | List of acceptable string values (see below) |
-| Union | `[ <typespec>, ... ]` | List of type specs; data should match at least one |
 | List | `{ "value_type":"list", "item_type":<typespec> }` | Acceptable data is an array or list of items of specified type |
 
 
@@ -218,6 +222,17 @@ of acceptable values for the property:
 	    ...
 		Enum:
 		    - https://sts.ctos-data-team.org/model/MyModel/property/<propname2>/list
+
+A property with `value_type: list` can have an acceptable value list as its `item_type`:
+
+    <propname3>:
+        ...
+      Type:
+        value_type: list
+        item_type:
+          - acceptable
+          - values
+          - here
 
 ### Terms
 
@@ -316,7 +331,7 @@ single object according to specific rules. These allow the user to
 resort to multiple versions of a base model. The first pair of files
 is merged, the next file is merged into that result, and so on to the
 end of the input files.  For example, using
-[./drivers/Perl/make-model](model-tool):
+[./tools/make-model](model-tool):
 
     model-tool -g graph.svg icdc-model.yml temp-changes.yml
 

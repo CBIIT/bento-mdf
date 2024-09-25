@@ -1,6 +1,5 @@
-"""
-Tests for bento_mdf.diff
-"""
+"""Tests for bento_mdf.diff."""
+
 from bento_mdf.diff import (
     Diff,
     diff_collection_atts,
@@ -176,10 +175,10 @@ class TestDiffSimpleAtts:
             NODES: {
                 "changed": {
                     NODE_HANDLE_1: {
-                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -201,10 +200,10 @@ class TestDiffSimpleAtts:
             NODES: {
                 "changed": {
                     NODE_HANDLE_1: {
-                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -229,10 +228,10 @@ class TestDiffSimpleAtts:
                         self.SIMP_ATT: {
                             "added": self.SIMP_ATT_2,
                             "removed": self.SIMP_ATT_1,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -254,10 +253,10 @@ class TestDiffSimpleAtts:
             EDGES: {
                 "changed": {
                     EDGE_KEY: {
-                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -279,10 +278,10 @@ class TestDiffSimpleAtts:
             EDGES: {
                 "changed": {
                     EDGE_KEY: {
-                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -307,10 +306,10 @@ class TestDiffSimpleAtts:
                         self.SIMP_ATT: {
                             "added": self.SIMP_ATT_2,
                             "removed": self.SIMP_ATT_1,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -332,10 +331,10 @@ class TestDiffSimpleAtts:
             PROPS: {
                 "changed": {
                     PROP_KEY: {
-                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -357,10 +356,10 @@ class TestDiffSimpleAtts:
             PROPS: {
                 "changed": {
                     PROP_KEY: {
-                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -385,10 +384,10 @@ class TestDiffSimpleAtts:
                         self.SIMP_ATT: {
                             "added": self.SIMP_ATT_2,
                             "removed": self.SIMP_ATT_1,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -410,10 +409,10 @@ class TestDiffSimpleAtts:
             TERMS: {
                 "changed": {
                     TERM_KEY_1: {
-                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": self.SIMP_ATT_2, "removed": None},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -435,10 +434,10 @@ class TestDiffSimpleAtts:
             TERMS: {
                 "changed": {
                     TERM_KEY_1: {
-                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1}
-                    }
-                }
-            }
+                        self.SIMP_ATT: {"added": None, "removed": self.SIMP_ATT_1},
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -463,10 +462,10 @@ class TestDiffSimpleAtts:
                         self.SIMP_ATT: {
                             "added": self.SIMP_ATT_2,
                             "removed": self.SIMP_ATT_1,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -512,10 +511,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -540,10 +539,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": None,
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -568,10 +567,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -596,10 +595,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -624,10 +623,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": None,
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -652,10 +651,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -680,10 +679,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_V: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -708,10 +707,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_V: {
                             "added": None,
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -736,10 +735,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_V: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -764,10 +763,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -792,10 +791,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": None,
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -820,10 +819,10 @@ class TestDiffObjectAtts:
                         self.OBJ_ATT_C: {
                             "added": {self.TERM_2.value: self.TERM_2},
                             "removed": {self.TERM_1.value: self.TERM_1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -849,7 +848,7 @@ class TestDiffCollectionAtts:
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_P: {PROP_HANDLE_2: self.COLL_ATT_P2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -868,10 +867,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_P: {
                             "added": {PROP_HANDLE_2: self.COLL_ATT_P2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -881,7 +880,7 @@ class TestDiffCollectionAtts:
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_P: {PROP_HANDLE_1: self.COLL_ATT_P1},
-            }
+            },
         )
         b_ent = Node({"handle": NODE_HANDLE_1})
 
@@ -901,10 +900,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_P: {
                             "added": None,
                             "removed": {PROP_HANDLE_1: self.COLL_ATT_P1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -914,13 +913,13 @@ class TestDiffCollectionAtts:
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_P: {PROP_HANDLE_1: self.COLL_ATT_P1},
-            }
+            },
         )
         b_ent = Node(
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_P: {PROP_HANDLE_2: self.COLL_ATT_P2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -939,10 +938,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_P: {
                             "added": {PROP_HANDLE_2: self.COLL_ATT_P2},
                             "removed": {PROP_HANDLE_1: self.COLL_ATT_P1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -953,7 +952,7 @@ class TestDiffCollectionAtts:
             {
                 "handle": EDGE_HANDLE,
                 self.COLL_ATT_P: {PROP_HANDLE_2: self.COLL_ATT_P2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -972,10 +971,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_P: {
                             "added": {PROP_HANDLE_2: self.COLL_ATT_P2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -985,7 +984,7 @@ class TestDiffCollectionAtts:
             {
                 "handle": EDGE_HANDLE,
                 self.COLL_ATT_P: {PROP_HANDLE_1: self.COLL_ATT_P1},
-            }
+            },
         )
         b_ent = Node({"handle": EDGE_HANDLE})
 
@@ -1005,10 +1004,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_P: {
                             "added": None,
                             "removed": {PROP_HANDLE_1: self.COLL_ATT_P1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -1018,13 +1017,13 @@ class TestDiffCollectionAtts:
             {
                 "handle": EDGE_HANDLE,
                 self.COLL_ATT_P: {PROP_HANDLE_1: self.COLL_ATT_P1},
-            }
+            },
         )
         b_ent = Node(
             {
                 "handle": EDGE_HANDLE,
                 self.COLL_ATT_P: {PROP_HANDLE_2: self.COLL_ATT_P2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -1043,10 +1042,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_P: {
                             "added": {PROP_HANDLE_2: self.COLL_ATT_P2},
                             "removed": {PROP_HANDLE_1: self.COLL_ATT_P1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -1057,7 +1056,7 @@ class TestDiffCollectionAtts:
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -1076,10 +1075,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_T: {
                             "added": {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -1089,7 +1088,7 @@ class TestDiffCollectionAtts:
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-            }
+            },
         )
         b_ent = Property({"handle": NODE_HANDLE_1})
 
@@ -1109,27 +1108,27 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_T: {
                             "added": None,
                             "removed": {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
     def test_change_tag_of_prop(self):
-        """tags have same key but updated value"""
+        """Tags have same key but updated value"""
         diff = Diff()
         a_ent = Property(
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-            }
+            },
         )
         b_ent = Property(
             {
                 "handle": NODE_HANDLE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -1148,10 +1147,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_T: {
                             "added": {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
                             "removed": {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -1162,7 +1161,7 @@ class TestDiffCollectionAtts:
             {
                 "value": TERM_VALUE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -1181,10 +1180,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_T: {
                             "added": {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
                             "removed": None,
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -1194,7 +1193,7 @@ class TestDiffCollectionAtts:
             {
                 "value": TERM_VALUE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-            }
+            },
         )
         b_ent = Term({"value": TERM_VALUE_1})
 
@@ -1214,10 +1213,10 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_T: {
                             "added": None,
                             "removed": {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected
 
@@ -1227,13 +1226,13 @@ class TestDiffCollectionAtts:
             {
                 "value": TERM_VALUE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-            }
+            },
         )
         b_ent = Term(
             {
                 "value": TERM_VALUE_1,
                 self.COLL_ATT_T: {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
-            }
+            },
         )
 
         diff_collection_atts(
@@ -1252,9 +1251,9 @@ class TestDiffCollectionAtts:
                         self.COLL_ATT_T: {
                             "added": {self.COLL_ATT_T2.key: self.COLL_ATT_T2},
                             "removed": {self.COLL_ATT_T1.key: self.COLL_ATT_T1},
-                        }
-                    }
-                }
-            }
+                        },
+                    },
+                },
+            },
         }
         assert actual == expected

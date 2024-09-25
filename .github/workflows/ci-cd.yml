@@ -6,6 +6,6 @@ jobs:
   ci-cd:
     uses: CBIIT/bento-workflows/.github/workflows/ci-cd.yml@v2.3.1
     with:
-      workdir: ./drivers/python
+      workdir: ./python
       pkg_name: bento-mdf
     secrets: inherit
