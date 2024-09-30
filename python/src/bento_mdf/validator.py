@@ -162,7 +162,7 @@ class MDFValidator:
         """Load the YAML instance from files."""
         # inst_file is a file path
         if isinstance(inst_file, (str, Path)):
-            with Path(inst_file).open() as f:
+            with Path(inst_file).open(encoding="UTF-8") as f:
                 self.update_instance_from_yaml_file(f)
         # inst_file is a file object
         elif isinstance(

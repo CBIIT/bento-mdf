@@ -117,6 +117,9 @@ def test_enum_and_type_kw():
         v.validate_instance_with_schema()
 
 
-@pytest.mark.skip("TODO")
 def test_validate_crdc_model():
     v = MDFValidator(test_latest_schema, crdc_dh_file)
+    assert v
+    assert v.load_and_validate_schema()
+    assert v.load_and_validate_yaml()
+    v.validate_instance_with_schema()
