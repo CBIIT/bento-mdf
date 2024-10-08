@@ -202,7 +202,6 @@ class MDFValidator:
             if self.raise_error:
                 raise
             return None
-        self.logger.error("No instance yaml(s) specified")
         return self.instance
 
     def validate_instance_with_schema(self) -> MergedOptions | None:
