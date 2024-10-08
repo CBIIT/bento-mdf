@@ -391,16 +391,16 @@ color:
       Tags:
         color: blue
 
-# Model Description Format - Mappings
+## Model Description Format - Mappings
 
 MDF-Map is an extension of MDF that allows a user to provide a simple,
 human-readable description of cross-model mappings between two or more
 models.
 
-  Source: MyModel 
-  URI: "https://sts.ctos-data-team.org/model/MyModel"
+    Source: MyModel 
+    URI: "https://sts.ctos-data-team.org/model/MyModel"
 
-## Source
+### Source
 
 The `Source` value is intended to be a short, human-readable name that
 represents the entity performing or asserting the cross-model mappings
@@ -409,7 +409,7 @@ Aggregator (CDA).
 
     Source: MappingSource
 
-## Models
+### Models
 
 The `Models` top-level key points to an object containing descriptions
 of each target model that the source maps to such as Integrated Canine
@@ -432,7 +432,7 @@ version of the model.
 
 At least one of these keys should be present for each model.
 
-## Props
+### Props
 
 The `Props` top-level key refers to mappings between source and target
 property names/handles given as strings. Property mappings look like:
