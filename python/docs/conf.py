@@ -17,9 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'bento-mdf'
-copyright = u'2020, FNLCR'
-author = u'Mark Jensen'
+project = "bento-mdf"
+copyright = "2020, FNLCR"
+author = "Mark Jensen, Nelson Moore"
 
 # -- General configuration ---------------------------------------------------
 
@@ -27,24 +27,33 @@ author = u'Mark Jensen'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'myst_nb',
-    'autoapi.extension',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
+    "myst_nb",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    # "autoapi.extension",
 ]
-autoapi_dirs = ['../src']
+# autoapi_type = "python"
+# autoapi_dirs = ["../src/bento_mdf"]
+# autoapi_keep_files = True
+# autoapi_generate_api_docs = True
+# autoapi_use_implicit_namespaces = True
+# autoapi_member_order = "groupwise"
+# autoapi_ignore = ["./diff.py"]
+
+master_doc = "index"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
+html_title = "MDF Documentation"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
