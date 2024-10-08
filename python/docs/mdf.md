@@ -23,9 +23,9 @@ file.
 
 Top level keys that describe the model itself include:
 
-  Handle: MyModel 
-  URI: "https://sts.ctos-data-team.org/model/MyModel"
-    Version: v1.7.2
+    Handle: MyModel 
+    URI: "https://sts.ctos-data-team.org/model/MyModel"
+      Version: v1.7.2
 
 The `Handle` value is intended to be a short, human-readable moniker 
 for the model described in the document. It should be easy to compute 

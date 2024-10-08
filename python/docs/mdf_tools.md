@@ -19,7 +19,7 @@ A simple command line validator `test-mdf.py` is included in
 
 and run:
 
-  $ test-mdf.py [model-file.yaml] [model-props-file.yaml] ...
+    $ test-mdf.py [model-file.yaml] [model-props-file.yaml] ...
 
 ## Scripts
 
