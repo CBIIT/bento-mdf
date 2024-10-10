@@ -323,7 +323,7 @@ PropDefinitions:
     Key: true
   file_name:
     Type: string
-  md4sum:
+  md5sum:
     Type: string
 Terms:
   american_indian_or_alaska_native:
