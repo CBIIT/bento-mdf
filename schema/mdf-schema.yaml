@@ -218,11 +218,19 @@ defs:
             $ref: "#/defs/enumType"
           -
             $ref: "#/defs/numberWithUnits"
+      Enum:
+        $ref: "#/defs/enumType"
       Tags:
         $ref: "#/defs/tagsSpec"
-    required:
-      - value_type
-      - item_type
+    oneOf:
+      -
+        required:
+          - value_type
+          - item_type
+      -
+        required:
+          - value_type
+          - Enum
   tagsSpec:
     $id: "#tagsSpec"
     type: object
@@ -406,9 +414,9 @@ defs:
           -
             $ref: "#/defs/url"
           -
-            $ref: "#/defs/enumType"
-          -
             $ref: "#/defs/listType"
+          -
+            $ref: "#/defs/enumType"
       Enum:
         description: |
               Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist

@@ -38,7 +38,7 @@ test_enum_and_type_kw_files = [
 crdc_dh_file = tdir / "samples" / "crdc_datahub_mdf.yml"
 test_model_file = tdir / "samples" / "test-model.yml"
 test_model_file_bad_type_value = tdir / "samples" / "test-model-bad-type-value-1.yml"
-
+test_model_file_bad_list_type = tdir / "samples" / "test-model-bad-list-type.yml"
 
 def test_with_all_file_args():
     sch = test_schema_file.open()
@@ -138,6 +138,16 @@ def test_example_model():
 def test_bad_type_value():
     # test that 'Type: enum' is invalid
     v = MDFValidator(test_latest_schema, test_model_file_bad_type_value,
+                     raise_error = True)
+    assert v
+    assert v.load_and_validate_schema()
+    assert v.load_and_validate_yaml()
+    with pytest.raises(ValidationError):
+        v.validate_instance_with_schema()
+
+def test_bad_list_type():
+    # tests invalid list type spec
+    v = MDFValidator(test_latest_schema, test_model_file_bad_list_type,
                      raise_error = True)
     assert v
     assert v.load_and_validate_schema()
