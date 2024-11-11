@@ -157,7 +157,7 @@ defs:
       enumType (an array - could be size 1; or a reference to value
       domain api)
     items:
-      oneOf:
+      anyOf:
         -
           type:
             string
@@ -388,36 +388,33 @@ defs:
           found in the specified Enum. This is useful when the acceptable value list has not
           been solidified in initial development.
         type: boolean
-      oneOf:
-        -
-          Type:
-            description: |
+      Type:
+        description: |
               Property values can have (1) simple types (number, integer, string
               datetime, or --if necessary-- \'TBD\'; (2) a number_with_units type
               (e.g., { \"value_type\":\"integer\", \"units\":\"mm\" }); (3) a regular
               expression that a (string) value must match; (4) an enumeration
               of acceptable values, or a url or path fragment to an api that will validate against
               such a list.
-            oneOf:
-              -
-                $ref: "#/defs/simpleType"
-              -
-                $ref: "#/defs/numberWithUnits"
-              -
-                $ref: "#/defs/regex"
-              -
-                $ref: "#/defs/url"
-              -
-                $ref: "#/defs/enumType"
-              -
-                $ref: "#/defs/listType"
-        -
-          Enum:
-            description: |
+        oneOf:
+          -
+            $ref: "#/defs/simpleType"
+          -
+            $ref: "#/defs/numberWithUnits"
+          -
+            $ref: "#/defs/regex"
+          -
+            $ref: "#/defs/url"
+          -
+            $ref: "#/defs/enumType"
+          -
+            $ref: "#/defs/listType"
+      Enum:
+        description: |
               Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
               readability. Either one of Type or Enum may be present in a property definition,
               but not both.
-            $ref: "#/defs/enumType" 
+        $ref: "#/defs/enumType" 
       Tags:
         $ref: "#/defs/tagsSpec"
       Term:

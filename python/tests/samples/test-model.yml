@@ -26,6 +26,7 @@ Nodes:
       - disease
 Relationships:
   of_case:
+    Props: ~
     Mul: one_to_one
     Ends:
       - Src: sample
@@ -44,6 +45,7 @@ Relationships:
         Value: 'of_case'
         Origin: 'CTDC'
   of_sample:
+    Props: ~
     Mul: one_to_one
     Ends:
       - Src: file
@@ -73,7 +75,7 @@ PropDefinitions:
   patient_id:
     Type: string
   sample_type:
-    Type:
+    Enum:
       - normal
       - tumor
   amount:
