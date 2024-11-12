@@ -62,6 +62,7 @@ Nodes:
   study:
     Props:
       - study_data_types
+      - study_data_types_enum
       - experimental_strategy_and_data_subtype
       - study_payments
       - adult_or_childhood_study
@@ -289,6 +290,13 @@ PropDefinitions:
     Type:
       value_type: list
       item_type:
+        - Genomic
+        - Imaging
+        - Clinical
+  study_data_types_enum:
+    Type:
+      value_type: list
+      Enum:
         - Genomic
         - Imaging
         - Clinical

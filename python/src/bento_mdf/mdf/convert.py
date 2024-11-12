@@ -196,9 +196,10 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
                 domain_spec["units"] = ";".join(spec["units"])
             return domain_spec
         # list type
-        if spec.get("item_type"):
+        if spec.get("item_type") or spec.get("Enum"):
             domain_spec = {"value_domain": "list"}
-            item_domain_spec = typespec_to_domain_spec(spec["item_type"])
+            list_spec = spec.get("item_type") or spec.get("Enum")
+            item_domain_spec = typespec_to_domain_spec(list_spec)
             domain_spec["item_domain"] = item_domain_spec["value_domain"]
             for key in ("units", "value_set", "url"):
                 if key not in item_domain_spec:

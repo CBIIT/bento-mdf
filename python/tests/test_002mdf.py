@@ -224,3 +224,12 @@ class TestDataHubModel:
     def test_property_is_required_default(self) -> None:
         """Test "is_required" attribute set to False when "Req" not present in MDF."""
         assert self.m.model.props[("diagnosis", "diagnosis_id")].is_required is False
+
+    def test_enum_list_type(self) -> None:
+        """Test list types expressed as (value_type, item_type) and (value_type, Enum)"""
+        sdt = self.m.model.props[('study', 'study_data_types')]
+        sdte = self.m.model.props[('study', 'study_data_types_enum')]
+        assert len(sdt.terms) == 3
+        assert len(sdte.terms) == 3
+        assert 'Genomic' in sdt.terms
+        assert 'Imaging' in sdte.terms
