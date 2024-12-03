@@ -98,7 +98,7 @@ defs:
   snake_case_id:
     $id: "#snake_case_id"
     type: string
-    pattern: "^[A-Za-z_][A-Za-z0-9_.]*$"
+    pattern: "^[A-Za-z_0-9][A-Za-z0-9_.]*$"
   camelCaseId:
     $id: "#camelCaseId"
     type: string
