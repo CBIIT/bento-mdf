@@ -12,6 +12,7 @@ import re
 from collections import ChainMap
 from pathlib import Path
 from tempfile import TemporaryFile
+from urllib.parse import urlparse
 
 import requests
 from bento_meta.entity import ArgError, Entity
@@ -125,8 +126,9 @@ class MDF:
         *,
         verify: bool = True,
     ) -> None:
-        """Load YAML from a URL."""
-        response = requests.get(url, verify=verify, timeout=10)
+        """Load YAML from a URL. Converts GitHub repo URLs to raw URLs."""
+        raw_url = convert_github_url(url)
+        response = requests.get(raw_url, verify=verify, timeout=10)
         if not response.ok:
             msg = f"Fetching url {response.url} returned code {response.status_code}"
             self.logger.error(msg)
@@ -447,3 +449,14 @@ class MDF:
             self.model.annotate(ent, term)
             if self._commit and not ent.concept._commit:
                 ent.concept._commit = self._commit
+
+
+def convert_github_url(url: str) -> str:
+    """Convert a GitHub blob URL to a raw URL."""
+    parsed_url = urlparse(url)
+    parts = parsed_url.path.strip("/").split("/")
+    if parsed_url.netloc != "github.com" or len(parts) < 4 or parts[2] != "blob":
+        return url  # not a GitHub blob URL
+    user, repo, _, branch = parts[:4]
+    file_path = "/".join(parts[4:])
+    return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"

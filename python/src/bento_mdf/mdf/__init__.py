@@ -1,2 +1,2 @@
 # mdf
-from .mdf import MDF
+from .mdf import MDF, convert_github_url
