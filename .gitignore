@@ -19,7 +19,7 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-lib/
+python/*/lib/
 lib64/
 parts/
 sdist/
