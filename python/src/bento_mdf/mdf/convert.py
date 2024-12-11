@@ -230,3 +230,92 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
         return {"value_domain": "value_set", "value_set": vs}
     # unknown - default domain
     return {"value_domain": Property.default("value_domain")}
+
+
+def entity_to_spec(
+        ent: Entity,
+        spec: dict = {}
+) -> dict:
+    if ent.tags:
+        tags = {}
+        for t in ent.tags.values():
+            entity_to_spec(t,tags)
+        spec["Tags"] = tags
+    if ent.concept and ent.concept.terms:
+        spec["Term"] = [entity_to_spec(t) for t in ent.concept.terms.values()]
+    if ent.desc:
+        spec["Desc"] = ent.desc
+    if isinstance(ent, Node):
+        spec["Props"] = [x for x in ent.props]
+        if len(spec["Props"]) == 0:
+            spec["Props"] = "null"
+        pass
+    elif isinstance(ent, Property):
+        if ent.is_nullable:
+            spec["Nul"] = True
+        if ent.is_required:
+            spec["Req"] = True
+        if ent.is_strict:
+            spec["Strict"] = True
+        if ent.is_key:
+            spec["Key"] = True
+        if ent.is_deprecated:
+            spec["Deprecated"] = True
+        if ent.value_domain == 'value_set':
+            if ent.url:
+                spec["Enum"] = [ent.url]
+            else:
+                spec["Enum"] = [x for x in ent.terms]
+        else:
+            spec["Type"] = domain_spec_to_typespec(ent)
+        pass
+    elif isinstance(ent, Edge):
+        # note that edge mdf specs must be merged correctly in the caller
+        if ent.is_required:
+            spec["Req"] = True
+        if ent.multiplicity:
+            spec["Mul"] = ent.multiplicity
+        spec["Ends"] = [{"Src": ent.src.handle, "Dst": ent.dst.handle}]
+        spec["Props"] = [x for x in ent.props]
+        if len(spec["Props"]) == 0:
+            spec["Props"] = "null"
+        pass
+    elif isinstance(ent, Term):
+        spec["Value"] = ent.value
+        spec["Definition"] = ent.definition
+        spec["Origin"] = ent.origin_name
+        spec["Version"] = ent.origin_version
+        spec["Code"] = ent.origin_id
+        pass
+    elif isinstance(ent, Tag):
+        spec[ent.key] = ent.value
+        pass
+    else:
+        raise RuntimeError(f'Cannot process Entity subtype: {ent}')
+    return spec
+
+
+def domain_spec_to_typespec(prop):
+    ret = {}
+    if prop.value_domain == 'value_set':
+        ret = [prop.url] if prop.url else [x for x in prop.terms]
+    elif prop.value_domain == 'list':
+        ret["value_type"] = 'list'
+        if prop.item_domain == "value_set":
+            ret["Enum"] = [prop.url] if prop.url else [x for x in prop.terms]
+        else:
+            if prop.units:
+                ret["item_type"] = {"value_type": prop.item_domain,
+                                    "units": prop.units.split(";")}
+            elif prop.pattern:
+                ret["item_type"] = {"pattern": prop.pattern}
+            else:
+                ret["item_type"] = prop.item_domain
+    elif prop.units:
+        ret["value_type"] = prop.value_domain
+        ret["units"] = prop.units.split(";")
+    elif prop.pattern:
+        ret["pattern"] = prop.pattern
+    else:
+        ret = prop.value_domain
+    return ret
