@@ -1,19 +1,20 @@
-import os
 import pytest
 import yaml
+from pathlib import Path
 from yaml import Loader as yloader
-from bento_mdf.mdf import MDF
+from bento_mdf import MDFReader
+from bento_mdf import MDFWriter
 from bento_meta.model import Model
 from bento_meta.objects import Concept, Node, Property, Tag, Term
+from pdb import set_trace
 
-TDIR = "tests/" if os.path.exists("tests") else ""
+TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 
 
-@pytest.mark.skip("TODO")
 def test_write_mdf():
-    yml = yaml.load(open("{}samples/test-model.yml".format(TDIR), "r"), Loader=yloader)
-    m = MDF("{}samples/test-model.yml".format(TDIR), handle="test")
-    wr_m = MDF(model=m.model)
+    yml = yaml.load(open(TDIR / "samples" / "test-model.yml", "r"), Loader=yloader)
+    m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
+    wr_m = MDFWriter(model=m.model)
     assert isinstance(wr_m.model, Model)
     mdf = wr_m.write_mdf()
     assert isinstance(mdf, dict)
@@ -26,7 +27,7 @@ def test_write_mdf():
             assert set(yml["Nodes"][n]["Props"]) == set(mdf["Nodes"][n]["Props"])
     for n in yml["Relationships"]:
         def_props = set()
-        if "Props" in yml["Relationships"][n]:
+        if yml["Relationships"][n].get("Props"):
             def_props = set(yml["Relationships"][n]["Props"])
         yml_ends = yml["Relationships"][n]["Ends"]
         yml_ends = {(x["Src"], x["Dst"]): x for x in yml_ends}
@@ -43,7 +44,7 @@ def test_write_mdf():
     mp = mdf["PropDefinitions"]
     assert yp["case_id"]["Type"]["pattern"] == mp["case_id"]["Type"]["pattern"]
     assert yp["patient_id"]["Type"] == mp["patient_id"]["Type"]
-    assert set(yp["sample_type"]["Type"]) == set(mp["sample_type"]["Enum"])
+    assert set(yp["sample_type"]["Enum"]) == set(mp["sample_type"]["Enum"])
     assert set(yp["amount"]["Type"]["units"]) == set(mp["amount"]["Type"]["units"])
     assert set(yp["file_size"]["Type"]["units"]) == set(
         mp["file_size"]["Type"]["units"]
@@ -54,7 +55,6 @@ def test_write_mdf():
     assert yp["md5sum"]["Tags"]["another"] == mp["md5sum"]["Tags"]["another"]
 
 
-@pytest.mark.skip("TODO")    
 def test_write_mdf_nested_terms_tags():
     model = Model(handle="test")
     node = Node({"handle": "test_node"})
@@ -91,7 +91,7 @@ def test_write_mdf_nested_terms_tags():
     concept.terms[term_3.value] = term_3
     term_1.concept = concept
     model.add_terms(prop, term_1)
-    mdf = MDF(handle="test", model=model)
+    mdf = MDFWriter(model=model)
     mdf_dict = mdf.write_mdf()
     actual = mdf_dict.get("Terms")
     expected = {

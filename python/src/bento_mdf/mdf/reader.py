@@ -32,7 +32,7 @@ def make_nano() -> str:
     )
 
 
-class MDF:
+class MDFReader:
     """MDF class for reading MDF files into a bento-meta Model."""
 
     def __init__(

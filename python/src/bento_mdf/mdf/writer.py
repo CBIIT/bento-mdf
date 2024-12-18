@@ -1,10 +1,11 @@
 import logging
 import yaml
+from collections import Counter
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
 from bento_meta.objects import Edge, Node, Property, Term
 from .convert import entity_to_spec
-
+from pdb import set_trace
 class MDFWriter(object):
     def __init__(self, model=None):
         self.mdf = {
@@ -40,27 +41,26 @@ class MDFWriter(object):
 
         for pr in sorted(self.model.props):
             prop = self.model.props[pr]
-            self.mdf["PropDefinitions"][pr] = entity_to_spec(prop)
+            self.mdf["PropDefinitions"][prop.handle] = entity_to_spec(prop)
 
-        # note that the former possibility of src-dst pair-specific properties is
-        # removed for now - this is not currently (at commit 9ead2e3) specified
-        # in the mdf schema
-
-        for rl in sorted(self.model.edges):
-            edge = self.model.edges[rl]
-            spec = entity_to_spec(edge)
-            if edge.handle not in self.mdf["Relationships"]:
-                if not spec.get("Mul"):
-                    spec["Mul"] = Edge.default("multiplicity")
-                self.mdf["Relationships"][edge.handle] = spec
+        edge_specs = {}
+        for rl in self.model.edges.values():
+            if rl.handle in edge_specs:
+                edge_specs[rl.handle].append(entity_to_spec(rl))
             else:
-                mdf_edge = self.mdf["Relationships"][edge.handle]
-                ends = spec["Ends"]
-                if spec.get("Mul") and spec["Mul"] != mdf_edge["Mul"]:
-                    ends["Mul"] = spec["Mul"]
-                if spec.get("Tags"):
-                    ends["Tags"] = spec["Tags"]
-                mdf_edge["Ends"].append(ends)
+                edge_specs[rl.handle] = [entity_to_spec(rl)]
+
+        for hdl in edge_specs:
+            top = {}
+            muls = Counter([x.get("Mul") for x in edge_specs[hdl]])
+            dfMul = muls.most_common(1)[0][0]
+            top["Mul"] = dfMul or Edge.default("multiplicity")
+            top["Ends"] = []
+            for spec in edge_specs[hdl]:
+                if spec["Mul"] == top["Mul"]:
+                    del spec["Mul"]
+                top["Ends"].append(spec)
+            self.mdf["Relationships"][hdl] = top
 
         # collect Terms?
 

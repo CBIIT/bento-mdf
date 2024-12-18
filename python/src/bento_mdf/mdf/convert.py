@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
+from pdb import set_trace
 
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
@@ -234,19 +235,21 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
 
 def entity_to_spec(
         ent: Entity,
-        spec: dict = {}
+        spec: dict = None
 ) -> dict:
+    if spec is None:
+        spec = {}
     if ent.tags:
         tags = {}
         for t in ent.tags.values():
             entity_to_spec(t,tags)
         spec["Tags"] = tags
-    if ent.concept and ent.concept.terms:
+    if "concept" in ent.attspec and ent.concept and ent.concept.terms:
         spec["Term"] = [entity_to_spec(t) for t in ent.concept.terms.values()]
     if ent.desc:
         spec["Desc"] = ent.desc
     if isinstance(ent, Node):
-        spec["Props"] = [x for x in ent.props]
+        spec["Props"] = sorted([x.handle for x in ent.props.values()])
         if len(spec["Props"]) == 0:
             spec["Props"] = "null"
         pass
@@ -262,10 +265,7 @@ def entity_to_spec(
         if ent.is_deprecated:
             spec["Deprecated"] = True
         if ent.value_domain == 'value_set':
-            if ent.url:
-                spec["Enum"] = [ent.url]
-            else:
-                spec["Enum"] = [x for x in ent.terms]
+            spec["Enum"] = domain_spec_to_typespec(ent)
         else:
             spec["Type"] = domain_spec_to_typespec(ent)
         pass
@@ -275,17 +275,21 @@ def entity_to_spec(
             spec["Req"] = True
         if ent.multiplicity:
             spec["Mul"] = ent.multiplicity
-        spec["Ends"] = [{"Src": ent.src.handle, "Dst": ent.dst.handle}]
-        spec["Props"] = [x for x in ent.props]
+        spec["Src"] = ent.src.handle
+        spec["Dst"] = ent.dst.handle
+        spec["Props"] = sorted([x.handle for x in ent.props.values()])
         if len(spec["Props"]) == 0:
             spec["Props"] = "null"
         pass
     elif isinstance(ent, Term):
         spec["Value"] = ent.value
-        spec["Definition"] = ent.definition
         spec["Origin"] = ent.origin_name
-        spec["Version"] = ent.origin_version
-        spec["Code"] = ent.origin_id
+        if ent.origin_definition:
+            spec["Definition"] = ent.origin_definition
+        if ent.origin_version:
+            spec["Version"] = ent.origin_version
+        if ent.origin_id:
+            spec["Code"] = ent.origin_id
         pass
     elif isinstance(ent, Tag):
         spec[ent.key] = ent.value
@@ -298,11 +302,17 @@ def entity_to_spec(
 def domain_spec_to_typespec(prop):
     ret = {}
     if prop.value_domain == 'value_set':
-        ret = [prop.url] if prop.url else [x for x in prop.terms]
+        if prop.value_set.url:
+            ret = [prop.value_set.url]
+        else:
+            ret = [x for x in prop.terms]
     elif prop.value_domain == 'list':
         ret["value_type"] = 'list'
         if prop.item_domain == "value_set":
-            ret["Enum"] = [prop.url] if prop.url else [x for x in prop.terms]
+            if prop.value_set.url:
+                ret["Enum"] = prop.value_set.url
+            else:
+                ret["Enum"] = [x for x in prop.terms]
         else:
             if prop.units:
                 ret["item_type"] = {"value_type": prop.item_domain,
