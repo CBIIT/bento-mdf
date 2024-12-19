@@ -1,0 +1,8 @@
+uri:
+  model_file_path: "https://raw.githubusercontent.com/CBIIT/c3dc-model/refs/heads/main/model-desc/c3dc-model.yml"
+  props_file_path: "https://raw.githubusercontent.com/CBIIT/c3dc-model/refs/heads/main/model-desc/c3dc-model-props.yml"
+  base_schema_uri: "https://github.com/CBIIT/c3dc_model/schemas"
+meta:
+  schema_ref: "http://json-schema.org/draft-07/schema#"
+  title: "C3DC"
+  description: "The Childhood Cancer Clinical Data Commons (C3DC) Model"
