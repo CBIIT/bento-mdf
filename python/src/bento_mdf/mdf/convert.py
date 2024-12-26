@@ -141,6 +141,10 @@ def process_prop(spec: dict, prop: Property) -> None:
             prop.item_domain = "value_set"
         else:
             prop.value_domain = "value_set"
+        if domain_spec.get("units"):
+            prop.units = domain_spec["units"]
+        if domain_spec.get("pattern"):
+            prop.pattern = domain_spec["pattern"]
         if domain_spec.get("url"):
             prop.value_set = ValueSet(
                 {"url": domain_spec["url"], "_commit": prop._commit},

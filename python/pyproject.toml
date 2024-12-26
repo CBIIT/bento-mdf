@@ -25,7 +25,7 @@ authors = [
 ]
 license = "Apache 2.0"
 readme = "README.md"
-include = ["logs/log.ini"]
+include = ["templates/nodemodel.py.jinja2"]
 
 [tool.poetry.scripts]
 "test-mdf.py" = { reference = "bin/test-mdf.py", type = "file" }
@@ -35,11 +35,13 @@ include = ["logs/log.ini"]
 python = "^3.8"
 bento-meta = "^0.2.7"
 jsonschema = "^4.17.3"
+Jinja2 = ">=3.1.4"
 pyyaml = ">=6.0.1"
 pydantic = ">=2.10.4"
 delfick-project = "^0.7.9"
 requests = "^2.28.2"
 tqdm = "^4.64.1"
+annotated-types = "^0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
