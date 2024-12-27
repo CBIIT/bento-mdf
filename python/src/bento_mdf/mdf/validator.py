@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Literal, Optional, Annotated, TYPE_CHECKING
 from annotated_types import Predicate
 from datetime import datetime
 from enum import Enum, IntEnum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, TypeAdapter
 from pdb import set_trace
 
 # custom validator for regex-checked strings:
@@ -92,34 +92,65 @@ class MDFDataValidator:
     def __init__(self, mdf: MDFReader):
         self.model = mdf.model
         self._pymodel = None
+        self._module = None
+        self._node_classes = []
+        self._enum_classes = []
+        self.generate_data_model()
+        self.import_data_model()
 
     @property
     def data_model(self):
-        if self._pymodel:
-            return self._pymodel
-        
+        return self._pymodel or None
+
+    @property
+    def data_module(self):
+        return self._module or None
+
+    @property
+    def module_name(self):
+        return self.data_module and self.data_module.__name__
+
+    @property
+    def node_classes(self):
+        return self._node_classes
+
+    @property
+    def enum_classes(self):
+        return self._enum_classes
+    
     def generate_data_model(self):
         """
         Generates Pydantic classes for each node in the MDF model.
         """
+        # write down classes to be generated
+        for node in self.model.nodes.values():
+            self._node_classes.append(toCamelCase(node.handle))
+            for pr in node.props.values():
+                if pr.value_domain == 'value_set':
+                    self._enum_classes.append("{}Enum".format(toCamelCase(pr.handle)))
+        self._node_classes.sort()
+        self._enum_classes.sort()
         template = jenv.get_template("pymodel.py.jinja2")
         self._pymodel = template.render(model=self.model, typemap=self.typemap)
         pass
 
     def import_data_model(self):
         """
-        Imports model classes as a module
+        Imports model classes as a module '<model handle>Data'
         :returns: module object
         """
         if not self.data_model:
             return
         with NamedTemporaryFile(mode="w+", suffix=".py", delete_on_close=False) as modf:
-            set_trace()
-            modname = "MDF{}".format(self.model.handle)
+            modname = "{}Data".format(self.model.handle)
             print(self.data_model, file=modf)
             modf.close()
             spec = importlib.util.spec_from_file_location(modname, modf.name)
             module = importlib.util.module_from_spec(spec)
             sys.modules[modname] = module
             spec.loader.exec_module(module)
-            return module
+            self._module = module
+
+    def adapter(self, clsname):
+        cls = eval("self.data_module.{}".format(clsname))
+        return TypeAdapter(cls)

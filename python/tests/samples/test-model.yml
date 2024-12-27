@@ -87,7 +87,7 @@ PropDefinitions:
     Tags:
       another: value3
     Type:
-      pattern: "^[a-f0-9]{40}"
+      pattern: "^[a-f0-9]{32}"
   file_name:
     Type: string
   file_size:
