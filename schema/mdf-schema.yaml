@@ -155,7 +155,9 @@ defs:
       array
     description: |
       enumType (an array - could be size 1; or a reference to value
-      domain api)
+      domain api). Reference to value domain could be a URL or a path
+      that points to either a list of acceptable values or part of a
+      set of MDF yaml files that define the value domain (term list and defs)
     items:
       anyOf:
         -

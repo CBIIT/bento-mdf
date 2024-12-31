@@ -27,6 +27,7 @@ CCDI_MODEL_URL = (
 CCDI_PROPS_URL = (
     "https://github.com/CBIIT/ccdi-model/blob/main/model-desc/ccdi-model-props.yml"
 )
+TEST_SEP_ENUM_MODEL_FILE = TDIR / "samples" / "test-model-sep-enum.yml"
 
 
 def test_class() -> None:
@@ -185,7 +186,9 @@ def test_create_model_with_terms_section() -> None:
 class TestDataHubModel:
     """Tests for parts of the CRDC DataHub sample model."""
 
-    m = MDF(CRDC_MODEL_FILE)
+    def setup_method(self) -> None:
+        """Set up MDF for testing."""
+        self.m = MDF(CRDC_MODEL_FILE)
 
     def test_create_dh_model(self) -> None:
         """Test creating the CRDC model."""
@@ -256,3 +259,21 @@ def test_load_repo_url() -> None:
     m.load_yaml()
     m.create_model()
     assert m.model
+
+
+def test_load_separate_enums_from_file_path() -> None:
+    """Test loading model where enum list in separate file."""
+    m = MDF(TEST_SEP_ENUM_MODEL_FILE, handle="CCDI")
+    # sex_at_birth\
+    print(m.model.terms)
+    print(m.model.props[("participant", "sex_at_birth")].terms)
+    assert "female" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("male", "caDSR") in m.model.terms
+    assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("none_of_these_describe_me", "CCDI") in m.model.terms
+    # race
+    print(m.model.props[("participant", "race")].terms)
+    assert "asian" in m.model.props[("participant", "race")].terms
+    assert ("white", "caDSR") in m.model.terms
+    assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
+    assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms

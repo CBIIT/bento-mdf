@@ -396,6 +396,8 @@ class MDF:
                 {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
                 Property,
             )
+            if prop.value_set and prop.value_set.url is not None:  # enum as reference
+                self.merge_enum_reference(prop)
             if prop.value_set and prop.value_set._commit == "dummy":
                 terms = []
                 # merge terms references in enums into terms defined
@@ -408,13 +410,7 @@ class MDF:
                 # allow bento_meta.model machinery to create
                 # the actual value_set object and store
                 # terms in Model object:
-                if prop.value_domain == "list" and prop.item_domain == "value_set":
-                    # kludge so Model.add_terms works with list type props with val sets
-                    prop.value_domain = "value_set"
-                    self.model.add_terms(prop, *terms)
-                    prop.value_domain = "list"
-                else:
-                    self.model.add_terms(prop, *terms)
+                self.add_terms_to_model_prop(prop, terms)
 
             if "Term" in spec:
                 self.annotate_entity_from_mdf(prop, spec["Term"])
@@ -422,6 +418,70 @@ class MDF:
                 return prop
             self._props[(prop.model, prop.handle)] = prop
         return self._props[(self.handle, p_hdl)]
+
+    def load_enum_reference(
+        self,
+        enum_ref: str,
+    ) -> dict[str, dict[str, list[str] | dict[str, str]]]:
+        """Load enum from a reference (path or url, yaml file or list of strings)."""
+        if re.match("^/", enum_ref):  # looks like a path
+            enum_path = (Path.cwd() / Path(enum_ref.lstrip("/"))).resolve()
+            if not enum_path.exists():
+                self.logger.error("Enum reference path '%s' does not exist", enum_path)
+                return {}
+            with Path(enum_path).open() as f:
+                v = MDFValidator(None, f)
+                enum_mdf = v.load_and_validate_yaml()
+                if not enum_mdf:
+                    self.logger.error("Error loading enum from path '%s'", enum_path)
+                    return {}
+                return enum_mdf.as_dict()  # type: ignore reportReturnType
+        if re.match("(?:file|https?)://", enum_ref):  # looks like a url
+            pass  # TODO: load enum from url
+        return {}
+
+    def merge_enum_reference(self, prop: Property) -> None:
+        """
+        Merge enum from a reference (path or url to yaml file or list of strings).
+
+        Adds terms to the property value set.
+        """
+        if not prop.value_set or not prop.value_set.url:
+            self.logger.error("No enum reference in property '%s'", prop.handle)
+            return
+        enum = self.load_enum_reference(prop.value_set.url)
+        enum_values = enum.get("PropDefinitions", {}).get(prop.handle, [])
+        enum_terms = enum.get("Terms", {})
+        if not enum_values:
+            self.logger.error(
+                "No enum at reference '%s'",
+                prop.value_set.url,
+            )
+            return
+        specs = {val: {"Value": val} for val in enum_values}
+        if enum_terms:  # merge term definitions with enum values
+            specs.update(
+                {val: enum_terms.get(val, {"Value": val}) for val in enum_values},
+            )
+        for spec in specs.values():
+            if "Origin" in spec:
+                continue
+            spec["Origin"] = prop.model
+        terms = [
+            spec_to_entity(None, spec, {"_commit": "dummy"}, Term)
+            for spec in specs.values()
+        ]
+        self.add_terms_to_model_prop(prop, terms)
+
+    def add_terms_to_model_prop(self, prop: Property, terms: list[Term]) -> None:
+        """Add terms to a model property & handles list type props with value sets."""
+        if prop.value_domain == "list" and prop.item_domain == "value_set":
+            # kludge so Model.add_terms works with list type props with val sets
+            prop.value_domain = "value_set"
+            self.model.add_terms(prop, *terms)
+            prop.value_domain = "list"
+        else:
+            self.model.add_terms(prop, *terms)
 
     def annotate_entity_from_mdf(self, ent: Entity, yterm_list: list) -> None:
         """Annotate an entity from a list of term references in MDF."""
