@@ -3,10 +3,12 @@
 from pathlib import Path
 
 import pytest
-from bento_mdf.mdf import MDF
+from bento_mdf.mdf import MDF, convert_github_url
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
 from bento_meta.objects import ValueSet
+
+from tests.samples.test_urls import TEST_CONVERT_URLS
 
 TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 CTDC_MODEL_FILE = TDIR / "samples" / "ctdc_model_file.yaml"
@@ -19,6 +21,14 @@ TEST_MODEL_FILE = TDIR / "samples" / "test-model.yml"
 TEST_MODEL_QUAL_PROPS_FILE = TDIR / "samples" / "test-model-qual-props.yml"
 TEST_MODEL_TERMS_A = TDIR / "samples" / "test-model-with-terms-a.yml"
 CRDC_MODEL_FILE = TDIR / "samples" / "crdc_datahub_mdf.yml"
+CCDI_MODEL_URL = (
+    "https://github.com/CBIIT/ccdi-model/blob/main/model-desc/ccdi-model.yml"
+)
+CCDI_PROPS_URL = (
+    "https://github.com/CBIIT/ccdi-model/blob/main/model-desc/ccdi-model-props.yml"
+)
+TEST_SEP_ENUM_MODEL_FILE_PATH = TDIR / "samples" / "test-model-sep-enum.yml"
+TEST_SEP_ENUM_MODEL_FILE_URL = TDIR / "samples" / "test-model-sep-enum-url.yml"
 
 
 def test_class() -> None:
@@ -177,7 +187,9 @@ def test_create_model_with_terms_section() -> None:
 class TestDataHubModel:
     """Tests for parts of the CRDC DataHub sample model."""
 
-    m = MDF(CRDC_MODEL_FILE)
+    def setup_method(self) -> None:
+        """Set up MDF for testing."""
+        self.m = MDF(CRDC_MODEL_FILE)
 
     def test_create_dh_model(self) -> None:
         """Test creating the CRDC model."""
@@ -226,10 +238,55 @@ class TestDataHubModel:
         assert self.m.model.props[("diagnosis", "diagnosis_id")].is_required is False
 
     def test_enum_list_type(self) -> None:
-        """Test list types expressed as (value_type, item_type) and (value_type, Enum)"""
-        sdt = self.m.model.props[('study', 'study_data_types')]
-        sdte = self.m.model.props[('study', 'study_data_types_enum')]
+        """Test list types expressed as (value_type, item_type) and (value_type, Enum)."""
+        sdt = self.m.model.props[("study", "study_data_types")]
+        sdte = self.m.model.props[("study", "study_data_types_enum")]
         assert len(sdt.terms) == 3
         assert len(sdte.terms) == 3
-        assert 'Genomic' in sdt.terms
-        assert 'Imaging' in sdte.terms
+        assert "Genomic" in sdt.terms
+        assert "Imaging" in sdte.terms
+
+
+@pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)
+def test_convert_github_url(input_url: str, expected_url: str) -> None:
+    """Test converting a GitHub blob URL to a raw URL."""
+    assert convert_github_url(input_url) == expected_url
+
+
+def test_load_repo_url() -> None:
+    """Test loading model from a GitHub blob URL converted to raw URL."""
+    m = MDF(handle="CCDI")
+    m.files = [CCDI_MODEL_URL, CCDI_PROPS_URL]
+    m.load_yaml()
+    m.create_model()
+    assert m.model
+
+
+def test_load_separate_enums_yaml_from_file_path() -> None:
+    """Test loading model where enum list in separate yaml file referenced by path."""
+    m = MDF(TEST_SEP_ENUM_MODEL_FILE_PATH, handle="CCDI")
+    # sex_at_birth
+    assert "female" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("male", "caDSR") in m.model.terms
+    assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("none_of_these_describe_me", "CCDI") in m.model.terms
+    # race
+    assert "asian" in m.model.props[("participant", "race")].terms
+    assert ("white", "caDSR") in m.model.terms
+    assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
+    assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms
+
+
+def test_load_separate_enums_yaml_from_url() -> None:
+    """Test loading model where enum list in separate yaml file referenced by url."""
+    m = MDF(TEST_SEP_ENUM_MODEL_FILE_URL, handle="CCDI")
+    # sex_at_birth
+    assert "female" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("male", "caDSR") in m.model.terms
+    assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("none_of_these_describe_me", "CCDI") in m.model.terms
+    # race
+    assert "asian" in m.model.props[("participant", "race")].terms
+    assert ("white", "caDSR") in m.model.terms
+    assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
+    assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms

@@ -1,15 +1,13 @@
 [project]
 name = "bento-mdf"
-version = "0.10.1"
+version = "0.10.2"
 description = "Python driver/validator for Bento Model Description Format"
-authors = [
-    { name="Mark A. Jensen", email = "mark.jensen@nih.gov"}
-]
+authors = [{ name = "Mark A. Jensen", email = "mark.jensen@nih.gov" }]
 requires-python = ">=3.8"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache License"
+    "License :: OSI Approved :: Apache License",
 ]
 
 [project.urls]
@@ -18,11 +16,9 @@ classifiers = [
 
 [tool.poetry]
 name = "bento-mdf"
-version = "0.10.1"
+version = "0.10.2"
 description = "Python driver/validator for Bento Model Description Format"
-authors = [
-    "Mark A. Jensen <mark.jensen@nih.gov>"
-]
+authors = ["Mark A. Jensen <mark.jensen@nih.gov>"]
 license = "Apache 2.0"
 readme = "README.md"
 include = ["logs/log.ini"]
@@ -49,7 +45,7 @@ jupyter = "^1.0.0"
 python-semantic-release = "^7.33.0"
 pytest-cov = "^4.0.0"
 sphinx = "5.3.0"
-myst-nb = {version = "^0.17.1", python = "^3.8"}
+myst-nb = { version = "^0.17.1", python = "^3.8" }
 sphinx-autoapi = "^2.0.1"
 sphinx-rtd-theme = "^1.1.1"
 
@@ -67,11 +63,8 @@ upload_to_release = true
 upload_to_pypi = false
 remove_dist = false
 patch_without_tag = true
-major_on_zero = false # while major version on 0.y.z, won't bump to 1.0.0
-version_source = "tag" # temp?
+major_on_zero = false                       # while major version on 0.y.z, won't bump to 1.0.0
+version_source = "tag"                      # temp?
 
 [tool.pytest.ini_options]
-filterwarnings = [
-   "ignore::UserWarning",
-   ]
-   
+filterwarnings = ["ignore::UserWarning"]
