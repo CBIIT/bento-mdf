@@ -97,7 +97,7 @@ class MDF:
         vargs = []
         for f in self.files:
             if isinstance(f, str) and re.match("(?:file|https?)://", f):
-                self.load_yaml_vargs_from_url(vargs, f, verify=verify)
+                self.load_yaml_vargs_from_url(vargs, f, verify=verify, raise_error=True)
             elif isinstance(f, str) and Path(f).exists():
                 fh = Path(f).open(encoding="utf-8")
                 vargs.append(fh)
@@ -125,14 +125,19 @@ class MDF:
         url: str,
         *,
         verify: bool = True,
+        raise_error: bool = False,
     ) -> None:
         """Load YAML from a URL. Converts GitHub repo URLs to raw URLs."""
         raw_url = convert_github_url(url)
-        response = requests.get(raw_url, verify=verify, timeout=10)
-        if not response.ok:
-            msg = f"Fetching url {response.url} returned code {response.status_code}"
+        try:
+            response = requests.get(raw_url, verify=verify, timeout=10)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            msg = f"Fetching url {raw_url} raised exception {e}"
             self.logger.error(msg)
-            raise ArgError(msg)
+            if raise_error:
+                raise ArgError(msg) from e
+            return
         response.encoding = "utf8"
         fh = TemporaryFile()
         for chunk in response.iter_content(chunk_size=128):
@@ -438,7 +443,7 @@ class MDF:
                 return enum_mdf.as_dict()  # type: ignore reportReturnType
         if re.match("(?:file|https?)://", enum_ref):  # looks like a url
             vargs = []
-            self.load_yaml_vargs_from_url(vargs, enum_ref)
+            self.load_yaml_vargs_from_url(vargs, enum_ref, raise_error=False)
             v = MDFValidator(None, *vargs)
             enum_mdf = v.load_and_validate_yaml()
             if not enum_mdf:
