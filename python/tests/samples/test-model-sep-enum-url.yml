@@ -1,0 +1,36 @@
+Handle: CCDI
+Version: "2.0.0_SEP_ENUM"
+Nodes:
+  participant:
+    Desc: "The participant node is comprised of properties which describe the participant attributes."
+    Props:
+      - race
+      - sex_at_birth
+Relationships: {}
+PropDefinitions:
+  race:
+    Desc: The text for reporting information about race based on the Office of Management and Budget (OMB) categories SPD 15 (spd15revision.gov).
+    Term:
+      - Origin: caDSR
+        Code: "2192199"
+        Value: Race Category Text
+        Version: "1.00"
+    Type:
+      value_type: list
+      item_type:
+        - https://github.com/CBIIT/ccdi-model/blob/CCDIDC-1353-enum_structure_updates/model-desc/enum_lists/race.yml
+    Req: true
+    Strict: false
+    Private: false
+  sex_at_birth:
+    Desc: "A textual description of a person's sex at birth."
+    Term:
+      - Origin: caDSR
+        Code: '7572817'
+        Value: Person Sex at Birth Category
+        Version: "2.0"
+    Enum:
+      - https://github.com/CBIIT/ccdi-model/blob/a0c5d0e4b460ef9209b8a8a0d2837acbf610108f/model-desc/enum_lists/sex_at_birth.yml
+    Req: true
+    Strict: false
+    Private: false

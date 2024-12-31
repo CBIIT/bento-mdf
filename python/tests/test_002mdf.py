@@ -27,7 +27,8 @@ CCDI_MODEL_URL = (
 CCDI_PROPS_URL = (
     "https://github.com/CBIIT/ccdi-model/blob/main/model-desc/ccdi-model-props.yml"
 )
-TEST_SEP_ENUM_MODEL_FILE = TDIR / "samples" / "test-model-sep-enum.yml"
+TEST_SEP_ENUM_MODEL_FILE_PATH = TDIR / "samples" / "test-model-sep-enum.yml"
+TEST_SEP_ENUM_MODEL_FILE_URL = TDIR / "samples" / "test-model-sep-enum-url.yml"
 
 
 def test_class() -> None:
@@ -261,18 +262,30 @@ def test_load_repo_url() -> None:
     assert m.model
 
 
-def test_load_separate_enums_from_file_path() -> None:
-    """Test loading model where enum list in separate file."""
-    m = MDF(TEST_SEP_ENUM_MODEL_FILE, handle="CCDI")
-    # sex_at_birth\
-    print(m.model.terms)
-    print(m.model.props[("participant", "sex_at_birth")].terms)
+def test_load_separate_enums_yaml_from_file_path() -> None:
+    """Test loading model where enum list in separate yaml file referenced by path."""
+    m = MDF(TEST_SEP_ENUM_MODEL_FILE_PATH, handle="CCDI")
+    # sex_at_birth
     assert "female" in m.model.props[("participant", "sex_at_birth")].terms
     assert ("male", "caDSR") in m.model.terms
     assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
     assert ("none_of_these_describe_me", "CCDI") in m.model.terms
     # race
-    print(m.model.props[("participant", "race")].terms)
+    assert "asian" in m.model.props[("participant", "race")].terms
+    assert ("white", "caDSR") in m.model.terms
+    assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
+    assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms
+
+
+def test_load_separate_enums_yaml_from_url() -> None:
+    """Test loading model where enum list in separate yaml file referenced by url."""
+    m = MDF(TEST_SEP_ENUM_MODEL_FILE_URL, handle="CCDI")
+    # sex_at_birth
+    assert "female" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("male", "caDSR") in m.model.terms
+    assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("none_of_these_describe_me", "CCDI") in m.model.terms
+    # race
     assert "asian" in m.model.props[("participant", "race")].terms
     assert ("white", "caDSR") in m.model.terms
     assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms

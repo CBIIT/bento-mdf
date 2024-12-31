@@ -437,7 +437,14 @@ class MDF:
                     return {}
                 return enum_mdf.as_dict()  # type: ignore reportReturnType
         if re.match("(?:file|https?)://", enum_ref):  # looks like a url
-            pass  # TODO: load enum from url
+            vargs = []
+            self.load_yaml_vargs_from_url(vargs, enum_ref)
+            v = MDFValidator(None, *vargs)
+            enum_mdf = v.load_and_validate_yaml()
+            if not enum_mdf:
+                self.logger.error("Error loading enum from url '%s'", enum_ref)
+                return {}
+            return enum_mdf.as_dict()  # type: ignore reportReturnType
         return {}
 
     def merge_enum_reference(self, prop: Property) -> None:
