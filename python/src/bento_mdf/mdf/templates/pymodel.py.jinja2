@@ -14,12 +14,22 @@ def MatchedStrType(pat : str):
 def URIType():
     return MatchedStrType("^https?://.*")
 
+def PathType():
+    return MatchedStrType("^/.*")
 
 {% for node in model.nodes.values() %}
 
 {% for pr in node.props.values() %}
 {% if pr.value_domain == 'value_set' %}
+{% if pr.value_set.url %}
+class {{pr.handle | toCamelCase}}EnumURL(BaseModel):
+    url: URIType()
+{% elif pr.value_set.path %}
+class {{pr.handle | toCamelCase}}EnumPath(BaseModel):
+    path: PathType()
+{% else %}
 class {{pr.handle | toCamelCase}}Enum(str, Enum):
+{% endif %}
 {% for tm in pr.terms.values() %}
     {{tm.value | to_snakecase}} = '{{tm.value}}'
 {% endfor %}
@@ -29,19 +39,25 @@ class {{pr.handle | toCamelCase}}Enum(str, Enum):
 class {{node.handle | toCamelCase }}(BaseModel):
 {% for pr in node.props.values() %}
 {% if pr.value_domain == 'value_set' %}
-  {{pr.handle}}: {{ [pr.handle | toCamelCase, 'Enum'] | join('') | maybe_optional(pr) }} 
+{% if pr.value_set.url %}
+    {{pr.handle}}: {{ [pr.handle | toCamelCase, 'EnumURL'] | join('') | maybe_optional(pr) }}
+{% elif pr.value_set.path %}
+    {{pr.handle}}: {{ [pr.handle | toCamelCase, 'EnumPath'] | join('') | maybe_optional(pr) }}
+{% else %}
+    {{pr.handle}}: {{ [pr.handle | toCamelCase, 'Enum'] | join('') | maybe_optional(pr) }}
+{% endif %}
 {% elif pr.value_domain == 'regexp' %}
-  {{pr.handle}}: {{ "MatchedStrType('{}')".format(pr.pattern) | maybe_optional(pr) }}
+    {{pr.handle}}: {{ "MatchedStrType('{}')".format(pr.pattern) | maybe_optional(pr) }}
 {% elif pr.value_domain == 'url' %}
-  {{pr.handle}}: {{ "URIType()" | maybe_optional(pr) }}
+    {{pr.handle}}: {{ "URIType()" | maybe_optional(pr) }}
 {% elif pr.value_domain == 'number' or pr.value_domain == 'integer' %}
 {% if pr.units %}
-  {{pr.handle}}: {{ pr.units | to_unit_types(typemap[pr.value_domain]) | join(' | ') | maybe_optional(pr) }}
+    {{pr.handle}}: {{ pr.units | to_unit_types(typemap[pr.value_domain]) | join(' | ') | maybe_optional(pr) }}
 {% else %}
-  {{pr.handle}}: {{typemap[pr.value_domain].__name__ | maybe_optional(pr)}}
+    {{pr.handle}}: {{typemap[pr.value_domain].__name__ | maybe_optional(pr)}}
 {% endif %}
 {% elif pr.value_domain == 'datetime' %}
-  {{pr.handle}}: {{ "datetime" | maybe_optional(pr) }}
+    {{pr.handle}}: {{ "datetime" | maybe_optional(pr) }}
 {% else %}
 {% endif %}
 {% endfor %}

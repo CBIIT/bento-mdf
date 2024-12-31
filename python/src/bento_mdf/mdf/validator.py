@@ -1,15 +1,15 @@
 from __future__ import annotations
 import re
-import importlib.util
 import sys
+import importlib.util
+from functools import cache
 from .reader import MDFReader
+from bento_meta.objects import Property
 from tempfile import NamedTemporaryFile
 from jinja2 import Environment, PackageLoader
-from typing import Any, Dict, List, Literal, Optional, Annotated, TYPE_CHECKING
-from annotated_types import Predicate
+from typing import Any, List, NoReturn, TYPE_CHECKING
 from datetime import datetime
-from enum import Enum, IntEnum
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 from pdb import set_trace
 
 # custom validator for regex-checked strings:
@@ -52,11 +52,11 @@ jenv = Environment(
 )
 
 
-def toCamelCase(val):
+def toCamelCase(val : str) -> str:
     return "".join([x.capitalize() for x in val.split("_")])
 
 
-def to_snakecase(val):
+def to_snakecase(val : str) -> str:
     return re.sub("\W", "_", val).lower()
 
 
@@ -64,7 +64,7 @@ def to_unit_types(unitstr : str, typ : type(int) | type(float)) -> List[str]:
     return [f"Annotated[{typ.__name__}, Unit('{u}')]" for u in unitstr.split(';')]
 
 
-def maybe_optional(val, prop):
+def maybe_optional(val : str, prop : Property):
     if prop.is_required:
         return val
     else:
@@ -86,7 +86,7 @@ class MDFDataValidator:
         "string": str,
         "regexp": str,
         "url": str,
-        "TBD": None,
+        "TBD": Any,
         }
 
     def __init__(self, mdf: MDFReader):
@@ -95,11 +95,12 @@ class MDFDataValidator:
         self._module = None
         self._node_classes = []
         self._enum_classes = []
+        self._validation_errors = None
         self.generate_data_model()
         self.import_data_model()
 
     @property
-    def data_model(self):
+    def data_model(self) -> str:
         return self._pymodel or None
 
     @property
@@ -107,18 +108,22 @@ class MDFDataValidator:
         return self._module or None
 
     @property
-    def module_name(self):
+    def module_name(self) -> str:
         return self.data_module and self.data_module.__name__
 
     @property
-    def node_classes(self):
+    def node_classes(self) -> List:
         return self._node_classes
 
     @property
-    def enum_classes(self):
+    def enum_classes(self) -> List:
         return self._enum_classes
+
+    @property
+    def last_validation_errors(self) -> dict | None:
+        return self._validation_errors
     
-    def generate_data_model(self):
+    def generate_data_model(self) -> NoReturn:
         """
         Generates Pydantic classes for each node in the MDF model.
         """
@@ -127,14 +132,18 @@ class MDFDataValidator:
             self._node_classes.append(toCamelCase(node.handle))
             for pr in node.props.values():
                 if pr.value_domain == 'value_set':
-                    self._enum_classes.append("{}Enum".format(toCamelCase(pr.handle)))
+                    if pr.value_set.url:
+                        self._enum_classes.append("{}EnumURL".format(toCamelCase(pr.handle)))
+                    elif pr.value_set.path:
+                        self._enum_classes.append("{}EnumPath".format(toCamelCase(pr.handle)))
+                    else:
+                        self._enum_classes.append("{}Enum".format(toCamelCase(pr.handle)))
         self._node_classes.sort()
         self._enum_classes.sort()
         template = jenv.get_template("pymodel.py.jinja2")
         self._pymodel = template.render(model=self.model, typemap=self.typemap)
-        pass
 
-    def import_data_model(self):
+    def import_data_model(self) -> NoReturn:
         """
         Imports model classes as a module '<model handle>Data'
         :returns: module object
@@ -151,6 +160,44 @@ class MDFDataValidator:
             spec.loader.exec_module(module)
             self._module = module
 
-    def adapter(self, clsname):
+    @cache
+    def adapter(self, clsname : str) -> TypeAdapter:
+        """
+        Return a TypeAdapter for the given Node or Enum class (cached)
+        """
+        # sanitize
+        if clsname not in self.node_classes and clsname not in self.enum_classes:
+            raise RuntimeError(f"Validation model does not contain class '{clsname}'")
         cls = eval("self.data_module.{}".format(clsname))
         return TypeAdapter(cls)
+
+    def validate(self, clsname, data : dict | List[dict], strict : bool = False,
+                 verbose : bool = False) -> bool:
+        """
+        Validate a dict or list of dicts against a given Node class.
+        Returns true if all items are valid, false otherwise.
+        If items fail validation, The attribute 'last_validation_errors' will contain
+        a dict whose keys are the index of the item in the submitted data list, and values
+        which are lists of specific errors found in the item.
+        ('last_validation_errors' is reset to None if validation succeeds.)
+        """
+        dta = []
+        result = True
+        self._validation_errors = {}
+        if isinstance(data, dict):
+            dta = [data]
+        else:
+            dta = data
+        ta = self.adapter(clsname)
+        for i, rec in enumerate(dta):
+            try:
+                ta.validate_python(rec, strict=strict)
+            except ValidationError as e:
+                result = False
+                if verbose:
+                    print(e.title, file=sys.stderr)
+                self._validation_errors[i] = e.errors()
+        if result:
+            self._validation_errors = None
+        return result
+

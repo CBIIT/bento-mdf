@@ -28,25 +28,46 @@ def test_data_validation():
     smp = v.adapter('Sample')
     fl = v.adapter('File')
     dx =  v.adapter('Diagnosis')
-    assert cs.validate_python({"case_id":"CASE-999"})
+    assert cs.validate_python({"case_id": "CASE-999"})
     with raises(ValidationError, match='fullmatch failed'):
-        cs.validate_python({"case_id":"CASE-99A"})
-    assert smp.validate_python({"sample_type":"tumor", "amount":1.0})
+        cs.validate_python({"case_id": "CASE-99A"})
+    assert smp.validate_python({"sample_type": "tumor", "amount": 1.0})
     with raises(ValidationError, match='should be a valid number'):
-        smp.validate_python({"sample_type":"tumor", "amount":"dude"})
+        smp.validate_python({"sample_type": "tumor", "amount": "dude"})
     with raises(ValidationError, match="should be 'normal' or 'tumor'"):
-        smp.validate_python({"sample_type":"narf", "amount":1.0})
-    assert fl.validate_python({"md5sum":"9d4cf66a8472f2f97f4594758a06fbd0",
-                               "file_name":"grelf.txt",
-                               "file_size":50})
+        smp.validate_python({"sample_type": "narf", "amount": 1.0})
+    assert fl.validate_python({"md5sum": "9d4cf66a8472f2f97f4594758a06fbd0",
+                               "file_name": "grelf.txt",
+                               "file_size": 50})
     with raises(ValidationError, match="fullmatch failed"):
-        fl.validate_python({"md5sum":"9d4cf66a8472f2f97F4594758a06fbd0",
-                            "file_name":"grelf.txt",
-                            "file_size":50})
+        fl.validate_python({"md5sum": "9d4cf66a8472f2f97F4594758a06fbd0",
+                            "file_name": "grelf.txt",
+                            "file_size": 50})
 
     with raises(ValidationError, match="should be a valid integer"):
-        fl.validate_python({"md5sum":"9d4cf66a8472f2f97c4594758a06fbd0",
-                            "file_name":"grelf.txt",
-                            "file_size":50.0}, strict=True)
-        
+        fl.validate_python({"md5sum": "9d4cf66a8472f2f97c4594758a06fbd0",
+                            "file_name": "grelf.txt",
+                            "file_size": 50.0}, strict=True)
+
+    data = [
+        {"md5sum": "9d4cf66a8472f2f97c4594758a06fbd0",
+         "file_name": "grelf.txt",
+         "file_size": 50},
+        {"md5sum": "9d4cf66a8472f2f97c4594758a06Fbd0",
+         "file_name": "grolf.txt",
+         "file_size": 50.0},
+        {"md5sum": "9d4cf66a8472f2f97c4594758a06Fbd0",
+         "file_name": "grilf.txt",
+         "file_size": "big"}
+        ]
+    assert not v.validate('File', data)
+    assert v.last_validation_errors
+    assert {x for x in v.last_validation_errors} == {1, 2}
     pass
+
+def test_validator_for_gold_mdf():
+
+    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml")
+    v = MDFDataValidator(m)
+    assert v
+    
