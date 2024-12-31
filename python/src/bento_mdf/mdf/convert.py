@@ -149,6 +149,10 @@ def process_prop(spec: dict, prop: Property) -> None:
             prop.value_set = ValueSet(
                 {"url": domain_spec["url"], "_commit": prop._commit},
             )
+        elif domain_spec.get("path"):
+            prop.value_set = ValueSet(
+                {"path": domain_spec["path"], "_commit": prop._commit},
+            )
         elif domain_spec.get("value_set"):
             # create 'dummy' ValueSet to hold Enum terms,
             # but merge them with any Terms section terms in mdf.py
@@ -206,7 +210,7 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
             list_spec = spec.get("item_type") or spec.get("Enum")
             item_domain_spec = typespec_to_domain_spec(list_spec)
             domain_spec["item_domain"] = item_domain_spec["value_domain"]
-            for key in ("units", "value_set", "url"):
+            for key in ("units", "value_set", "url", "path"):
                 if key not in item_domain_spec:
                     continue
                 domain_spec[key] = item_domain_spec[key]
@@ -221,12 +225,11 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
         if (
             len(spec) == 1
             and isinstance(spec[0], str)
-            and re.match(
-                "^/|.*://",
-                spec[0],
-            )
         ):
-            return {"value_domain": "value_set", "url": spec[0]}
+            if re.match("^[a-z][a-z]*://",spec[0]):
+                return {"value_domain": "value_set", "url": spec[0]}
+            elif re.match("^/.*",spec[0]):
+                return {"value_domain": "value_set", "path": spec[0]}
         vs = []
         for tm in spec:
             if isinstance(tm, bool):
@@ -308,13 +311,17 @@ def domain_spec_to_typespec(prop):
     if prop.value_domain == 'value_set':
         if prop.value_set.url:
             ret = [prop.value_set.url]
+        elif prop.value_set.path:
+            ret = [prop.value_set.path]
         else:
             ret = [x for x in prop.terms]
     elif prop.value_domain == 'list':
         ret["value_type"] = 'list'
         if prop.item_domain == "value_set":
             if prop.value_set.url:
-                ret["Enum"] = prop.value_set.url
+                ret["Enum"] = [prop.value_set.url]
+            elif prop.value_set.path:
+                ret["Enum"] = [prop.value_set.path]
             else:
                 ret["Enum"] = [x for x in prop.terms]
         else:

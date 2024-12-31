@@ -33,7 +33,7 @@ include = ["templates/nodemodel.py.jinja2"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-bento-meta = "^0.2.7"
+bento-meta = "^0.2.11"
 jsonschema = "^4.17.3"
 Jinja2 = ">=3.1.4"
 pyyaml = ">=6.0.1"

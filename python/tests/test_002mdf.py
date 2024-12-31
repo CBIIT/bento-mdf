@@ -182,6 +182,9 @@ class TestDataHubModel:
     def test_create_dh_model(self) -> None:
         """Test creating the CRDC model."""
         assert self.m.model
+        pr = [x for x in self.m.model.props.values() if x.handle == "collection_method"]
+        assert pr[0]
+        assert pr[0].value_set.path == '/path/to/collection/methods'
 
     def test_property_is_key(self) -> None:
         """Test "is_key" attribute set on Property from "Key" object in MDF."""
