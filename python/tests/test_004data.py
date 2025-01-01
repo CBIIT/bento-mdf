@@ -1,4 +1,5 @@
 import pytest
+import re
 from pytest import raises
 from bento_mdf import MDFReader, MDFDataValidator
 from pydantic import ValidationError
@@ -28,6 +29,7 @@ def test_data_validation():
     smp = v.adapter('Sample')
     fl = v.adapter('File')
     dx =  v.adapter('Diagnosis')
+    md = v.adapter('testData')
     assert cs.validate_python({"case_id": "CASE-999"})
     with raises(ValidationError, match='fullmatch failed'):
         cs.validate_python({"case_id": "CASE-99A"})
@@ -63,7 +65,32 @@ def test_data_validation():
     assert not v.validate('File', data)
     assert v.last_validation_errors
     assert {x for x in v.last_validation_errors} == {1, 2}
+
+    data = {
+        "case": {"case_id": "CASE-22"},
+        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
+        "sample": {"amount": "4.0", "sample_type": "normal"},
+        }
+    assert v.validate('testData', data)
+    data_nulls = {
+        "case": {"case_id": "CASE-22"},
+        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
+        "sample": {"amount": "4.0", "sample_type": None},
+        }
+    assert v.validate('testData', data_nulls)
+    data_nulled_req = {
+        "case": {"case_id": None},
+        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
+        "sample": {"amount": "4.0", "sample_type": None},
+        }
+    assert not v.validate('testData', data_nulled_req)
+    assert re.match(".*should be a valid string", v.last_validation_errors[0][0]['msg'])
+    
     pass
+
 
 def test_validator_for_gold_mdf():
 

@@ -57,7 +57,7 @@ def toCamelCase(val : str) -> str:
 
 
 def to_snakecase(val : str) -> str:
-    return re.sub("\W", "_", val).lower()
+    return re.sub("\\W", "_", val).lower()
 
 
 def to_unit_types(unitstr : str, typ : type(int) | type(float)) -> List[str]:
@@ -98,14 +98,14 @@ class MDFDataValidator:
         self._validation_errors = None
         self.generate_data_model()
         self.import_data_model()
-
+        
     @property
     def data_model(self) -> str:
-        return self._pymodel or None
+        return self._pymodel
 
     @property
     def data_module(self):
-        return self._module or None
+        return self._module
 
     @property
     def module_name(self) -> str:
@@ -163,10 +163,10 @@ class MDFDataValidator:
     @cache
     def adapter(self, clsname : str) -> TypeAdapter:
         """
-        Return a TypeAdapter for the given Node or Enum class (cached)
+        Return a TypeAdapter for the given Model, Node, or Enum class (cached)
         """
         # sanitize
-        if clsname not in self.node_classes and clsname not in self.enum_classes:
+        if clsname != self.module_name and clsname not in self.node_classes and clsname not in self.enum_classes:
             raise RuntimeError(f"Validation model does not contain class '{clsname}'")
         cls = eval("self.data_module.{}".format(clsname))
         return TypeAdapter(cls)

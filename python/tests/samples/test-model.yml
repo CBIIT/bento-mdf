@@ -72,6 +72,7 @@ PropDefinitions:
     Term:
       - Value: 'case_id'
         Origin: 'CTDC'
+    Req: true
   patient_id:
     Type: string
   sample_type:
