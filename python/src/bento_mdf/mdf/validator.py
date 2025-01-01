@@ -51,6 +51,7 @@ jenv = Environment(
     trim_blocks=True,
 )
 
+# jinja helpers    
 
 def toCamelCase(val : str) -> str:
     return "".join([x.capitalize() for x in val.split("_")])
@@ -70,7 +71,6 @@ def maybe_optional(val : str, prop : Property):
     else:
         return f"Optional[{val}]"
 
-    
 jenv.filters['toCamelCase'] = toCamelCase
 jenv.filters['to_snakecase'] = to_snakecase
 jenv.filters['to_unit_types'] = to_unit_types
@@ -104,12 +104,12 @@ class MDFDataValidator:
         return self._pymodel
 
     @property
-    def data_module(self):
+    module(self):
         return self._module
 
     @property
-    def module_name(self) -> str:
-        return self.data_module and self.data_module.__name__
+    def model_class(self) -> str:
+        return self.module and self.module.__name__
 
     @property
     def node_classes(self) -> List:
@@ -166,15 +166,24 @@ class MDFDataValidator:
         Return a TypeAdapter for the given Model, Node, or Enum class (cached)
         """
         # sanitize
-        if clsname != self.module_name and clsname not in self.node_classes and clsname not in self.enum_classes:
+        if clsname != self.model_class and clsname not in self.node_classes and clsname not in self.enum_classes:
             raise RuntimeError(f"Validation model does not contain class '{clsname}'")
-        cls = eval("self.data_module.{}".format(clsname))
+        cls = eval("self.module.{}".format(clsname))
         return TypeAdapter(cls)
 
-    def validate(self, clsname, data : dict | List[dict], strict : bool = False,
+    def json_schema(self, clsname : str) -> dict | list:
+        """
+        Return a jsonable object representing a JSONSchema that can validate
+        the given model class.
+        """
+        if clsname == self.model_class:
+            return self.module.model_json_schema()
+        return self.adapter(clsname).json_schema()
+        
+    def validate(self, clsname : str, data : dict | List[dict], strict : bool = False,
                  verbose : bool = False) -> bool:
         """
-        Validate a dict or list of dicts against a given Node class.
+        Validate a dict or list of dicts against a given model class.
         Returns true if all items are valid, false otherwise.
         If items fail validation, The attribute 'last_validation_errors' will contain
         a dict whose keys are the index of the item in the submitted data list, and values

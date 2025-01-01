@@ -14,8 +14,8 @@ def test_data_validator():
     m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
     v = MDFDataValidator(m)
     compile(v.data_model, '<string>', 'exec')
-    assert v.data_module
-    assert v.module_name == 'testData'
+    assert v.module
+    assert v.model_class == 'testData'
     assert set(v.node_classes) == {'Case', 'Sample', 'File', 'Diagnosis'}
     assert set(v.enum_classes) == {'SampleTypeEnum'}
     pass

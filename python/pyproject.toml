@@ -25,7 +25,7 @@ authors = [
 ]
 license = "Apache 2.0"
 readme = "README.md"
-include = ["templates/nodemodel.py.jinja2"]
+include = ["templates/pymodel.py.jinja2"]
 
 [tool.poetry.scripts]
 "test-mdf.py" = { reference = "bin/test-mdf.py", type = "file" }
