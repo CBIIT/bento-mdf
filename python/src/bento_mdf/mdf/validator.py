@@ -9,7 +9,8 @@ from tempfile import NamedTemporaryFile
 from jinja2 import Environment, PackageLoader
 from typing import Any, List, NoReturn, TYPE_CHECKING
 from datetime import datetime
-from pydantic import TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
+from pydantic.json_schema import GenerateJsonSchema
 from pdb import set_trace
 
 # custom validator for regex-checked strings:
@@ -71,10 +72,19 @@ def maybe_optional(val : str, prop : Property):
     else:
         return f"Optional[{val}]"
 
+
 jenv.filters['toCamelCase'] = toCamelCase
 jenv.filters['to_snakecase'] = to_snakecase
 jenv.filters['to_unit_types'] = to_unit_types
 jenv.filters['maybe_optional'] = maybe_optional
+
+
+class GenerateQualJsonSchema(GenerateJsonSchema):
+    # override to add $schema tag
+    def generate(self, schema, mode='validation'):
+        json_schema = super().generate(schema, mode=mode)
+        json_schema['$schema'] = self.schema_dialect
+        return self.sort(json_schema)
 
 
 class MDFDataValidator:
@@ -104,7 +114,7 @@ class MDFDataValidator:
         return self._pymodel
 
     @property
-    module(self):
+    def module(self):
         return self._module
 
     @property
@@ -161,24 +171,35 @@ class MDFDataValidator:
             self._module = module
 
     @cache
-    def adapter(self, clsname : str) -> TypeAdapter:
-        """
-        Return a TypeAdapter for the given Model, Node, or Enum class (cached)
-        """
-        # sanitize
+    def model_of(self, clsname : str):
         if clsname != self.model_class and clsname not in self.node_classes and clsname not in self.enum_classes:
             raise RuntimeError(f"Validation model does not contain class '{clsname}'")
-        cls = eval("self.module.{}".format(clsname))
-        return TypeAdapter(cls)
-
+        return eval("self.module.{}".format(clsname))
+        
+    @cache
+    def validator(self, clsname : str):
+        """
+        Return a validator function appropriate to the class named 'clsname'
+        """
+        model = self.model_of(clsname)
+        if issubclass(model, BaseModel):
+            return model.model_validate
+        else:
+            return TypeAdapter(model).validate_python
+        
     def json_schema(self, clsname : str) -> dict | list:
         """
         Return a jsonable object representing a JSONSchema that can validate
         the given model class.
         """
-        if clsname == self.model_class:
-            return self.module.model_json_schema()
-        return self.adapter(clsname).json_schema()
+
+        model = self.model_of(clsname)
+        if issubclass(model, BaseModel):
+            return model.model_json_schema(
+                schema_generator=GenerateQualJsonSchema)
+        else:
+            return TypeAdapter(model).json_schema(
+                schema_generator=GenerateQualJsonSchema)
         
     def validate(self, clsname : str, data : dict | List[dict], strict : bool = False,
                  verbose : bool = False) -> bool:
@@ -197,10 +218,10 @@ class MDFDataValidator:
             dta = [data]
         else:
             dta = data
-        ta = self.adapter(clsname)
+        valf = self.validator(clsname)
         for i, rec in enumerate(dta):
             try:
-                ta.validate_python(rec, strict=strict)
+                valf(rec, strict=strict)
             except ValidationError as e:
                 result = False
                 if verbose:

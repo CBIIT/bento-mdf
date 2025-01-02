@@ -1,8 +1,10 @@
 import pytest
 import re
+import jsonschema
 from pytest import raises
 from bento_mdf import MDFReader, MDFDataValidator
-from pydantic import ValidationError
+from pydantic import ValidationError, BaseModel
+from enum import Enum
 from pathlib import Path
 from pdb import set_trace
 
@@ -18,6 +20,9 @@ def test_data_validator():
     assert v.model_class == 'testData'
     assert set(v.node_classes) == {'Case', 'Sample', 'File', 'Diagnosis'}
     assert set(v.enum_classes) == {'SampleTypeEnum'}
+    assert issubclass(v.model_of('testData'), BaseModel)
+    assert issubclass(v.model_of('Case'), BaseModel)
+    assert issubclass(v.model_of('SampleTypeEnum'), Enum)
     pass
 
 
@@ -25,31 +30,31 @@ def test_data_validation():
     
     m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
     v = MDFDataValidator(m)
-    cs = v.adapter('Case')
-    smp = v.adapter('Sample')
-    fl = v.adapter('File')
-    dx =  v.adapter('Diagnosis')
-    md = v.adapter('testData')
-    assert cs.validate_python({"case_id": "CASE-999"})
+    cs = v.validator('Case')
+    smp = v.validator('Sample')
+    fl = v.validator('File')
+    dx =  v.validator('Diagnosis')
+    md = v.validator('testData')
+    assert cs({"case_id": "CASE-999"})
     with raises(ValidationError, match='fullmatch failed'):
-        cs.validate_python({"case_id": "CASE-99A"})
-    assert smp.validate_python({"sample_type": "tumor", "amount": 1.0})
+        cs({"case_id": "CASE-99A"})
+    assert smp({"sample_type": "tumor", "amount": 1.0})
     with raises(ValidationError, match='should be a valid number'):
-        smp.validate_python({"sample_type": "tumor", "amount": "dude"})
+        smp({"sample_type": "tumor", "amount": "dude"})
     with raises(ValidationError, match="should be 'normal' or 'tumor'"):
-        smp.validate_python({"sample_type": "narf", "amount": 1.0})
-    assert fl.validate_python({"md5sum": "9d4cf66a8472f2f97f4594758a06fbd0",
-                               "file_name": "grelf.txt",
-                               "file_size": 50})
+        smp({"sample_type": "narf", "amount": 1.0})
+    assert fl({"md5sum": "9d4cf66a8472f2f97f4594758a06fbd0",
+               "file_name": "grelf.txt",
+               "file_size": 50})
     with raises(ValidationError, match="fullmatch failed"):
-        fl.validate_python({"md5sum": "9d4cf66a8472f2f97F4594758a06fbd0",
-                            "file_name": "grelf.txt",
-                            "file_size": 50})
+        fl({"md5sum": "9d4cf66a8472f2f97F4594758a06fbd0",
+            "file_name": "grelf.txt",
+            "file_size": 50})
 
     with raises(ValidationError, match="should be a valid integer"):
-        fl.validate_python({"md5sum": "9d4cf66a8472f2f97c4594758a06fbd0",
-                            "file_name": "grelf.txt",
-                            "file_size": 50.0}, strict=True)
+        fl({"md5sum": "9d4cf66a8472f2f97c4594758a06fbd0",
+            "file_name": "grelf.txt",
+            "file_size": 50.0}, strict=True)
 
     data = [
         {"md5sum": "9d4cf66a8472f2f97c4594758a06fbd0",
@@ -70,26 +75,43 @@ def test_data_validation():
         "case": {"case_id": "CASE-22"},
         "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
         "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
-        "sample": {"amount": "4.0", "sample_type": "normal"},
+        "sample": {"amount": 4.0, "sample_type": "normal"},
         }
     assert v.validate('testData', data)
     data_nulls = {
         "case": {"case_id": "CASE-22"},
         "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
         "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
-        "sample": {"amount": "4.0", "sample_type": None},
+        "sample": {"amount": 4.0, "sample_type": None},
         }
     assert v.validate('testData', data_nulls)
     data_nulled_req = {
         "case": {"case_id": None},
         "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
         "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
-        "sample": {"amount": "4.0", "sample_type": None},
+        "sample": {"amount": 4.0, "sample_type": None},
         }
     assert not v.validate('testData', data_nulled_req)
     assert re.match(".*should be a valid string", v.last_validation_errors[0][0]['msg'])
     
     pass
+
+
+def test_jsonschema():
+    m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
+    v = MDFDataValidator(m)
+    js = v.json_schema('testData')
+    assert js['$schema']
+    data = {
+        "case": {"case_id": "CASE-22"},
+        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
+        "sample": {"amount": 4.0, "sample_type": "normal"},
+        }
+    jsonschema.validate(data, js)
+    data["sample"] = "alien"
+    with raises(jsonschema.exceptions.ValidationError):
+        jsonschema.validate(data, js)
 
 
 def test_validator_for_gold_mdf():
