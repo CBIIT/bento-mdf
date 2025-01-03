@@ -233,7 +233,6 @@ PropDefinitions:
       units:
         - pattern: ^\\d+(mg|kg|g)$
           flavor: Perl
-        - pattern: ^\\d+(lbs|stone)$
   sample_length:
     Type:
       value_type: number
