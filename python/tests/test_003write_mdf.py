@@ -2,8 +2,10 @@ import pytest
 import yaml
 from pathlib import Path
 from yaml import Loader as yloader
+from tempfile import NamedTemporaryFile
 from bento_mdf import MDFReader
 from bento_mdf import MDFWriter
+from bento_mdf.diff import diff_models
 from bento_meta.model import Model
 from bento_meta.objects import Concept, Node, Property, Tag, Term
 from pdb import set_trace
@@ -18,7 +20,6 @@ def test_write_mdf():
     assert isinstance(wr_m.model, Model)
     mdf = wr_m.write_mdf()
     assert isinstance(mdf, dict)
-
     assert set(yml["Nodes"]) == set(mdf["Nodes"])
     assert set(yml["Relationships"]) == set(mdf["Relationships"])
     assert set(yml["PropDefinitions"]) == set(mdf["PropDefinitions"])
@@ -53,10 +54,24 @@ def test_write_mdf():
         yp["file_size"]["Type"]["value_type"] == mp["file_size"]["Type"]["value_type"]
     )
     assert yp["md5sum"]["Tags"]["another"] == mp["md5sum"]["Tags"]["another"]
+    # following asserts that model building in reader.py collects terms appropriately
+    assert set([x for x in yml["Terms"]]) == set([x for x in mdf["Terms"]]) 
 
 
+def test_read_write_gold_std_roundtrip():
+    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml", handle="test")
+    wr_m = MDFWriter(model=m.model)
+    assert isinstance(wr_m.model, Model)
+    with NamedTemporaryFile(mode="w+", suffix=".yaml", delete_on_close=False) as mdf_w:
+        wr_m.write_mdf(file=mdf_w)
+        mdf_w.close()
+        rd_wr_m = MDFReader(mdf_w.name)
+        result = diff_models(rd_wr_m.model, m.model, include_summary=True)
+        assert result['summary'] is None
+
+@pytest.mark.skip("Need a schema change (allow Terms to have Term keys) for this use case")
 def test_write_mdf_nested_terms_tags():
-    model = Model(handle="test")
+    model = Model(handle="test", version="1.0.0")
     node = Node({"handle": "test_node"})
     model.add_node(node)
     prop = Property({"handle": "test_prop", "value_domain": "value_set"})
@@ -93,6 +108,7 @@ def test_write_mdf_nested_terms_tags():
     model.add_terms(prop, term_1)
     mdf = MDFWriter(model=model)
     mdf_dict = mdf.write_mdf()
+    set_trace()
     actual = mdf_dict.get("Terms")
     expected = {
         'test_term_1': {

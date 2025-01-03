@@ -1,11 +1,14 @@
 import logging
 import yaml
 from collections import Counter
+from functools import reduce
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
 from bento_meta.objects import Edge, Node, Property, Term
 from .convert import entity_to_spec
 from pdb import set_trace
+
+
 class MDFWriter(object):
     def __init__(self, model=None):
         self.mdf = {
@@ -52,18 +55,45 @@ class MDFWriter(object):
 
         for hdl in edge_specs:
             top = {}
+            # determine default Mul 
             muls = Counter([x.get("Mul") for x in edge_specs[hdl]])
             dfMul = muls.most_common(1)[0][0]
             top["Mul"] = dfMul or Edge.default("multiplicity")
+            # raise common Desc
+            top["Desc"] = None
+            descs = Counter([x.get("Desc") for x in edge_specs[hdl] if x.get("Desc")])
+            if descs.total() == len(edge_specs[hdl]):
+                dfDesc = descs.most_common(1)[0][0]
+                top["Desc"] = dfDesc
+            if not top["Desc"]:
+                del top["Desc"]
+            # merge props - this logic raises all Props specified in
+            # Ends members to the Relationship[<handle>] level
+            # (MDF schema does not currently allow Props to be specified
+            #  at the End level)
+            propsets = [set(x.get("Props")) for x in edge_specs[hdl]]
+            if not any([len(s) > 0 for s in propsets]):
+                top["Props"] = "null"
+            else:
+                mrgd = list(reduce(lambda x, y: x | y, propsets))
+                top["Props"] = mrgd
             top["Ends"] = []
             for spec in edge_specs[hdl]:
                 if spec["Mul"] == top["Mul"]:
                     del spec["Mul"]
+                if spec.get("Desc") and top.get("Desc"):
+                    if spec["Desc"] == top["Desc"]:
+                        del spec["Desc"]
+                if spec.get("Props"):
+                    del spec["Props"]
                 top["Ends"].append(spec)
             self.mdf["Relationships"][hdl] = top
 
         # collect Terms?
-
+        for tm in sorted(self.model.terms):
+            term = self.model.terms[tm]
+            self.mdf["Terms"][term.handle] = entity_to_spec(term)
+        
         if file:
             fh = file
             if isinstance(file, str):

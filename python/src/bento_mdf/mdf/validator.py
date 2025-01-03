@@ -13,40 +13,6 @@ from pydantic import BaseModel, TypeAdapter, ValidationError
 from pydantic.json_schema import GenerateJsonSchema
 from pdb import set_trace
 
-# custom validator for regex-checked strings:
-# use a custom Annotated type with Predicate, res
-
-# want to dynamically create a pydantic model Class that can validate data that
-# is submitted under the conditions laid out in the MDF for Properties
-# Reasonable structure is: one (sub)Class per defined Node, with classname equal to node name
-# (possibly camel-cased)
-# The subClass would contain named typed attributes, with names derived from the Properties
-# defined for the Node. Types of attribute values are derived from MDF PropDefinitions.
-#
-
-  # treatment:
-  #   Props:
-  #     - treatment_id
-  #     - age_at_treatment_start
-  #     - age_at_treatment_end
-  #     - treatment_type
-  #     - treatment_agent
-  #     - id
-
-# class TreatmentTypeEnum(str, Enum):
-#     <snakecase_normalized_values> = <values>
-
-# class TreatmentAgentEnum(str, Enum):
-#     <snakecase_normalized_values> = <values>
-    
-# class Treatment(BaseModel):
-#     treatment_id: str
-#     age_at_treatment_start: int
-#     age_at_treatment_end: int
-#     treatment_type: TreatmentTypeEnum
-#     treatment_agent: TreatmentAgentEnum
-#     id: str
-
 jenv = Environment(
     loader=PackageLoader("bento_mdf", package_path="mdf/templates"),
     trim_blocks=True,
