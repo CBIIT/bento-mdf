@@ -26,14 +26,13 @@ Nodes:
       - disease
 Relationships:
   of_case:
-    Props: ~
+    Props:
+      - days_to_sample
     Mul: one_to_one
     Ends:
       - Src: sample
         Dst: case
         Mul: many_to_one
-        Props:
-          - days_to_sample
       - Src: diagnosis
         Dst: case
         Term:
@@ -57,12 +56,11 @@ Relationships:
       item2: value2
     Mul: one_to_many
     Props:
+      - workflow_id
       - id
     Ends:
       - Src: file
         Dst: file
-        Props:
-          - workflow_id
       - Src: sample
         Dst: sample
 PropDefinitions:

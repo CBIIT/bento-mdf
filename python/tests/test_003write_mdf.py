@@ -34,13 +34,14 @@ def test_write_mdf():
         yml_ends = {(x["Src"], x["Dst"]): x for x in yml_ends}
         mdf_ends = mdf["Relationships"][n]["Ends"]
         mdf_ends = {(x["Src"], x["Dst"]): x for x in mdf_ends}
+        if def_props:  # i.e., there are default properties in the source file
+            assert set(mdf["Relationships"][n]["Props"]) == def_props
         for ends in yml_ends:
             assert mdf_ends[ends]
+            # Note, props at specific End specs are not currently allowed by MDF Schema
             if "Props" in yml_ends[ends]:
                 assert set(mdf_ends[ends]["Props"]) == set(yml_ends[ends]["Props"])
-            else:
-                if def_props:  # i.e., there are default properties in the source file
-                    assert set(mdf_ends[ends]["Props"]) == def_props
+
     yp = yml["PropDefinitions"]
     mp = mdf["PropDefinitions"]
     assert yp["case_id"]["Type"]["pattern"] == mp["case_id"]["Type"]["pattern"]

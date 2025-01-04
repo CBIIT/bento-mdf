@@ -111,8 +111,9 @@ def test_created_model() -> None:
     assert file_size.units == "Gb;Mb"
     derived_from = m.model.edges[("derived_from", "sample", "sample")]
     assert derived_from
-    assert len(derived_from.props.keys()) == 1
-    assert next(iter(derived_from.props.values())).handle == "id"
+    # following tests specific Props at Rel:Ends spec
+    # assert len(derived_from.props.keys()) == 1
+    # assert next(iter(derived_from.props.values())).handle == "id"
     d_f = m.model.edges_by_dst(m.model.nodes["file"])
     assert d_f
     assert len(d_f) == 1
