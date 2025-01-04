@@ -73,27 +73,47 @@ def test_data_validation():
 
     data = {
         "case": {"case_id": "CASE-22"},
-        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "diagnosis": {
+            "disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
+            "date_of_dx": "1965-05-04T00:00:00",
+        },
         "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": "normal"},
         }
     assert v.validate('testData', data)
     data_nulls = {
         "case": {"case_id": "CASE-22"},
-        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "diagnosis": {
+            "disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
+            "date_of_dx": None,
+        },
         "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": None},
         }
     assert v.validate('testData', data_nulls)
     data_nulled_req = {
         "case": {"case_id": None},
-        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "diagnosis": {
+            "disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
+            "date_of_dx": "1965-05-04T00:00:00",
+        },
         "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": None},
         }
     assert not v.validate('testData', data_nulled_req)
     assert re.match(".*should be a valid string", v.last_validation_errors[0][0]['msg'])
-    
+    data_bad_url_and_date = {
+        "case": {"case_id": "CASE-22"},
+        "diagnosis": {
+            "disease": "ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
+            "date_of_dx": "05-04-1965T00:00:00",
+        },
+        "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
+        "sample": {"amount": 4.0, "sample_type": "normal"},
+        }
+    assert not v.validate('testData', data_bad_url_and_date)
+    assert re.match(".*should be a valid URL", v.last_validation_errors[0][0]['msg'])
+    assert re.match(".*should be a valid date", v.last_validation_errors[0][1]['msg'])
     pass
 
 

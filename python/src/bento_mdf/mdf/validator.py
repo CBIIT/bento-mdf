@@ -7,9 +7,9 @@ from .reader import MDFReader
 from bento_meta.objects import Property
 from tempfile import NamedTemporaryFile
 from jinja2 import Environment, PackageLoader
-from typing import Any, List, NoReturn, TYPE_CHECKING
+from typing import Any, List, NoReturn #, TYPE_CHECKING
 from datetime import datetime
-from pydantic import BaseModel, TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError, AnyUrl
 from pydantic.json_schema import GenerateJsonSchema
 from pdb import set_trace
 
@@ -61,7 +61,7 @@ class MDFDataValidator:
         "number": float,
         "string": str,
         "regexp": str,
-        "url": str,
+        "url": AnyUrl,
         "TBD": Any,
         }
 

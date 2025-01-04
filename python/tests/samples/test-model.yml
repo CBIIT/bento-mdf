@@ -24,6 +24,7 @@ Nodes:
   diagnosis:
     Props:
       - disease
+      - date_of_dx
 Relationships:
   of_case:
     Props:
@@ -97,6 +98,8 @@ PropDefinitions:
       value_type: integer
   disease:
     Type: url
+  date_of_dx:
+    Type: datetime
   days_to_sample:
     Type:
       units:
