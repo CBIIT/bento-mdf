@@ -5,6 +5,7 @@ from yaml import Loader as yloader
 from tempfile import NamedTemporaryFile
 from bento_mdf import MDFReader
 from bento_mdf import MDFWriter
+from bento_mdf import MDFValidator
 from bento_mdf.diff import diff_models
 from bento_meta.model import Model
 from bento_meta.objects import Concept, Node, Property, Tag, Term
@@ -66,6 +67,12 @@ def test_read_write_gold_std_roundtrip():
     with NamedTemporaryFile(mode="w+", suffix=".yaml", delete_on_close=False) as mdf_w:
         wr_m.write_mdf(file=mdf_w)
         mdf_w.close()
+        # validate generated MDF
+        val = MDFValidator(None, mdf_w.name, raise_error=True)
+        val.load_and_validate_schema()
+        val.load_and_validate_yaml()
+        val.validate_instance_with_schema()
+        # check that generated model is equivalent to input model
         rd_wr_m = MDFReader(mdf_w.name)
         result = diff_models(rd_wr_m.model, m.model, include_summary=True)
         assert result['summary'] is None

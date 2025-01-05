@@ -23,7 +23,7 @@ def test_data_validator():
     assert issubclass(v.model_of('testData'), BaseModel)
     assert issubclass(v.model_of('Case'), BaseModel)
     assert issubclass(v.model_of('SampleTypeEnum'), Enum)
-    pass
+
 
 
 def test_data_validation():
