@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "bento-mdf"
-copyright = "2020, FNLCR"
+copyright = "2020-2025, FNLCR"
 author = "Mark Jensen, Nelson Moore"
 
 # -- General configuration ---------------------------------------------------
@@ -46,6 +46,8 @@ master_doc = "index"
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+myst_heading_anchors = 2
 
 # -- Options for HTML output -------------------------------------------------
 

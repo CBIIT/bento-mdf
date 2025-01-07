@@ -14,8 +14,8 @@ by a [JSONSchema](https://json-schema.org/understanding-json-schema/)
   case, with underscores replacing any spaces ("snakecase");
 
 A graph model can be expressed in a single YAML file, or multiple YAML
-files. [Compliant](../../spec/README.md) drivers will merge the data structures are
-merged, so that, for example, nodes and relationships can be described
+files. [Compliant](../../spec/README.md) drivers will merge the data structures, 
+so that, for example, nodes and relationships can be described
 in one file, and property definitions can be provided in a separate
 file.
 
@@ -34,8 +34,9 @@ with, e.g., contain no spaces and not start with a numeral.
 The `URI` value, if present, should be a resolving URL that can 
 provide further detailed information about the model described in the 
 MDF instance. Ideally, it should be the base URL for a terminology 
-server (like the Simple Terminology Server), that can be concatenated 
-with path information in the MDF to return relevant details. 
+server (like the [Simple Terminology Server](https://github.com/CBIIT/bento-sts)), 
+that can be concatenated with path information in the MDF to return 
+relevant details. 
 
 In particular, an enumerated value set can be included "by reference"
 in the MDF, using a path.  Joining the URL value and the path value 
@@ -89,7 +90,7 @@ of each relationship type. Relationship descriptions look like:
          Mul: [ one_to_one | many_to_one | many_to_many | one_to_many ]
          Ends:
             - Src: <nodename1>
-               Dst: <nodename2>
+              Dst: <nodename2>
             - Src: <nodename...>
                ...
 
@@ -236,7 +237,7 @@ containing Node, Relationship, or Property.
 In the example below, the property "inversion time" is associated with
 two relevant entities from other resources, caDSR and DICOM:
 
-    PropDefns:
+    PropDefintions:
     ...
       inversion_time:
         Desc: |
@@ -291,7 +292,7 @@ end of the input files.  For example, using
 
     model-tool -g graph.svg icdc-model.yml temp-changes.yml
 
-would create a graphic of nodes and edges defined in `icdc-model.yml`,
+would create a GraphViz graphic of nodes and edges defined in `icdc-model.yml`,
 as modified by changes specified in `temp-changes.yml`.
 
 ### Adding elements

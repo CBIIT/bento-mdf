@@ -15,6 +15,7 @@ def test_data_validator():
 
     m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
     v = MDFDataValidator(m)
+    set_trace()
     compile(v.data_model, '<string>', 'exec')
     assert v.module
     assert v.model_class == 'testData'
@@ -23,7 +24,6 @@ def test_data_validator():
     assert issubclass(v.model_of('testData'), BaseModel)
     assert issubclass(v.model_of('Case'), BaseModel)
     assert issubclass(v.model_of('SampleTypeEnum'), Enum)
-
 
 
 def test_data_validation():
