@@ -38,12 +38,18 @@ def maybe_optional(val : str, prop : Property):
     else:
         return f"Optional[{val}]"
 
+def maybe_list(val : str, prop : PropertyO):
+    if prop.value_domain == "list":
+        return f"List[{val}]"
+    else:
+        return val
+
 
 jenv.filters['toCamelCase'] = toCamelCase
 jenv.filters['to_snakecase'] = to_snakecase
 jenv.filters['to_unit_types'] = to_unit_types
 jenv.filters['maybe_optional'] = maybe_optional
-
+jenv.filters['maybe_list'] = maybe_list
 
 class GenerateQualJsonSchema(GenerateJsonSchema):
     # override to add $schema tag
@@ -107,7 +113,7 @@ class MDFDataValidator:
         for node in self.model.nodes.values():
             self._node_classes.append(toCamelCase(node.handle))
             for pr in node.props.values():
-                if pr.value_domain == 'value_set':
+                if pr.value_domain == 'value_set' or pr.item_domain == 'value_set':
                     if pr.value_set.url:
                         self._enum_classes.append("{}EnumURL".format(toCamelCase(pr.handle)))
                     elif pr.value_set.path:

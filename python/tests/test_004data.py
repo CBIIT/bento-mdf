@@ -139,4 +139,34 @@ def test_validator_for_gold_mdf():
     m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml")
     v = MDFDataValidator(m)
     assert v
+
+
+def test_list_type_validation():
+    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml")
+    v = MDFDataValidator(m)
+    data = {
+        "transaction_id": None,
+        "transaction_date": None,
+        "file_name": "file.txt",
+        "date": "2024-04-30T00:14:00",
+        "file_id": None,
+        "file_size": 50000,
+        "list_of_integers": [1, 2, 3],
+        "list_of_numbers": [1, 2.0, 4.5],
+        "list_of_datetimes": ["1965-05-04T00:00:00",
+                              "1776-07-04T00:00:01",
+                              "2001-01-04T12:15:00"],
+        "list_of_urls": ["https://google.com", "http://mdb.ctos-data-team.org/v1/",
+                         "ftp://data.net"]
+        }
+    assert v.validate('File', data)
+    data['list_of_numbers'].append("wrong")
+    data['list_of_datetimes'].append("2000-04-31T12:00:05") # day DNE
+    data['list_of_urls'] = "https://google.com" # not a list
+
+    assert not v.validate('File', data)
+    assert re.match(".*should be a valid number", v.last_validation_errors[0][0]['msg'])
+    assert re.match(".*value is outside expected range", v.last_validation_errors[0][1]['msg'])
+    assert re.match(".*should be a valid list", v.last_validation_errors[0][2]['msg'])
+    pass
     
