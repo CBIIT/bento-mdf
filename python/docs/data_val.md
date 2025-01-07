@@ -5,7 +5,7 @@ The MDF [PropDefinitions](#property-definitions) section describes properties (s
 The `MDFDataValidator` class uses the [Pydantic](https://docs.pydantic.dev/latest/) data validation library to interpret MDF nodes and properties as Python classes having attributes whose values are automatically validated. This provides several options for performing data validation against an MDF model. Data simply needs to be expressed as a Python dict or as JSON. Suppose you have defined a node `sample` in MDF, with properties `sample_type` and `amount`:
 
 ```yaml
-\# sample-model.yml
+# sample-model.yml
 Handle: test
 Nodes:
   sample:
@@ -37,3 +37,24 @@ from bento_mdf import MDFReader, MDFDataValidator
     assert result is False # at least one record was invalid
     assert val.last_validation_errors[2] # the last record has error info
 ```
+
+## Generated Validation Classes
+
+`MDFDataValidator` generates a Python module containing Pydantic classes (known as "models"). The module code is contained in `v.data_model`; it can be printed to a file and used independently. The validator object creates it and imports it dynamically; there is no need to deal directly with it in the simplest case of data validation (above).
+
+The Pydantic classes themselves, however, can be accessed using `model_of()`:
+
+```python
+    # instantiate a validated object:
+    sample1 = v.model_of('Sample')(sample_type="normal", amount="1.0")
+```
+
+The class names are generally camelCase versions of MDF Nodes, and their attributes are Property handles. The class names are available on the MDFDataValidator object:
+
+```python
+    pymodel = v.model_of( v.model_class )
+    pynodes = {cls : v.model_of(cls) for cls in v.node_classes}
+    pyenums = {cls : v.model_of(cls) for cls in v.enum_classes}
+```
+
+## JSON Schema Representations
