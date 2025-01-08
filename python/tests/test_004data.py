@@ -15,7 +15,6 @@ def test_data_validator():
 
     m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
     v = MDFDataValidator(m)
-    set_trace()
     compile(v.data_model, '<string>', 'exec')
     assert v.module
     assert v.model_class == 'testData'
@@ -124,7 +123,10 @@ def test_jsonschema():
     assert js['$schema']
     data = {
         "case": {"case_id": "CASE-22"},
-        "diagnosis": {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872"},
+        "diagnosis": {
+            "disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
+            "date_of_dx": None,
+        },
         "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": "normal"},
         }

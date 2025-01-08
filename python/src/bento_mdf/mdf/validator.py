@@ -3,6 +3,7 @@ import re
 import sys
 import importlib.util
 from functools import cache
+from pathlib import Path
 from .reader import MDFReader
 from bento_meta.objects import Property
 from tempfile import NamedTemporaryFile
@@ -132,7 +133,7 @@ class MDFDataValidator:
         """
         if not self.data_model:
             return
-        with NamedTemporaryFile(mode="w+", suffix=".py", delete_on_close=False) as modf:
+        with NamedTemporaryFile(mode="w+", suffix=".py", delete=False) as modf:
             modname = "{}Data".format(self.model.handle)
             print(self.data_model, file=modf)
             modf.close()
@@ -141,6 +142,7 @@ class MDFDataValidator:
             sys.modules[modname] = module
             spec.loader.exec_module(module)
             self._module = module
+            Path(modf.name).unlink()
 
     @cache
     def model_of(self, clsname : str):
