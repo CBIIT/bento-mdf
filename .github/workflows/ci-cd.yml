@@ -4,12 +4,10 @@ on: [push, pull_request]
 
 jobs:
   ci-cd:
-    uses: CBIIT/bento-workflows/.github/workflows/ci-cd.yml@v2.3.5
+    uses: CBIIT/bento-workflows/.github/workflows/ci-cd.yml@v2.3.6
     with:
       workdir: ./python
-      versions:
-        - 3.10
-        - 3.11
-        - 3.12
+      versions: |
+        ["3.10","3.11","3.12"]
       pkg_name: bento-mdf
     secrets: inherit
