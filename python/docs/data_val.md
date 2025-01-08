@@ -68,7 +68,9 @@ else:
 
 ## The "Model Class"
 
-An additional validation class is created that aggregates all Node classes. This can be used to validate a dict containing a data record for all model Nodes. The model class is named by appending 'Data' to the model handle. For example, [test-model.yml](/python/tests/samples/test-model.yml) has handle `test` and its model class is named `testData`. An example validation:
+An additional validation class is created that aggregates all Node classes. This can be used to validate a dict containing a data record for all model Nodes. The model class is named by appending 'Data' to the model handle. This name is found in `val.model_class`.
+
+For example, [test-model.yml](/python/tests/samples/test-model.yml) has handle `test` and its model class is named `testData`. An example validation:
 
 ```python
 data = {
@@ -204,5 +206,14 @@ print(json.dumps(val.json_schema('Diagnosis'), indent=4))
 }
 ```
 
+In Python, this JSON Schema could be used to validate data as follows:
 
-
+```python
+import jsonschema
+jsonschema.validate(
+    {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
+     "date_of_dx": None},
+    val.json_schema('Diagnosis'),
+    format_checker=Draft202012Validator.FORMAT_CHECKER
+)
+```
