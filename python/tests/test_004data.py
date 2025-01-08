@@ -8,6 +8,7 @@ from enum import Enum
 from pathlib import Path
 from pdb import set_trace
 
+
 TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 
 
