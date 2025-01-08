@@ -64,7 +64,7 @@ def test_read_write_gold_std_roundtrip():
     m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml", handle="test")
     wr_m = MDFWriter(model=m.model)
     assert isinstance(wr_m.model, Model)
-    with NamedTemporaryFile(mode="w+", suffix=".yaml", delete_on_close=False) as mdf_w:
+    with NamedTemporaryFile(mode="w+", suffix=".yaml", delete=False) as mdf_w:
         wr_m.write_mdf(file=mdf_w)
         mdf_w.close()
         # validate generated MDF
@@ -76,6 +76,7 @@ def test_read_write_gold_std_roundtrip():
         rd_wr_m = MDFReader(mdf_w.name)
         result = diff_models(rd_wr_m.model, m.model, include_summary=True)
         assert result['summary'] is None
+        Path(mdf_w.name).unlink()
 
 @pytest.mark.skip("Need a schema change (allow Terms to have Term keys) for this use case")
 def test_write_mdf_nested_terms_tags():

@@ -76,6 +76,7 @@ def test_created_model() -> None:
         "file_name",
         "file_size",
         "disease",
+        "date_of_dx",
         "days_to_sample",
         "workflow_id",
         "id",
