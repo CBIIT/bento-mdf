@@ -32,7 +32,7 @@ include = ["templates/pymodel.py.jinja2"]
 "load-mdf" = { reference = "bin/load-mdf.py", type = "file" }
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.10"
 bento-meta = "^0.2.11"
 jsonschema = "^4.17.3"
 Jinja2 = ">=3.1.4"
