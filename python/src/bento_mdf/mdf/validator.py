@@ -149,7 +149,16 @@ class MDFDataValidator:
         if clsname != self.model_class and clsname not in self.node_classes and clsname not in self.enum_classes:
             raise RuntimeError(f"Validation model does not contain class '{clsname}'")
         return eval("self.module.{}".format(clsname))
-        
+
+    @cache
+    def fields_of(self, clsname : str) -> List[str]:
+        if clsname != self.model_class and clsname not in self.node_classes:
+            raise RuntimeError(f"Validation model does not contain node class '{clsname}'")
+        return [x for x in self.model_of(clsname).model_fields]
+
+    def props_of(self, clsname : str) -> List[str]:
+        return self.fields_of(clsname)
+    
     @cache
     def validator(self, clsname : str):
         """
