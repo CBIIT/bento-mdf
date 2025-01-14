@@ -24,6 +24,7 @@ The Bento framework is currently used in the following projects:
 
 example.ipynb
 mdf.md
+data_val.md
 mdf_tools.md
 changelog.md
 contributing.md

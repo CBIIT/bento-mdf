@@ -191,7 +191,8 @@ defs:
             items:
               -
                 $ref: "#/defs/regex"
-            uniqueItems: true
+            minItems: 1
+            maxItems: 1
           -
             $ref: "#/defs/enumType"
       Tags:

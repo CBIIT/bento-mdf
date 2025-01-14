@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
+from pdb import set_trace
 
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
@@ -103,11 +104,11 @@ def spec_to_entity(
 
 def process_node(spec: dict, node: Node) -> None:
     """Additional processing for Node entities."""
-
+    pass
 
 def process_reln(spec: dict, edge: Edge) -> None:
     """Additional processing for Relationship entities."""
-
+    pass
 
 def process_term(spec: dict, term: Term) -> None:
     """Additional processing for Term entities."""
@@ -119,14 +120,11 @@ def process_term(spec: dict, term: Term) -> None:
 
 def process_tag(spec: dict, tag: Tag):
     """Additional processing for tag entities."""
-
+    pass
 
 def process_prop(spec: dict, prop: Property) -> None:
     """Additional processing for Property entities."""
     ty_spec = spec.get("Enum") or spec.get("Type")
-    # kludge to process deprecated {"Type": {"Enum": [...]}} construct:
-    if isinstance(ty_spec, dict) and "Enum" in ty_spec:
-        ty_spec = ty_spec["Enum"]
     domain_spec = typespec_to_domain_spec(ty_spec)
     if (
         domain_spec["value_domain"] != "value_set"
@@ -140,9 +138,17 @@ def process_prop(spec: dict, prop: Property) -> None:
             prop.item_domain = "value_set"
         else:
             prop.value_domain = "value_set"
+        if domain_spec.get("units"):
+            prop.units = domain_spec["units"]
+        if domain_spec.get("pattern"):
+            prop.pattern = domain_spec["pattern"]
         if domain_spec.get("url"):
             prop.value_set = ValueSet(
                 {"url": domain_spec["url"], "_commit": prop._commit},
+            )
+        elif domain_spec.get("path"):
+            prop.value_set = ValueSet(
+                {"path": domain_spec["path"], "_commit": prop._commit},
             )
         elif domain_spec.get("value_set"):
             # create 'dummy' ValueSet to hold Enum terms,
@@ -181,6 +187,17 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
     if isinstance(spec, str):
         return {"value_domain": spec}
     if isinstance(spec, dict):
+        # list type
+        if spec.get("value_type") == "list":
+            domain_spec = {"value_domain": "list"}
+            list_spec = spec.get("item_type") or spec.get("Enum")
+            item_domain_spec = typespec_to_domain_spec(list_spec)
+            domain_spec["item_domain"] = item_domain_spec["value_domain"]
+            for key in ("units", "value_set", "url", "path"):
+                if key not in item_domain_spec:
+                    continue
+                domain_spec[key] = item_domain_spec[key]
+            return domain_spec
         # regex type
         if spec.get("pattern"):
             # TODO: add regex flavor attribute to bento-meta Property entity?
@@ -195,17 +212,6 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
             else:
                 domain_spec["units"] = ";".join(spec["units"])
             return domain_spec
-        # list type
-        if spec.get("item_type") or spec.get("Enum"):
-            domain_spec = {"value_domain": "list"}
-            list_spec = spec.get("item_type") or spec.get("Enum")
-            item_domain_spec = typespec_to_domain_spec(list_spec)
-            domain_spec["item_domain"] = item_domain_spec["value_domain"]
-            for key in ("units", "value_set", "url"):
-                if key not in item_domain_spec:
-                    continue
-                domain_spec[key] = item_domain_spec[key]
-            return domain_spec
     # enum type
     if isinstance(spec, list):
         # do not implement union type for now
@@ -216,12 +222,11 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
         if (
             len(spec) == 1
             and isinstance(spec[0], str)
-            and re.match(
-                "^/|.*://",
-                spec[0],
-            )
         ):
-            return {"value_domain": "value_set", "url": spec[0]}
+            if re.match("^[a-z][a-z]*://",spec[0]):
+                return {"value_domain": "value_set", "url": spec[0]}
+            elif re.match("^/.*",spec[0]):
+                return {"value_domain": "value_set", "path": spec[0]}
         vs = []
         for tm in spec:
             if isinstance(tm, bool):
@@ -230,3 +235,108 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
         return {"value_domain": "value_set", "value_set": vs}
     # unknown - default domain
     return {"value_domain": Property.default("value_domain")}
+
+
+def entity_to_spec(
+        ent: Entity,
+        spec: dict = None
+) -> dict:
+    if spec is None:
+        spec = {}
+    if ent.tags:
+        tags = {}
+        for t in ent.tags.values():
+            entity_to_spec(t,tags)
+        spec["Tags"] = tags
+    if "concept" in ent.attspec and ent.concept and ent.concept.terms:
+        spec["Term"] = [entity_to_spec(t) for t in ent.concept.terms.values()]
+    if ent.desc:
+        spec["Desc"] = ent.desc
+    if isinstance(ent, Node):
+        spec["Props"] = sorted([x.handle for x in ent.props.values()])
+        if len(spec["Props"]) == 0:
+            spec["Props"] = "null"
+        pass
+    elif isinstance(ent, Property):
+        if ent.is_nullable is not None:
+            spec["Nul"] = ent.is_nullable
+        if ent.is_required is not None:
+            spec["Req"] = ent.is_required
+        if ent.is_strict is not None:
+            spec["Strict"] = ent.is_strict
+        if ent.is_key is not None:
+            spec["Key"] = ent.is_key
+        if ent.is_deprecated is not None:
+            spec["Deprecated"] = ent.is_deprecated
+        if ent.value_domain == 'value_set':
+            spec["Enum"] = domain_spec_to_typespec(ent)
+        else:
+            spec["Type"] = domain_spec_to_typespec(ent)
+        pass
+    elif isinstance(ent, Edge):
+        # note that edge mdf specs must be merged correctly in the caller
+        if ent.is_required:
+            spec["Req"] = True
+        if ent.multiplicity:
+            spec["Mul"] = ent.multiplicity
+        spec["Src"] = ent.src.handle
+        spec["Dst"] = ent.dst.handle
+        spec["Props"] = sorted([x.handle for x in ent.props.values()])
+        if len(spec["Props"]) == 0:
+            spec["Props"] = "null"
+        pass
+    elif isinstance(ent, Term):
+        spec["Value"] = ent.value
+        spec["Origin"] = ent.origin_name
+        if ent.origin_definition:
+            spec["Definition"] = ent.origin_definition
+        if ent.origin_version:
+            spec["Version"] = ent.origin_version
+        if ent.origin_id:
+            spec["Code"] = ent.origin_id
+        pass
+    elif isinstance(ent, Tag):
+        spec[ent.key] = ent.value
+        pass
+    else:
+        raise RuntimeError(f'Cannot process Entity subtype: {ent}')
+    return spec
+
+
+def domain_spec_to_typespec(prop : Property) -> str | dict:
+    ret = {}
+    if prop.value_domain == 'value_set':
+        if prop.value_set.url:
+            ret = [prop.value_set.url]
+        elif prop.value_set.path:
+            ret = [prop.value_set.path]
+        else:
+            ret = [x for x in prop.terms]
+    elif prop.value_domain == 'list':
+        ret["value_type"] = 'list'
+        if prop.item_domain == "value_set":
+            if prop.value_set.url:
+                ret["Enum"] = [prop.value_set.url]
+            elif prop.value_set.path:
+                ret["Enum"] = [prop.value_set.path]
+            else:
+                ret["Enum"] = [x for x in prop.terms]
+        else:
+            if prop.units:
+                ret["item_type"] = {"value_type": prop.item_domain,
+                                    "units": prop.units.split(";")}
+            elif prop.pattern:
+                ret["item_type"] = {"pattern": prop.pattern}
+            else:
+                ret["item_type"] = prop.item_domain
+    elif prop.units:
+        ret["value_type"] = prop.value_domain
+        if prop.units == "regexp":
+            ret["units"] = [{"pattern": prop.pattern}]
+        else:
+            ret["units"] = prop.units.split(";")
+    elif prop.pattern:
+        ret["pattern"] = prop.pattern
+    else:
+        ret = prop.value_domain
+    return ret

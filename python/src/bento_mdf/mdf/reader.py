@@ -33,7 +33,7 @@ def make_nano() -> str:
     )
 
 
-class MDF:
+class MDFReader:
     """MDF class for reading MDF files into a bento-meta Model."""
 
     def __init__(
@@ -401,7 +401,8 @@ class MDF:
                 {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
                 Property,
             )
-            if prop.value_set and prop.value_set.url is not None:  # enum as reference
+            if prop.value_set and (prop.value_set.path is not None
+                                   or prop.value_set.url is not None):  # enum as reference
                 self.merge_enum_reference(prop)
             if prop.value_set and prop.value_set._commit == "dummy":
                 terms = []
@@ -458,16 +459,16 @@ class MDF:
 
         Adds terms to the property value set.
         """
-        if not prop.value_set or not prop.value_set.url:
+        if not prop.value_set or not (prop.value_set.path or prop.value_set.url):
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
-        enum = self.load_enum_reference(prop.value_set.url)
+        enum = self.load_enum_reference(prop.value_set.path or prop.value_set.url)
         enum_values = enum.get("PropDefinitions", {}).get(prop.handle, [])
         enum_terms = enum.get("Terms", {})
         if not enum_values:
             self.logger.error(
                 "No enum at reference '%s'",
-                prop.value_set.url,
+                prop.value_set.path or prop.value_set.url,
             )
             return
         specs = {val: {"Value": val} for val in enum_values}

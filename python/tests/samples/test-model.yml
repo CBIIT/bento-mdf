@@ -24,16 +24,16 @@ Nodes:
   diagnosis:
     Props:
       - disease
+      - date_of_dx
 Relationships:
   of_case:
-    Props: ~
+    Props:
+      - days_to_sample
     Mul: one_to_one
     Ends:
       - Src: sample
         Dst: case
         Mul: many_to_one
-        Props:
-          - days_to_sample
       - Src: diagnosis
         Dst: case
         Term:
@@ -57,12 +57,11 @@ Relationships:
       item2: value2
     Mul: one_to_many
     Props:
+      - workflow_id
       - id
     Ends:
       - Src: file
         Dst: file
-        Props:
-          - workflow_id
       - Src: sample
         Dst: sample
 PropDefinitions:
@@ -72,6 +71,7 @@ PropDefinitions:
     Term:
       - Value: 'case_id'
         Origin: 'CTDC'
+    Req: true
   patient_id:
     Type: string
   sample_type:
@@ -87,7 +87,7 @@ PropDefinitions:
     Tags:
       another: value3
     Type:
-      pattern: "^[a-f0-9]{40}"
+      pattern: "^[a-f0-9]{32}"
   file_name:
     Type: string
   file_size:
@@ -98,6 +98,8 @@ PropDefinitions:
       value_type: integer
   disease:
     Type: url
+  date_of_dx:
+    Type: datetime
   days_to_sample:
     Type:
       units:
@@ -109,5 +111,26 @@ PropDefinitions:
     Type:
       # uuid
       pattern: "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-  
-  
+Terms:
+  case_term:
+    Value: case
+    Origin: CTDC
+  subject:
+    Value: subject
+    Origin: caDSR
+  of_case_dx_case_term:
+    Value: of_case
+    Origin: Booga
+  of_case_term:
+    Value: of_case
+    Origin: CTDC
+  case_id:
+    Value: case_id
+    Origin: CTDC
+  normal:
+    Value: normal
+    Origin: test
+  tumor:
+    Value: tumor
+    Origin: test
+    

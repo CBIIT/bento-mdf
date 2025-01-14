@@ -233,7 +233,6 @@ PropDefinitions:
       units:
         - pattern: ^\\d+(mg|kg|g)$
           flavor: Perl
-        - pattern: ^\\d+(lbs|stone)$
   sample_length:
     Type:
       value_type: number
@@ -257,7 +256,7 @@ PropDefinitions:
       - https://anatomic_sites.gov/uberon/
   collection_method:
     Type:
-      - path/to/collection/methods
+      - /path/to/collection/methods
   list_of_strings:
     Type:
       value_type: list
