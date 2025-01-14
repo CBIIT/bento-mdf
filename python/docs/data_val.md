@@ -210,6 +210,7 @@ In Python, this JSON Schema could be used to validate data as follows:
 
 ```python
 import jsonschema
+from jsonschema import Draft202012Validator
 jsonschema.validate(
     {"disease": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872",
      "date_of_dx": None},
