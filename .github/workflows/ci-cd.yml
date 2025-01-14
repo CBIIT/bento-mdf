@@ -8,6 +8,6 @@ jobs:
     with:
       workdir: ./python
       versions: |
-        ["3.10","3.11","3.12"]
+        ["3.10","3.11","3.12","3.13"]
       pkg_name: bento-mdf
     secrets: inherit
