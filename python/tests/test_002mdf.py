@@ -271,7 +271,6 @@ def test_load_repo_url() -> None:
 def test_load_separate_enums_yaml_from_file_path() -> None:
     """Test loading model where enum list in separate yaml file referenced by path."""
     m = MDF(TEST_SEP_ENUM_MODEL_FILE_PATH, handle="CCDI")
-    set_trace()
     # sex_at_birth
     assert "female" in m.model.props[("participant", "sex_at_birth")].terms
     assert ("male", "caDSR") in m.model.terms
