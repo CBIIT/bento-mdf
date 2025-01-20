@@ -434,12 +434,14 @@ class MDFReader:
             enum_path = (Path.cwd() / Path(enum_ref.lstrip("/"))).resolve()
             if not enum_path.exists():
                 self.logger.error("Enum reference path '%s' does not exist", enum_path)
+                self.create_model_success = False
                 return {}
             with Path(enum_path).open() as f:
                 v = MDFValidator(None, f)
                 enum_mdf = v.load_and_validate_yaml()
                 if not enum_mdf:
                     self.logger.error("Error loading enum from path '%s'", enum_path)
+                    self.create_model_success = False
                     return {}
                 return enum_mdf.as_dict()  # type: ignore reportReturnType
         if re.match("(?:file|https?)://", enum_ref):  # looks like a url
@@ -449,6 +451,7 @@ class MDFReader:
             enum_mdf = v.load_and_validate_yaml()
             if not enum_mdf:
                 self.logger.error("Error loading enum from url '%s'", enum_ref)
+                self.create_model_success = False
                 return {}
             return enum_mdf.as_dict()  # type: ignore reportReturnType
         return {}
@@ -470,6 +473,7 @@ class MDFReader:
                 "No enum at reference '%s'",
                 prop.value_set.path or prop.value_set.url,
             )
+            self.create_model_success = False
             return
         specs = {val: {"Value": val} for val in enum_values}
         if enum_terms:  # merge term definitions with enum values
@@ -505,6 +509,7 @@ class MDFReader:
                     "in entity '%s'",
                     ent.handle,
                 )
+                self.create_model_success = False
                 return
             if "Origin" not in spec:
                 self.logger.warning(

@@ -2,16 +2,18 @@ import logging
 import yaml
 from collections import Counter
 from functools import reduce
+from typing import TYPE_CHECKING
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
+from .reader import MDFReader
 from bento_meta.objects import Edge, Node, Property, Term
 from .convert import entity_to_spec
 from pdb import set_trace
 
 
 class MDFWriter(object):
-    def __init__(self, model=None):
-        self.mdf = {
+    def __init__(self, model : MDFReader | Model = None):
+        self._mdf = {
             "Nodes": {},
             "Relationships": {},
             "PropDefinitions": {},
@@ -21,10 +23,19 @@ class MDFWriter(object):
             "URI": None,
         }
         self.logger = logging.getLogger(__name__)
-        self.model = model
-        if model:
+        if isinstance(model, Model):
+            self.model = model
+        elif isinstance(model, MDFReader):
+            self.model = model.model
+        else:
+            self.logger.error("MDFWriter arg1 must be Model or MDFReader")
+            raise RuntimeError("MDFWriter arg1 must be Model or MDFReader")
+    
+    @property
+    def mdf(self):
+        if not self._mdf['Handle']:
             self.write_mdf()
-        pass
+        return self._mdf
     
     def write_mdf(self, file=None):
         """
@@ -33,18 +44,18 @@ class MDFWriter(object):
         :param str|file file: File name or object to write to (default is None; just return the MDF as dict)
         :returns: MDF as dict
         """
-        self.mdf["Handle"] = self.model.handle or "NEED_MODEL_HANDLE"
-        self.mdf["Version"] = self.model.version or "NEED_MODEL_VERSION"
+        self._mdf["Handle"] = self.model.handle or "NEED_MODEL_HANDLE"
+        self._mdf["Version"] = self.model.version or "NEED_MODEL_VERSION"
         if self.model.uri:
-            self.mdf["URI"] = self.model.uri
+            self._mdf["URI"] = self.model.uri
 
         for nd in sorted(self.model.nodes):
             node = self.model.nodes[nd]
-            self.mdf["Nodes"][nd] = entity_to_spec(node)
+            self._mdf["Nodes"][nd] = entity_to_spec(node)
 
         for pr in sorted(self.model.props):
             prop = self.model.props[pr]
-            self.mdf["PropDefinitions"][prop.handle] = entity_to_spec(prop)
+            self._mdf["PropDefinitions"][prop.handle] = entity_to_spec(prop)
 
         edge_specs = {}
         for rl in self.model.edges.values():
@@ -87,19 +98,19 @@ class MDFWriter(object):
                 if spec.get("Props"):
                     del spec["Props"]
                 top["Ends"].append(spec)
-            self.mdf["Relationships"][hdl] = top
+            self._mdf["Relationships"][hdl] = top
 
         # collect Terms?
         for tm in sorted(self.model.terms):
             term = self.model.terms[tm]
-            self.mdf["Terms"][term.handle] = entity_to_spec(term)
+            self._mdf["Terms"][term.handle] = entity_to_spec(term)
         
         if file:
             fh = file
             if isinstance(file, str):
                 fh = open(file, "w")
-            yaml.dump(self.mdf, stream=fh, indent=4)
+            yaml.dump(self._mdf, stream=fh, indent=4)
 
-        return self.mdf
+        return self._mdf
 
 

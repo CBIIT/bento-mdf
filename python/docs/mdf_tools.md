@@ -7,9 +7,6 @@ framework should observe the latest [specification](./spec).
 and loads MDF into a [bento-meta](https://github.com/CBIIT/bento-meta)
 python object model.
 
-[make-model](../../tools/make-model/README.md) is a reference
-driver and tool written in [Perl](https://www.perl.org/).
-
 ## Validator
 
 A simple command line validator `test-mdf.py` is included in 
