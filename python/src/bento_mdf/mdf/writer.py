@@ -71,9 +71,9 @@ class MDFWriter(object):
             # Ends members to the Relationship[<handle>] level
             # (MDF schema does not currently allow Props to be specified
             #  at the End level)
-            propsets = [set(x.get("Props")) for x in edge_specs[hdl]]
+            propsets = [set(x.get("Props")) for x in edge_specs[hdl] if x.get("Props")]
             if not any([len(s) > 0 for s in propsets]):
-                top["Props"] = "null"
+                top["Props"] = None
             else:
                 mrgd = list(reduce(lambda x, y: x | y, propsets))
                 top["Props"] = mrgd

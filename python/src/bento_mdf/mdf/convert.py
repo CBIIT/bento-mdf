@@ -255,7 +255,7 @@ def entity_to_spec(
     if isinstance(ent, Node):
         spec["Props"] = sorted([x.handle for x in ent.props.values()])
         if len(spec["Props"]) == 0:
-            spec["Props"] = "null"
+            spec["Props"] = None
         pass
     elif isinstance(ent, Property):
         if ent.is_nullable is not None:
@@ -283,7 +283,7 @@ def entity_to_spec(
         spec["Dst"] = ent.dst.handle
         spec["Props"] = sorted([x.handle for x in ent.props.values()])
         if len(spec["Props"]) == 0:
-            spec["Props"] = "null"
+            spec["Props"] = None
         pass
     elif isinstance(ent, Term):
         spec["Value"] = ent.value
