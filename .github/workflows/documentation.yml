@@ -26,8 +26,7 @@ jobs:
       - name: Sphinx build
         working-directory: ./python/docs
         run: |
-          poetry run pip install ipython ipykernel
-          poetry run ipykernel install --user --name "ipykernel"
+          poetry run python -m ipykernel install --user --name "ipykernel"
           poetry run sphinx-build -b html . ./_build/html
       - name: List HTML Output
         run: ls -R ./python/docs/_build/html
