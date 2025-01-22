@@ -1,0 +1,25 @@
+# sample-model.yml
+Handle: test
+Version: 0.01
+Nodes:
+  sample:
+    Props:
+      - sample_type
+      - amount
+Relationships:
+  is_subsample_of:
+    Mul: many_to_one
+    Ends:
+      - Src: sample
+        Dst: sample
+        Props: null
+PropDefinitions:
+  sample_type:
+    Enum:
+      - normal
+      - tumor
+  amount:
+    Type:
+      units:
+        - mg
+      value_type: number
