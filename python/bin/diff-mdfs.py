@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Generate, view, and save model diff."""
 
 from __future__ import annotations
