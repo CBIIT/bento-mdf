@@ -48,6 +48,8 @@ class MDFWriter(object):
         self._mdf["Version"] = self.model.version or "NEED_MODEL_VERSION"
         if self.model.uri:
             self._mdf["URI"] = self.model.uri
+        else:
+            del self._mdf["URI"]
 
         for nd in sorted(self.model.nodes):
             node = self.model.nodes[nd]
@@ -90,7 +92,7 @@ class MDFWriter(object):
                 top["Props"] = mrgd
             top["Ends"] = []
             for spec in edge_specs[hdl]:
-                if spec["Mul"] == top["Mul"]:
+                if spec.get("Mul") and spec.get("Mul") == top.get("Mul"):
                     del spec["Mul"]
                 if spec.get("Desc") and top.get("Desc"):
                     if spec["Desc"] == top["Desc"]:

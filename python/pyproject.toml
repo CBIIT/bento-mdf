@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.11.3"
+version = "0.11.4"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [{ name = "Mark A. Jensen", email = "mark.jensen@nih.gov" }]
 requires-python = ">=3.10"
@@ -16,16 +16,16 @@ classifiers = [
 
 [tool.poetry]
 name = "bento-mdf"
-version = "0.11.3"
+version = "0.11.4"
 description = "Python driver/validator for Bento Model Description Format"
 authors = ["Mark A. Jensen <mark.jensen@nih.gov>"]
 license = "Apache 2.0"
 readme = "README.md"
 include = ["templates/pymodel.py.jinja2"]
 
-[tool.poetry.scripts]
-"test-mdf.py" = { reference = "bin/test-mdf.py", type = "file" }
-"load-mdf" = { reference = "bin/load-mdf.py", type = "file" }
+#[tool.poetry.scripts]
+#"test-mdf.py" = { reference = "bin/test-mdf.py", type = "file" }
+#"load-mdf" = { reference = "bin/load-mdf.py", type = "file" }
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -51,6 +51,9 @@ sphinx = "^8.1.3"
 myst-nb = { version = "^1.0.0", python = "^3.10" }
 sphinx-autoapi = "^3.4.0"
 sphinx-rtd-theme = "^3.0.2"
+
+[tool.poetry.scripts]
+test_mdf = 'bento_mdf.bin.val_mdf:do_test'
 
 [build-system]
 requires = ["poetry-core"]
