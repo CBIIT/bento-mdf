@@ -246,13 +246,13 @@ lxml = ["lxml"]
 
 [[package]]
 name = "bento-meta"
-version = "0.2.12"
+version = "0.2.13"
 description = "Python drivers for Bento Metamodel Database"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "bento_meta-0.2.12-py3-none-any.whl", hash = "sha256:0ad4b4a55f8ef31d7f06f1b9354e7dca6dd41887b13c81ce92040ce3df26604e"},
-    {file = "bento_meta-0.2.12.tar.gz", hash = "sha256:0dd8ab2675dd795aa2c4fd3a64dddee6612c32fd9e57febd715fe0b11f759cff"},
+    {file = "bento_meta-0.2.13-py3-none-any.whl", hash = "sha256:d7ca0030473589e237fae16c8e118df166c84c5609473e99ce80c132fce31f75"},
+    {file = "bento_meta-0.2.13.tar.gz", hash = "sha256:be19664fe17d4f17321c30a33e6606aad01cfee7b8e236d27a0ad072ec9215f1"},
 ]
 
 [package.dependencies]
@@ -3726,4 +3726,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "bc10b387df980f4782510485b9934ae05c3ccda24aaa02c9c219e7edd8387961"
+content-hash = "188bb5a123a278955390f5e958e7ad20039af1b5f89fddaade375062aa9b92cb"
