@@ -44,6 +44,7 @@ class MDFReader:
         _commit: str | None = None,
         mdf_schema: str | Path | None = None,
         raise_error: bool = False,
+        ignore_enum_by_reference: bool = False,
         logger: logging.Logger | None = None,
     ) -> None:
         """
@@ -66,6 +67,7 @@ class MDFReader:
         self.mdf_schema = mdf_schema
         self._model = model
         self._commit = _commit
+        self.ignore_enum_by_reference = ignore_enum_by_reference
         self._annotations = {}
         self._terms = {}
         self._props = {}
@@ -403,7 +405,10 @@ class MDFReader:
             )
             if prop.value_set and (prop.value_set.path is not None
                                    or prop.value_set.url is not None):  # enum as reference
-                self.merge_enum_reference(prop)
+                if self.ignore_enum_by_reference:
+                    self.logger.info("Ignoring enums by reference in property '%s'", prop.handle)
+                else:
+                    self.merge_enum_reference(prop)
             if prop.value_set and prop.value_set._commit == "dummy":
                 terms = []
                 # merge terms references in enums into terms defined

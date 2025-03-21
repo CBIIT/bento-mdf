@@ -33,7 +33,8 @@ def test(args, logger):
     if not retval:
         for f in args.mdf_files:
             f.seek(0)
-        if not MDF(*args.mdf_files, handle="test", logger=logger):
+        if not MDF(*args.mdf_files, handle="test", logger=logger,
+                   ignore_enum_by_reference=True):
             retval += 1
     return retval
 

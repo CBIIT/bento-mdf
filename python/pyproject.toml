@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.11.5"
+version = "0.11.6"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [{ name = "Mark A. Jensen", email = "mark.jensen@nih.gov" }]
 requires-python = ">=3.10"
@@ -16,16 +16,12 @@ classifiers = [
 
 [tool.poetry]
 name = "bento-mdf"
-version = "0.11.5"
+version = "0.11.6"
 description = "Python driver/validator for Bento Model Description Format"
-authors = ["Mark A. Jensen <mark.jensen@nih.gov>"]
+authors = ["Mark A. Jensen <mark.jensen@nih.gov>", "Nelson W. Moore <nelson.moore@essential-sorft.com"]
 license = "Apache 2.0"
 readme = "README.md"
 include = ["templates/pymodel.py.jinja2"]
-
-#[tool.poetry.scripts]
-#"test-mdf.py" = { reference = "bin/test-mdf.py", type = "file" }
-#"load-mdf" = { reference = "bin/load-mdf.py", type = "file" }
 
 [tool.poetry.dependencies]
 python = "^3.10"
