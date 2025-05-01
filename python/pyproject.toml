@@ -27,7 +27,7 @@ include = ["templates/pymodel.py.jinja2"]
 python = "^3.10"
 bento-meta = "^0.2.13"
 jsonschema = "^4.17.3"
-Jinja2 = ">=3.1.4"
+Jinja2 = "3.1.6"
 pyyaml = ">=6.0.1"
 pydantic = ">=2.10.4"
 delfick-project = "^0.7.9"
