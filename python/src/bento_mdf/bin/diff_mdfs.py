@@ -11,6 +11,8 @@ import click
 from bento_mdf.diff import diff_models
 from bento_mdf.mdf.reader import MDFReader
 
+logger = logging.getLogger("__name__")
+
 
 @click.command()
 @click.option(
@@ -82,7 +84,7 @@ from bento_mdf.mdf.reader import MDFReader
     default=False,
     help="Only include the diff summary in the result",
 )
-def diff_mdfs(  # noqa: PLR0913
+def main(  # noqa: PLR0913
     model_handle: str,
     old_mdfs: str | Path | list[str | Path],
     new_mdfs: str | Path | list[str | Path],
@@ -127,8 +129,8 @@ def diff_mdfs(  # noqa: PLR0913
         os.startfile(output_path)  # noqa: S606
     except OSError as e:
         msg = f"Error opening the file: {e}"
-        logging.exception(msg)
+        logger.exception(msg)
 
 
 if __name__ == "__main__":
-    diff_mdfs()
+    main()
