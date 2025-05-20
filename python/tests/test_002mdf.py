@@ -262,7 +262,7 @@ class TestDataHubModel:
         assert len(finding.composite_key_props) == 4
         assert {'participant.participant_id', 'visit.visit_id',
                 'finding.test_name', 'finding.test_value'} == {
-                    [v for v in x.belongs.values()][0].handle+"."+x.handle
+                    f"{x[0].handle}.{x[1].handle}"
                     for x in finding.composite_key_props
                 }
         assert finding.props['finding_id'].is_key

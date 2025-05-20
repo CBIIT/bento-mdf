@@ -551,7 +551,10 @@ class MDFReader:
                             )
                             self.create_model_success = False
                         else:
-                            key_props.append(nd.props[key_pr])
+                            key_props.append((
+                                list(nd.props[key_pr].belongs.values())[0],
+                                nd.props[key_pr]
+                            ))
                     else:
                         if self.model.nodes.get(ref_nd) is None:
                             self.logger.error(
@@ -569,7 +572,10 @@ class MDFReader:
                                 )
                                 self.create_model_success = False
                             else:
-                                key_props.append(self.model.nodes[ref_nd].props[key_pr])
+                                key_props.append((
+                                    list(self.model.nodes[ref_nd].props[key_pr].belongs.values())[0],
+                                    self.model.nodes[ref_nd].props[key_pr]
+                                ))
                 nd.composite_key_props = key_props
         return
 
