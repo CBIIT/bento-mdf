@@ -8,6 +8,7 @@ Utilities for converting MDF YAML to bento-meta objects
 from __future__ import annotations
 
 import re
+import json
 from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
@@ -28,31 +29,32 @@ def to_snake_case(string: str) -> str:
 # keys are valid specified MDF keys
 # values are valid attributes of a bento_meta.Entity
 mdf_to_meta = {
-    "Handle": "handle",
-    "Nodes": None,
-    "Relationships": None,
-    "PropDefinitions": None,
-    "UniversalNodeProperties": None,
-    "UniversalRelationshipProperites": None,
-    "Terms": None,
-    "Term": None,
+    "Code": "origin_id",
+    "CompKey": None,
+    "Definition": "origin_definition",
+    "Deprecated": "is_deprecated",
     "Desc": "desc",
-    "NanoID": "nanoid",
-    "Src": "src",
     "Dst": "dst",
+    "Enum": "Enum",
+    "Handle": "handle",
+    "Key": "is_key",
     "Mul": "multiplicity",
-    "Value": "value",
+    "NanoID": "nanoid",
+    "Nodes": None,
+    "Nul": "is_nullable",
+    "Origin": "origin_name",
+    "PropDefinitions": None,
+    "Relationships": None,
+    "Req": "is_required",
+    "Src": "src",
+    "Strict": "is_strict",
+    "Term": None,
+    "Terms": None,
     # don't translate type spec in init - process in process_prop
     "Type": "Type",
-    "Enum": "Enum",
-    "Key": "is_key",
-    "Nul": "is_nullable",
-    "Req": "is_required",
-    "Deprecated": "is_deprecated",
-    "Strict": "is_strict",
-    "Origin": "origin_name",
-    "Definition": "origin_definition",
-    "Code": "origin_id",
+    "UniversalNodeProperties": None,
+    "UniversalRelationshipProperites": None,
+    "Value": "value",
     "Version": "origin_version",
 }
 
@@ -90,7 +92,7 @@ def spec_to_entity(
         init["handle"] = hdl
     # init now contains (translated) spec keys and its original keys
     ent = ent_cls(init)
-    info = process[ent_cls](init, ent)
+    info = process[ent_cls](init, spec, ent)
     if spec.get("Tags"):
         for t in spec["Tags"]:
             ent.tags[t] = spec_to_entity(
@@ -102,15 +104,17 @@ def spec_to_entity(
     return ent
 
 
-def process_node(spec: dict, node: Node) -> None:
+def process_node(init: dict, spec: dict, node: Node) -> None:
     """Additional processing for Node entities."""
+    if spec.get('CompKey'):
+        node.composite_key_props = spec['CompKey']
     pass
 
-def process_reln(spec: dict, edge: Edge) -> None:
+def process_reln(init: dict, spec: dict, edge: Edge) -> None:
     """Additional processing for Relationship entities."""
     pass
 
-def process_term(spec: dict, term: Term) -> None:
+def process_term(init: dict, spec: dict, term: Term) -> None:
     """Additional processing for Term entities."""
     if not term.handle:
         term.handle = to_snake_case(term.value)
@@ -118,13 +122,13 @@ def process_term(spec: dict, term: Term) -> None:
         term.definition = unquote(term, spec["definition"])
 
 
-def process_tag(spec: dict, tag: Tag):
+def process_tag(init: dict, spec: dict, tag: Tag):
     """Additional processing for tag entities."""
     pass
 
-def process_prop(spec: dict, prop: Property) -> None:
+def process_prop(init: dict, spec: dict, prop: Property) -> None:
     """Additional processing for Property entities."""
-    ty_spec = spec.get("Enum") or spec.get("Type")
+    ty_spec = init.get("Enum") or init.get("Type")
     domain_spec = typespec_to_domain_spec(ty_spec)
     if (
         domain_spec["value_domain"] != "value_set"
