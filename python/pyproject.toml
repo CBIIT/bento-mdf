@@ -1,13 +1,13 @@
 [project]
 name = "bento-mdf"
-version = "0.11.7-rc"
+version = "0.11.7"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [{ name = "Mark A. Jensen", email = "mark.jensen@nih.gov" }]
 requires-python = ">=3.10"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache License",
+    "License :: OSI Approved :: Apache Software License",
 ]
 
 [project.urls]
@@ -16,24 +16,31 @@ classifiers = [
 
 [tool.poetry]
 name = "bento-mdf"
-version = "0.11.7-rc"
+version = "0.11.7"
 description = "Python driver/validator for Bento Model Description Format"
-authors = ["Mark A. Jensen <mark.jensen@nih.gov>", "Nelson W. Moore <nelson.moore@essential-sorft.com"]
+authors = [
+    "Mark A. Jensen <mark.jensen@nih.gov>",
+    "Nelson W. Moore <nelson.moore@essential-soft.com",
+]
 license = "Apache 2.0"
 readme = "README.md"
 include = ["templates/pymodel.py.jinja2"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+bento-meta = "^0.2.16"
 jsonschema = "^4.17.3"
-Jinja2 = ">=3.1.4"
+Jinja2 = "3.1.6"
 pyyaml = ">=6.0.1"
 pydantic = ">=2.10.4"
 delfick-project = "^0.7.9"
 requests = "^2.28.2"
 tqdm = "^4.64.1"
 annotated-types = "^0.7.0"
-bento-meta = "^0.2.15"
+certifi = "^2025.4.26"
+setuptools = "^80.9.0"
+cryptography = "^45.0.3"
+tornado = "^6.5.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
@@ -50,6 +57,8 @@ sphinx-rtd-theme = "^3.0.2"
 
 [tool.poetry.scripts]
 test_mdf = 'bento_mdf.bin.val_mdf:do_test'
+load_mdf = "bento_mdf.bin.load_mdf:main"
+diff_mdfs = "bento_mdf.bin.diff_mdfs:main"
 
 [build-system]
 requires = ["poetry-core"]
