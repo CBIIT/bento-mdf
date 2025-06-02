@@ -192,7 +192,7 @@ class TestDataHubModel:
 
     def setup_method(self) -> None:
         """Set up MDF for testing."""
-        self.m = MDF(CRDC_MODEL_FILE)
+        self.m = MDF(CRDC_MODEL_FILE, ignore_enum_by_reference=True)
 
     def test_create_dh_model(self) -> None:
         """Test creating the CRDC model."""
@@ -252,7 +252,22 @@ class TestDataHubModel:
         assert "Genomic" in sdt.terms
         assert "Imaging" in sdte.terms
 
-
+    def test_composite_keys(self) -> None:
+        """Test that composite key list gets loaded correctly."""
+        participant = self.m.model.nodes['participant']
+        visit = self.m.model.nodes['visit']
+        finding = self.m.model.nodes['finding']
+        assert not participant.composite_key_props
+        assert len(visit.composite_key_props) == 2
+        assert len(finding.composite_key_props) == 4
+        assert {'participant.participant_id', 'visit.visit_id',
+                'finding.test_name', 'finding.test_value'} == {
+                    f"{x[0].handle}.{x[1].handle}"
+                    for x in finding.composite_key_props
+                }
+        assert finding.props['finding_id'].is_key
+        assert visit.props['visit_id'].is_key
+        
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)
 def test_convert_github_url(input_url: str, expected_url: str) -> None:
     """Test converting a GitHub blob URL to a raw URL."""
@@ -277,7 +292,7 @@ def test_load_separate_enums_yaml_from_file_path() -> None:
     assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
     assert ("none_of_these_describe_me", "CCDI") in m.model.terms
     # race
-    assert "asian" in m.model.props[("participant", "race")].terms
+    assert "asian" in [x for x in  m.model.props[("participant", "race")].terms]
     assert ("white", "caDSR") in m.model.terms
     assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
     assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms

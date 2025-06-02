@@ -59,6 +59,23 @@ Nodes:
       - participant_bmis
     Tags:
       Template: "Yes"
+  visit:
+    CompKey:
+      - participant.participant_id
+      - visit_date
+    Props:
+      - visit_id
+      - visit_date
+  finding:
+    CompKey:
+      - participant.participant_id
+      - visit.visit_id
+      - test_name
+      - test_value
+    Props:
+      - finding_id
+      - test_name
+      - test_value
   study:
     Props:
       - study_data_types
@@ -129,6 +146,21 @@ PropDefinitions:
     Req: true
   date:
     Type: datetime
+    Req: Yes
+  visit_date:
+    Type: datetime
+    Req: Yes
+  visit_id:
+    Type: string
+    Key: true
+  finding_id:
+    Type: string
+    Key: true
+  test_name:
+    Type: string
+    Req: Yes
+  test_value:
+    Type: number
     Req: Yes
   transaction_id:
     Type: url
