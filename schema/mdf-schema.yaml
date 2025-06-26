@@ -274,6 +274,15 @@ defs:
         uniqueItems: true
       NanoID:
         $ref: "#/defs/nanoid"
+      CompKey:
+        description: |
+          This is a list of of properties that whose values can serve to uniquely
+          identify the Node instance in a given context. For example, for data submitted
+          under the model as TSV files (tables), the CompKey list indicated columns that
+          for a composite key on a table of records corresponding to Node instances.
+        type: array
+        items:
+          $ref: "#/defs/snake_case_id"
     required:
       - Props
   relnSpec:

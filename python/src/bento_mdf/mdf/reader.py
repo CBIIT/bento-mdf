@@ -6,9 +6,10 @@ Model Description Format into a :class:`bento_meta.model.Model` object.
 """
 
 from __future__ import annotations
-
+from pdb import set_trace
 import logging
 import re
+import json
 from collections import ChainMap
 from pathlib import Path
 from tempfile import TemporaryFile
@@ -24,6 +25,7 @@ from tqdm import tqdm
 from bento_mdf.mdf.convert import spec_to_entity
 from bento_mdf.validator import MDFValidator
 
+Node.pvt_attr.append('composite_key_props')
 
 def make_nano() -> str:
     """Generate a 6-character alphanumeric string."""
@@ -191,6 +193,8 @@ class MDFReader:
         self.create_nodes()
         self.create_edges()
         self.create_props()
+        self.resolve_composite_key_props()
+        
         if raise_error and not self.create_model_success:
             msg = "MDF errors found; see log output."
             raise RuntimeError(msg)
@@ -532,6 +536,48 @@ class MDFReader:
             self.model.annotate(ent, term)
             if self._commit and not ent.concept._commit:
                 ent.concept._commit = self._commit
+
+    def resolve_composite_key_props(self):
+        for nd in self.model.nodes.values():
+            if nd.composite_key_props is not None:
+                key_props = []
+                for pr in nd.composite_key_props:
+                    (ref_nd, key_pr) = re.match("^(?:([^.]*)[.])?([^.]*)", pr).groups()
+                    if ref_nd is None:
+                        if nd.props.get(key_pr) is None:
+                            self.logger.error(
+                                "Composite key property '%s' does not exist for node '%s'",
+                                key_pr, nd.handle
+                            )
+                            self.create_model_success = False
+                        else:
+                            key_props.append((
+                                list(nd.props[key_pr].belongs.values())[0],
+                                nd.props[key_pr]
+                            ))
+                    else:
+                        if self.model.nodes.get(ref_nd) is None:
+                            self.logger.error(
+                                "Composite key property in node '%s', '%s', refers to "
+                                "nonexistent node '%s'",
+                                nd.handle, key_pr, ref_nd
+                                )
+                            self.create_model_success = False
+                        else:
+                            if self.model.nodes[ref_nd].props.get(key_pr) is None:
+                                self.logger.error(
+                                    "Composite key property in node '%s', '%s', does "
+                                    "not exist in referent node '%s'",
+                                    nd.handle, key_pr, ref_nd
+                                )
+                                self.create_model_success = False
+                            else:
+                                key_props.append((
+                                    list(self.model.nodes[ref_nd].props[key_pr].belongs.values())[0],
+                                    self.model.nodes[ref_nd].props[key_pr]
+                                ))
+                nd.composite_key_props = key_props
+        return
 
 
 def convert_github_url(url: str) -> str:
