@@ -18,7 +18,7 @@ PropDefinitions:
     Type:
       value_type: list
       item_type:
-        - https://github.com/CBIIT/ccdi-model/blob/CCDIDC-1353-enum_structure_updates/model-desc/enum_lists/race.yml
+        - https://github.com/CBIIT/ccdi-model/blob/a0c5d0e4b460ef9209b8a8a0d2837acbf610108f/model-desc/enum_lists/race.yml
     Req: true
     Strict: false
     Private: false

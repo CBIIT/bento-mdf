@@ -1,25 +1,34 @@
 #!/usr/bin/env python
 # from pdb import set_trace
-from sys import exit
 import logging
 from argparse import ArgumentParser, FileType
+from sys import exit
+
 from ..mdf import MDF
 from ..validator import MDFValidator
 
 ap = ArgumentParser(description="Validate MDF against JSONSchema")
-ap.add_argument('--schema',
-                  help="MDF JSONschema file", type=FileType('r'),
-                  dest="schema")
-ap.add_argument('--quiet',
-                  help="Suppress output; return only exit value",
-                  action="store_true",
-                  dest="quiet")
-ap.add_argument('mdf_files',nargs='+',
-                  metavar='mdf-file',
-                  type=FileType('r'),
-                  help="MDF yaml files for validation")
-ap.add_argument("--log-file",
-                help="Log file name")
+ap.add_argument(
+    "--schema",
+    help="MDF JSONschema file",
+    type=FileType("r"),
+    dest="schema",
+)
+ap.add_argument(
+    "--quiet",
+    help="Suppress output; return only exit value",
+    action="store_true",
+    dest="quiet",
+)
+ap.add_argument(
+    "mdf_files",
+    nargs="+",
+    metavar="mdf-file",
+    type=FileType("r"),
+    help="MDF yaml files for validation",
+)
+ap.add_argument("--log-file", help="Log file name")
+
 
 def test(args, logger):
     retval = 0
@@ -33,8 +42,12 @@ def test(args, logger):
     if not retval:
         for f in args.mdf_files:
             f.seek(0)
-        if not MDF(*args.mdf_files, handle="test", logger=logger,
-                   ignore_enum_by_reference=True):
+        if not MDF(
+            *args.mdf_files,
+            handle="test",
+            logger=logger,
+            ignore_enum_by_reference=True,
+        ):
             retval += 1
     return retval
 
@@ -57,5 +70,6 @@ def do_test():
         logger.addHandler(fhdl)
     exit(test(args, logger))  # emit return val (0 = good) to os
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     do_test()

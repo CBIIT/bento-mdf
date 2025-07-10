@@ -9,7 +9,6 @@ from bento_meta.model import Model
 from bento_meta.objects import ValueSet
 
 from tests.samples.test_urls import TEST_CONVERT_URLS
-from pdb import set_trace
 
 TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 CTDC_MODEL_FILE = TDIR / "samples" / "ctdc_model_file.yaml"
@@ -199,7 +198,7 @@ class TestDataHubModel:
         assert self.m.model
         pr = [x for x in self.m.model.props.values() if x.handle == "collection_method"]
         assert pr[0]
-        assert pr[0].value_set.path == '/path/to/collection/methods'
+        assert pr[0].value_set.path == "/path/to/collection/methods"
 
     def test_property_is_key(self) -> None:
         """Test "is_key" attribute set on Property from "Key" object in MDF."""
@@ -215,7 +214,7 @@ class TestDataHubModel:
         p = self.m.model.props[("study", "study_data_types")]
         assert p.value_domain == "list"
         assert p.item_domain == "value_set"
-        assert p.values == ["Genomic", "Imaging", "Clinical"]  # noqa: PD011
+        assert p.values == ["Genomic", "Imaging", "Clinical"]
         assert list(p.terms.keys()) == ["Genomic", "Imaging", "Clinical"]
 
     def test_property_is_strict(self) -> None:
@@ -254,20 +253,22 @@ class TestDataHubModel:
 
     def test_composite_keys(self) -> None:
         """Test that composite key list gets loaded correctly."""
-        participant = self.m.model.nodes['participant']
-        visit = self.m.model.nodes['visit']
-        finding = self.m.model.nodes['finding']
+        participant = self.m.model.nodes["participant"]
+        visit = self.m.model.nodes["visit"]
+        finding = self.m.model.nodes["finding"]
         assert not participant.composite_key_props
         assert len(visit.composite_key_props) == 2
         assert len(finding.composite_key_props) == 4
-        assert {'participant.participant_id', 'visit.visit_id',
-                'finding.test_name', 'finding.test_value'} == {
-                    f"{x[0].handle}.{x[1].handle}"
-                    for x in finding.composite_key_props
-                }
-        assert finding.props['finding_id'].is_key
-        assert visit.props['visit_id'].is_key
-        
+        assert {
+            "participant.participant_id",
+            "visit.visit_id",
+            "finding.test_name",
+            "finding.test_value",
+        } == {f"{x[0].handle}.{x[1].handle}" for x in finding.composite_key_props}
+        assert finding.props["finding_id"].is_key
+        assert visit.props["visit_id"].is_key
+
+
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)
 def test_convert_github_url(input_url: str, expected_url: str) -> None:
     """Test converting a GitHub blob URL to a raw URL."""
@@ -292,7 +293,7 @@ def test_load_separate_enums_yaml_from_file_path() -> None:
     assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
     assert ("none_of_these_describe_me", "CCDI") in m.model.terms
     # race
-    assert "asian" in [x for x in  m.model.props[("participant", "race")].terms]
+    assert "asian" in list(m.model.props[("participant", "race")].terms)
     assert ("white", "caDSR") in m.model.terms
     assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
     assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms
