@@ -3,5 +3,6 @@
 from . import diff, validator
 from .mdf import MDF, MDFReader, MDFWriter, MDFDataValidator
 from .validator import MDFValidator
+from . import bin
 
 

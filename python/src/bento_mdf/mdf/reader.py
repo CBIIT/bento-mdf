@@ -6,10 +6,9 @@ Model Description Format into a :class:`bento_meta.model.Model` object.
 """
 
 from __future__ import annotations
-from pdb import set_trace
+
 import logging
 import re
-import json
 from collections import ChainMap
 from pathlib import Path
 from tempfile import TemporaryFile
@@ -25,7 +24,8 @@ from tqdm import tqdm
 from bento_mdf.mdf.convert import spec_to_entity
 from bento_mdf.validator import MDFValidator
 
-Node.pvt_attr.append('composite_key_props')
+Node.pvt_attr.append("composite_key_props")
+
 
 def make_nano() -> str:
     """Generate a 6-character alphanumeric string."""
@@ -194,7 +194,7 @@ class MDFReader:
         self.create_edges()
         self.create_props()
         self.resolve_composite_key_props()
-        
+
         if raise_error and not self.create_model_success:
             msg = "MDF errors found; see log output."
             raise RuntimeError(msg)
@@ -252,8 +252,7 @@ class MDFReader:
                         continue
                 if not spec.get("Mul"):
                     self.logger.warning(
-                        "edge '%s' from '%s' to '%s' "
-                        "does not specify a multiplicity",
+                        "edge '%s' from '%s' to '%s' does not specify a multiplicity",
                         e,
                         ends["Src"],
                         ends["Dst"],
@@ -347,16 +346,16 @@ class MDFReader:
                 )
                 self.create_model_success = False
         prop_of = {}
-        for ent in propnames:
-            for p in propnames[ent]:
+        for ent, props in propnames.items():
+            for p in props:
                 if prop_of.get(p):
                     prop_of[p].append(ent)
                 else:
                     prop_of[p] = [ent]
         propdefs = self.mdf["PropDefinitions"]
         defns_for = set(propdefs.keys())
-        for pname in prop_of:
-            for ent in prop_of[pname]:
+        for pname, ents in prop_of.items():
+            for ent in ents:
                 force = False
                 # see if a qualified name is defined in propdefs:
                 key = ent.handle + "." + pname
@@ -368,15 +367,15 @@ class MDFReader:
                     key = pname
                     spec = propdefs.get(pname)
                 if not spec:
-                    self.logger.warning(
+                    self.logger.error(
                         "property '%s' does not have a corresponding "
                         "propdef for entity '%s'",
                         pname,
                         ent.handle,
                     )
+                    self.create_model_success = False
                     continue
-                if key in defns_for:
-                    defns_for.remove(key)
+                defns_for.discard(key)
                 prop = self.create_or_merge_prop_from_mdf(
                     spec,
                     p_hdl=pname,
@@ -385,11 +384,12 @@ class MDFReader:
                 self.model.add_prop(ent, prop)
                 ent.props[prop.handle] = prop
         if defns_for:
-            self.logger.warning(
+            self.logger.error(
                 "No properties in model corresponding to the following "
                 "PropDefintions: %s",
                 defns_for,
             )
+            self.create_model_success = False
 
     def create_or_merge_prop_from_mdf(
         self,
@@ -407,10 +407,14 @@ class MDFReader:
                 {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
                 Property,
             )
-            if prop.value_set and (prop.value_set.path is not None
-                                   or prop.value_set.url is not None):  # enum as reference
+            if prop.value_set and (
+                prop.value_set.path is not None or prop.value_set.url is not None
+            ):  # enum as reference
                 if self.ignore_enum_by_reference:
-                    self.logger.info("Ignoring enums by reference in property '%s'", prop.handle)
+                    self.logger.info(
+                        "Ignoring enums by reference in property '%s'",
+                        prop.handle,
+                    )
                 else:
                     self.merge_enum_reference(prop)
             if prop.value_set and prop.value_set._commit == "dummy":
@@ -547,37 +551,47 @@ class MDFReader:
                         if nd.props.get(key_pr) is None:
                             self.logger.error(
                                 "Composite key property '%s' does not exist for node '%s'",
-                                key_pr, nd.handle
+                                key_pr,
+                                nd.handle,
                             )
                             self.create_model_success = False
                         else:
-                            key_props.append((
-                                list(nd.props[key_pr].belongs.values())[0],
-                                nd.props[key_pr]
-                            ))
+                            key_props.append(
+                                (
+                                    list(nd.props[key_pr].belongs.values())[0],
+                                    nd.props[key_pr],
+                                ),
+                            )
+                    elif self.model.nodes.get(ref_nd) is None:
+                        self.logger.error(
+                            "Composite key property in node '%s', '%s', refers to "
+                            "nonexistent node '%s'",
+                            nd.handle,
+                            key_pr,
+                            ref_nd,
+                        )
+                        self.create_model_success = False
+                    elif self.model.nodes[ref_nd].props.get(key_pr) is None:
+                        self.logger.error(
+                            "Composite key property in node '%s', '%s', does "
+                            "not exist in referent node '%s'",
+                            nd.handle,
+                            key_pr,
+                            ref_nd,
+                        )
+                        self.create_model_success = False
                     else:
-                        if self.model.nodes.get(ref_nd) is None:
-                            self.logger.error(
-                                "Composite key property in node '%s', '%s', refers to "
-                                "nonexistent node '%s'",
-                                nd.handle, key_pr, ref_nd
-                                )
-                            self.create_model_success = False
-                        else:
-                            if self.model.nodes[ref_nd].props.get(key_pr) is None:
-                                self.logger.error(
-                                    "Composite key property in node '%s', '%s', does "
-                                    "not exist in referent node '%s'",
-                                    nd.handle, key_pr, ref_nd
-                                )
-                                self.create_model_success = False
-                            else:
-                                key_props.append((
-                                    list(self.model.nodes[ref_nd].props[key_pr].belongs.values())[0],
-                                    self.model.nodes[ref_nd].props[key_pr]
-                                ))
+                        key_props.append(
+                            (
+                                list(
+                                    self.model.nodes[ref_nd]
+                                    .props[key_pr]
+                                    .belongs.values(),
+                                )[0],
+                                self.model.nodes[ref_nd].props[key_pr],
+                            ),
+                        )
                 nd.composite_key_props = key_props
-        return
 
 
 def convert_github_url(url: str) -> str:
