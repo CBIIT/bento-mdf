@@ -166,7 +166,7 @@ class MDFReader:
         If no referenced Term is found, then the string is treated
         as a literal Term value with the model as origin, as in the previous paragraph.
 
-        :param boolean raiseError: Raise if MDF errors found
+        :param boolean raise_error: Raise if MDF errors found
         Note: This is brittle, since the syntax of MDF is hard-coded into this method.
         """
         self.create_model_success = True
@@ -214,7 +214,7 @@ class MDFReader:
                     "(term '%s')",
                     t_hdl,
                 )
-                self.model_create_success = False
+                self.create_model_success = False
             if "Origin" not in spec:
                 self.logger.warning(
                     f"No Origin provided for term '{t_hdl}'",

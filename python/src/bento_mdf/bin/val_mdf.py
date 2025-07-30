@@ -47,7 +47,7 @@ def test(args, logger):
             handle="test",
             logger=logger,
             ignore_enum_by_reference=True,
-        ):
+        ).create_model_success:
             retval += 1
     return retval
 
