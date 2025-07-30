@@ -62,7 +62,7 @@ def format_value_list(values: list[str], indent_level: int = 0) -> str:
     return "\n".join(lines)
 
 
-def print_formatted_output(message: str, indent_level: int = 0):
+def print_formatted_output(message: str, indent_level: int = 0) -> None:
     """Print message with proper indentation."""
     indent = INDENT * indent_level
     print(f"{indent}{message}")
@@ -104,7 +104,7 @@ def check_cde_version(
         response.raise_for_status()
         de = response.json().get("DataElement", {})
         if not de:
-            print(f"{INDENT}No response from {url}")
+            print(f"{INDENT}No response from {url} for {cde_id} of {prop.handle}")
             return
         latest_version = de.get("version", "")
         if not current_version:
@@ -123,6 +123,10 @@ def check_cde_version(
             f"Failed to parse JSON response for entity {prop.handle} "
             f"annotated with CDE {cde_id}v{current_version}"
         )
+        logger.exception(msg)
+        return
+    except requests.HTTPError:
+        msg = f"HTTP error fetching CDE {cde_id}v{current_version} for entity {prop.handle}"
         logger.exception(msg)
         return
 
@@ -152,6 +156,10 @@ def fetch_cde_pvs(
         value_set = get_pvs_from_cde_json(json_response)
     except JSONDecodeError as e:
         msg = f"Failed to parse JSON response for entity {prop.handle}: {e}\nurl: {url}"
+        logger.exception(msg)
+        return []
+    except requests.HTTPError:
+        msg = f"HTTP error fetching CDE {cde_id}v{version_str} for entity {prop.handle}"
         logger.exception(msg)
         return []
     else:
