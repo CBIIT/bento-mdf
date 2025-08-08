@@ -21,6 +21,7 @@ Nodes:
 Relationships:
   of_case:
     Mul: one_to_one
+    Props: null
     Ends:
       - Src: sample
         Dst: case
@@ -31,6 +32,7 @@ Relationships:
         Dst: case
   of_sample:
     Mul: one_to_one
+    Props: null
     Ends:
       - Src: file
         Dst: sample
