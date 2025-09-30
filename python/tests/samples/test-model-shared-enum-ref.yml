@@ -1,0 +1,34 @@
+Handle: CCDI
+Version: "1.0.0"
+Nodes:
+  sample:
+    Desc: "Sample node with multiple properties referencing the same enum file"
+    Props:
+      - anatomic_site
+      - submitted_anatomic_site
+      - participant_id
+Relationships: {}
+PropDefinitions:
+  anatomic_site:
+    Desc: "The anatomic site of the sample (matches enum key)"
+    Type:
+      value_type: list
+      item_type:
+        - /tests/samples/test-model-sep-enum-shared.yml
+    Req: true
+    Strict: false
+    Private: false
+  submitted_anatomic_site:
+    Desc: "The submitted anatomic site (does not match enum key)"
+    Type:
+      value_type: list
+      item_type:
+        - /tests/samples/test-model-sep-enum-shared.yml
+    Req: true
+    Strict: false
+    Private: false
+  participant_id:
+    Desc: "Sample participant ID"
+    Type: string
+    Req: true
+    Private: false

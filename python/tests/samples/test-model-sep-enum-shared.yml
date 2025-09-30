@@ -1,0 +1,29 @@
+PropDefinitions:
+  anatomic_site:
+    - "Abdomen"
+    - "Bone"
+    - "Brain"
+    - "Breast"
+    - "Cervix"
+    - "Colon"
+    - "Kidney"
+    - "Liver"
+    - "Lung"
+    - "Ovary"
+    - "Pancreas"
+    - "Prostate"
+    - "Skin"
+    - "Unknown"
+Terms:
+  Brain:
+    Origin: caDSR
+    Definition: The brain is the center of the nervous system in all vertebrate and most invertebrate animals.
+    Code: "12345"
+    Version: "1.0"
+    Value: Brain
+  Lung:
+    Origin: caDSR
+    Definition: Either of the paired organs of respiration that occupy the cavity of the thorax.
+    Code: "54321"
+    Version: "1.0"
+    Value: Lung
