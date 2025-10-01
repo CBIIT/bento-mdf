@@ -29,6 +29,7 @@ CCDI_PROPS_URL = (
 )
 TEST_SEP_ENUM_MODEL_FILE_PATH = TDIR / "samples" / "test-model-sep-enum.yml"
 TEST_SEP_ENUM_MODEL_FILE_URL = TDIR / "samples" / "test-model-sep-enum-url.yml"
+TEST_SHARED_ENUM_REF_MODEL_FILE = TDIR / "samples" / "test-model-shared-enum-ref.yml"
 
 
 def test_class() -> None:
@@ -312,3 +313,40 @@ def test_load_separate_enums_yaml_from_url() -> None:
     assert ("white", "caDSR") in m.model.terms
     assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
     assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms
+
+
+def test_multiple_properties_shared_enum_ref() -> None:
+    """Test multiple properties referencing the same enum file with different handles."""
+    m = MDF(TEST_SHARED_ENUM_REF_MODEL_FILE, handle="CCDI")
+
+    anatomic_site_prop = m.model.props[("sample", "anatomic_site")]
+    submitted_anatomic_site_prop = m.model.props[("sample", "submitted_anatomic_site")]
+
+    expected_terms = [
+        "Abdomen",
+        "Bone",
+        "Brain",
+        "Breast",
+        "Cervix",
+        "Colon",
+        "Kidney",
+        "Liver",
+        "Lung",
+        "Ovary",
+        "Pancreas",
+        "Prostate",
+        "Skin",
+        "Unknown",
+    ]
+
+    anatomic_site_terms = anatomic_site_prop.values
+    submitted_anatomic_site_terms = submitted_anatomic_site_prop.values
+
+    for term in expected_terms:
+        assert term in anatomic_site_terms, f"Missing term '{term}' in anatomic_site"
+        assert term in submitted_anatomic_site_terms, (
+            f"Missing term '{term}' in submitted_anatomic_site"
+        )
+    assert ("brain", "caDSR") in m.model.terms
+    assert ("lung", "caDSR") in m.model.terms
+    assert len(anatomic_site_terms) == len(submitted_anatomic_site_terms)

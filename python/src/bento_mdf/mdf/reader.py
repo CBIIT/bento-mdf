@@ -479,7 +479,26 @@ class MDFReader:
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
         enum = self.load_enum_reference(prop.value_set.path or prop.value_set.url)
-        enum_values = enum.get("PropDefinitions", {}).get(prop.handle, [])
+        enum_prop_defs = enum.get("PropDefinitions", {})
+        if not enum_prop_defs:
+            self.logger.error(
+                "No PropDefinitions found in enum reference '%s'",
+                prop.value_set.path or prop.value_set.url,
+            )
+            self.create_model_success = False
+            return
+        enum_prop_handle = next(iter(enum_prop_defs.keys()))
+        if enum_prop_handle == prop.handle:
+            enum_values = enum_prop_defs.get(prop.handle, [])
+        else:
+            self.logger.warning(
+                "Property handle '%s' does not match enum key '%s' in reference '%s'. "
+                "Loading enum values at reference anyway.",
+                prop.handle,
+                enum_prop_handle,
+                prop.value_set.path or prop.value_set.url,
+            )
+            enum_values = enum_prop_defs.get(enum_prop_handle, [])
         enum_terms = enum.get("Terms", {})
         if not enum_values:
             self.logger.error(
