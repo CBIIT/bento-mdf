@@ -1,0 +1,26 @@
+Handle: test_versions
+Version: "1.0.0"
+Nodes:
+  sample:
+    Props:
+      - status_v1
+      - status_v2
+Relationships: {}
+PropDefinitions:
+  status_v1:
+    Desc: Status using version 1.0 of term
+    Type: string
+    Term:
+      - Origin: NCIt
+        Code: C25688
+        Value: Patient Status
+        Version: '1.0'
+  status_v2:
+    Desc: Status using version 2.0 of term
+    Type: string
+    Term:
+      - Origin: NCIt
+        Code: C25688
+        Value: Patient Status
+        Version: '2.0'
+

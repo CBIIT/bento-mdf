@@ -220,7 +220,13 @@ class MDFReader:
                     f"No Origin provided for term '{t_hdl}'",
                 )
             term = spec_to_entity(t_hdl, spec, {"_commit": self._commit}, Term)
-            self._terms[term.handle] = term
+            term_key = (
+                term.handle,
+                term.origin_name,
+                term.origin_id,
+                term.origin_version,
+            )
+            self._terms[term_key] = term
 
     def create_nodes(self) -> None:
         """Create nodes from loaded YAML."""
@@ -422,8 +428,9 @@ class MDFReader:
                 # merge terms references in enums into terms defined
                 # in a separate Terms: section
                 for t in prop.value_set.terms:
-                    if self._terms.get(t):
-                        terms.append(self._terms[t])
+                    term_from_terms_section = self.lookup_term_by_handle(t)
+                    if term_from_terms_section:
+                        terms.append(term_from_terms_section)
                     else:
                         terms.append(prop.value_set.terms[t])
                 # allow bento_meta.model machinery to create
@@ -532,6 +539,27 @@ class MDFReader:
         else:
             self.model.add_terms(prop, *terms)
 
+    def lookup_term_by_handle(self, handle: str) -> Term | None:
+        """
+        Look up a term by handle from the _terms dictionary.
+
+        Since _terms uses 4-tuple keys (handle, origin_name, origin_id, origin_version),
+        this method finds the first matching term where the handle matches.
+        If multiple terms exist with the same handle, logs a warning.
+        """
+        matches = [
+            term
+            for key, term in self._terms.items()
+            if isinstance(key, tuple) and key[0] == handle
+        ]
+        if len(matches) > 1:
+            self.logger.warning(
+                "Multiple terms found with handle '%s'. Using first match. "
+                "Consider using explicit Term references with Origin and Code.",
+                handle,
+            )
+        return matches[0] if matches else None
+
     def annotate_entity_from_mdf(self, ent: Entity, yterm_list: list) -> None:
         """Annotate an entity from a list of term references in MDF."""
         for spec in yterm_list:
@@ -551,10 +579,16 @@ class MDFReader:
                 spec["Origin"] = self.handle
             term = spec_to_entity(None, spec, {"_commit": self._commit}, Term)
             # merge or record term
-            if not self._annotations.get((term.handle, term.origin_name)):
-                self._annotations[(term.handle, term.origin_name)] = term
+            term_key = (
+                term.handle,
+                term.origin_name,
+                term.origin_id,
+                term.origin_version,
+            )
+            if not self._annotations.get(term_key):
+                self._annotations[term_key] = term
             else:
-                term = self._annotations[(term.handle, term.origin_name)]
+                term = self._annotations[term_key]
 
             self.model.annotate(ent, term)
             if self._commit and not ent.concept._commit:
