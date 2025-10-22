@@ -28,7 +28,7 @@ include = ["templates/pymodel.py.jinja2"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-bento-meta = "^0.2.16"
+bento-meta = "^0.2.19"
 jsonschema = "^4.17.3"
 Jinja2 = "3.1.6"
 pyyaml = ">=6.0.1"
