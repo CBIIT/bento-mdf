@@ -1,18 +1,17 @@
 import logging
-import yaml
 from collections import Counter
 from functools import reduce
-from typing import TYPE_CHECKING
-from bento_meta.entity import ArgError, Entity
+
+import yaml
 from bento_meta.model import Model
-from .reader import MDFReader
-from bento_meta.objects import Edge, Node, Property, Term
+from bento_meta.objects import Edge
+
 from .convert import entity_to_spec
-from pdb import set_trace
+from .reader import MDFReader
 
 
-class MDFWriter(object):
-    def __init__(self, model : MDFReader | Model = None):
+class MDFWriter:
+    def __init__(self, model: MDFReader | Model = None):
         self._mdf = {
             "Nodes": {},
             "Relationships": {},
@@ -30,17 +29,17 @@ class MDFWriter(object):
         else:
             self.logger.error("MDFWriter arg1 must be Model or MDFReader")
             raise RuntimeError("MDFWriter arg1 must be Model or MDFReader")
-    
+
     @property
     def mdf(self):
-        if not self._mdf['Handle']:
+        if not self._mdf["Handle"]:
             self.write_mdf()
         return self._mdf
-    
+
     def write_mdf(self, file=None):
         """
         Use a :class:`Model` to create model description file (MDF) formatted dict
-        :param :class:`Model` model: Model to convert 
+        :param :class:`Model` model: Model to convert
         :param str|file file: File name or object to write to (default is None; just return the MDF as dict)
         :returns: MDF as dict
         """
@@ -68,7 +67,7 @@ class MDFWriter(object):
 
         for hdl in edge_specs:
             top = {}
-            # determine default Mul 
+            # determine default Mul
             muls = Counter([x.get("Mul") for x in edge_specs[hdl]])
             dfMul = muls.most_common(1)[0][0]
             top["Mul"] = dfMul or Edge.default("multiplicity")
@@ -106,7 +105,7 @@ class MDFWriter(object):
         for tm in sorted(self.model.terms):
             term = self.model.terms[tm]
             self._mdf["Terms"][term.handle] = entity_to_spec(term)
-        
+
         if file:
             fh = file
             if isinstance(file, str):
@@ -114,5 +113,3 @@ class MDFWriter(object):
             yaml.dump(self._mdf, stream=fh, indent=4)
 
         return self._mdf
-
-

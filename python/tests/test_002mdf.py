@@ -463,3 +463,63 @@ def test_terms_with_no_code_use_none_in_key() -> None:
 
     assert case_term_key in m.model.terms
     assert subject_term_key in m.model.terms
+
+
+def test_use_null_cde_converted_to_property_tag() -> None:
+    """
+    Test that useNullCDE in Term is converted to Property tag by reader.
+
+    MDF has useNullCDE as Term attribute. Reader converts it to Property tag.
+    """
+    m = MDF(TDIR / "samples" / "test-model-null-cde.yml", handle="test_null_cde")
+
+    # Get properties with useNullCDE in their Term definitions
+    imaging_software_prop = m.model.props[("sample", "imaging_software")]
+    processing_method_prop = m.model.props[("sample", "processing_method")]
+
+    # The reader should have converted useNullCDE to Property tags
+    assert "useNullCDE" in imaging_software_prop.tags
+    assert imaging_software_prop.tags["useNullCDE"].value
+    assert "useNullCDE" in processing_method_prop.tags
+    assert not processing_method_prop.tags["useNullCDE"].value
+
+    # Verify Terms themselves don't have useNullCDE (terms are reusable)
+    imaging_term = next(iter(imaging_software_prop.concept.terms.values()))
+    processing_term = next(iter(processing_method_prop.concept.terms.values()))
+    assert not hasattr(imaging_term, "use_null_cde")
+    assert not hasattr(processing_term, "use_null_cde")
+
+
+def test_use_null_cde_backward_compatibility() -> None:
+    """Test that models without useNullCDE work normally (backward compatibility)."""
+    # Test with new model that has no useNullCDE
+    m = MDF(TDIR / "samples" / "test-model-null-cde.yml", handle="test_null_cde")
+    sample_id_prop = m.model.props[("sample", "sample_id")]
+    assert "useNullCDE" not in sample_id_prop.tags
+
+    # Test with existing model that has no useNullCDE
+    m2 = MDF(TDIR / "samples" / "test-model.yml", handle="test")
+    for prop in m2.model.props.values():
+        assert "useNullCDE" not in prop.tags
+
+
+def test_use_null_cde_helper_function() -> None:
+    """Test recommended pattern for checking if a property uses null CDE."""
+
+    def property_uses_null_cde(prop) -> bool:
+        """Check if a property uses null CDE."""
+        return "useNullCDE" in prop.tags and prop.tags["useNullCDE"].value in [
+            "Yes",
+            "yes",
+            True,
+        ]
+
+    m = MDF(TDIR / "samples" / "test-model-null-cde.yml", handle="test_null_cde")
+
+    imaging_software = m.model.props[("sample", "imaging_software")]
+    processing_method = m.model.props[("sample", "processing_method")]
+    sample_id = m.model.props[("sample", "sample_id")]
+
+    assert property_uses_null_cde(imaging_software) is True
+    assert property_uses_null_cde(processing_method) is False
+    assert property_uses_null_cde(sample_id) is False
