@@ -109,17 +109,17 @@ class TestDiffs:
             "terms": {
                 "removed": None,
                 "added": {
-                    ("password", "test"): {
+                    ("password", "test", None, None): {
                         "value": "password",
                         "origin_name": "test",
                         "handle": "password",
                     },
-                    ("not a tumor", "test"): {
+                    ("not a tumor", "test", None, None): {
                         "value": "not a tumor",
                         "origin_name": "test",
                         "handle": "not a tumor",
                     },
-                    ("certificate", "test"): {
+                    ("certificate", "test", None, None): {
                         "value": "certificate",
                         "origin_name": "test",
                         "handle": "certificate",
@@ -176,17 +176,17 @@ class TestDiffs:
             "terms": {
                 "removed": None,
                 "added": {
-                    ("non-fatal", "test"): {
+                    ("non-fatal", "test", None, None): {
                         "value": "non-fatal",
                         "origin_name": "test",
                         "handle": "non-fatal",
                     },
-                    ("fatal", "test"): {
+                    ("fatal", "test", None, None): {
                         "value": "fatal",
                         "origin_name": "test",
                         "handle": "fatal",
                     },
-                    ("unknown", "test"): {
+                    ("unknown", "test", None, None): {
                         "value": "unknown",
                         "origin_name": "test",
                         "handle": "unknown",
@@ -235,17 +235,17 @@ class TestDiffs:
             "terms": {
                 "removed": None,
                 "added": {
-                    ("non-fatal", "test"): {
+                    ("non-fatal", "test", None, None): {
                         "value": "non-fatal",
                         "origin_name": "test",
                         "handle": "non-fatal",
                     },
-                    ("unknown", "test"): {
+                    ("unknown", "test", None, None): {
                         "value": "unknown",
                         "origin_name": "test",
                         "handle": "unknown",
                     },
-                    ("fatal", "test"): {
+                    ("fatal", "test", None, None): {
                         "value": "fatal",
                         "origin_name": "test",
                         "handle": "fatal",
@@ -543,7 +543,7 @@ class TestDiffs:
             "terms": {
                 "removed": None,
                 "added": {
-                    ("unknown", "test"): {
+                    ("unknown", "test", None, None): {
                         "value": "unknown",
                         "origin_name": "test",
                         "handle": "unknown",
@@ -713,27 +713,29 @@ class TestDiffSummaries:
         actual_summary = actual["summary"]
         actual_summary_sorted = self.sort_summary_terms(actual_summary)
         expected_summary = (
-            "1 term(s) removed; "
-            "2 term(s) added; "
+            "4 term(s) removed; "
+            "5 term(s) added; "
             "1 attribute(s) changed for 1 node(s); "
-            "1 attribute(s) changed for 1 prop(s); "
-            "4 attribute(s) changed for 3 term(s)\n"
-            "- Changed term: 'case_id' with origin: 'CTDC' "
-            "which annotates prop: 'case_id' with parent: 'case'. "
-            "Attribute: 'origin_id' updated from 'None' to '123'\n"
+            "1 attribute(s) changed for 1 edge(s); "
+            "2 attribute(s) changed for 2 prop(s)\n"
+            "- Removed term: 'case_id' with origin: 'CTDC' "
+            "which annotates prop: 'case_id' with parent: 'case'\n"
+            "- Added term: 'case_id' with origin: 'CTDC' "
+            "which annotates prop: 'case_id' with parent: 'case'\n"
             "- Removed term: 'case_term' with origin: 'CTDC' "
             "which annotates node: 'case'\n"
             "- Added term: 'case_term' with origin: 'CDS' "
             "which annotates node: 'case'\n"
-            "- Changed term: 'of_case_term' with origin: 'CTDC' "
-            "which annotates edge: 'of_case' with src: 'sample' and dst: 'case'. "
-            "Attribute: 'origin_id' updated from 'None' to '596'. "
-            "Attribute: 'origin_version' updated from 'None' to 'v2.0'\n"
+            "- Removed term: 'of_case_term' with origin: 'CTDC' "
+            "which annotates edge: 'of_case' with src: 'sample' and dst: 'case'\n"
+            "- Added term: 'of_case_term' with origin: 'CTDC' "
+            "which annotates edge: 'of_case' with src: 'sample' and dst: 'case'\n"
             "- Added term: 'patient_id' with origin: 'caDSR' "
             "which annotates prop: 'patient_id' with parent: 'case'\n"
-            "- Changed term: 'subject' with origin: 'caDSR' "
-            "which annotates node: 'case'. "
-            "Attribute: 'origin_id' updated from 'None' to '42'"
+            "- Removed term: 'subject' with origin: 'caDSR' "
+            "which annotates node: 'case'\n"
+            "- Added term: 'subject' with origin: 'caDSR' "
+            "which annotates node: 'case'"
         )
         assert actual_summary_sorted == expected_summary
 

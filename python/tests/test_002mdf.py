@@ -147,9 +147,12 @@ def test_created_model() -> None:
         == "value2"
     )
     assert m.model.nodes["file"].props["md5sum"].tags["another"].value == "value3"
-    assert m.model.nodes["case"].concept.terms[("case_term", "CTDC")]
-    assert m.model.nodes["case"].concept.terms[("case_term", "CTDC")].value == "case"
-    assert m.model.nodes["case"].concept.terms[("subject", "caDSR")]
+    assert m.model.nodes["case"].concept.terms[("case_term", "CTDC", None, None)]
+    assert (
+        m.model.nodes["case"].concept.terms[("case_term", "CTDC", None, None)].value
+        == "case"
+    )
+    assert m.model.nodes["case"].concept.terms[("subject", "caDSR", None, None)]
 
 
 def test_create_model_qual_props() -> None:
@@ -170,8 +173,8 @@ def test_create_model_with_terms_section() -> None:
     m.files = [TEST_MODEL_TERMS_A]
     m.load_yaml()
     m.create_model()
-    assert m._terms["normal"].origin_name == "Fred"
-    assert m._terms["tumor"].origin_name == "Al"
+    assert m._terms[("normal", "Fred", 10083, None)].origin_name == "Fred"
+    assert m._terms[("tumor", "Al", 10084, None)].origin_name == "Al"
     assert m.model.nodes["sample"].props["sample_type"].terms["normal"]
     assert m.model.nodes["sample"].props["sample_type"].terms["tumor"]
     assert m.model.nodes["sample"].props["sample_type"].terms["undetermined"]
@@ -290,14 +293,14 @@ def test_load_separate_enums_yaml_from_file_path() -> None:
     m = MDF(TEST_SEP_ENUM_MODEL_FILE_PATH, handle="CCDI")
     # sex_at_birth
     assert "female" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("male", "caDSR") in m.model.terms
+    assert ("male", "caDSR", "2567171", "1") in m.model.terms
     assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("none_of_these_describe_me", "CCDI") in m.model.terms
+    assert ("none_of_these_describe_me", "CCDI", None, None) in m.model.terms
     # race
     assert "asian" in list(m.model.props[("participant", "race")].terms)
-    assert ("white", "caDSR") in m.model.terms
+    assert ("white", "caDSR", "2572236", "1") in m.model.terms
     assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
-    assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms
+    assert ("middle_eastern_or_north_african", "CCDI", None, None) in m.model.terms
 
 
 def test_load_separate_enums_yaml_from_url() -> None:
@@ -305,14 +308,14 @@ def test_load_separate_enums_yaml_from_url() -> None:
     m = MDF(TEST_SEP_ENUM_MODEL_FILE_URL, handle="CCDI")
     # sex_at_birth
     assert "female" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("male", "caDSR") in m.model.terms
+    assert ("male", "caDSR", "2567171", "1") in m.model.terms
     assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("none_of_these_describe_me", "CCDI") in m.model.terms
+    assert ("none_of_these_describe_me", "CCDI", None, None) in m.model.terms
     # race
     assert "asian" in m.model.props[("participant", "race")].terms
-    assert ("white", "caDSR") in m.model.terms
+    assert ("white", "caDSR", "2572236", "1") in m.model.terms
     assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
-    assert ("middle_eastern_or_north_african", "CCDI") in m.model.terms
+    assert ("middle_eastern_or_north_african", "CCDI", None, None) in m.model.terms
 
 
 def test_multiple_properties_shared_enum_ref() -> None:
@@ -347,6 +350,116 @@ def test_multiple_properties_shared_enum_ref() -> None:
         assert term in submitted_anatomic_site_terms, (
             f"Missing term '{term}' in submitted_anatomic_site"
         )
-    assert ("brain", "caDSR") in m.model.terms
-    assert ("lung", "caDSR") in m.model.terms
+    assert ("brain", "caDSR", "12345", "1.0") in m.model.terms
+    assert ("lung", "caDSR", "54321", "1.0") in m.model.terms
     assert len(anatomic_site_terms) == len(submitted_anatomic_site_terms)
+
+
+def test_term_collision_bug_fix() -> None:
+    """Test fix for term collision when Value and Origin are same but Codes differ."""
+    m = MDF(
+        TDIR / "samples" / "test-model-term-collision-bug.yml", handle="test_collision"
+    )
+
+    design_desc_prop = m.model.props[("sample", "design_description")]
+    instrument_prop = m.model.props[("sample", "instrument_model")]
+
+    assert design_desc_prop.concept is not None
+    assert instrument_prop.concept is not None
+
+    design_desc_terms = design_desc_prop.concept.terms
+    instrument_terms = instrument_prop.concept.terms
+
+    assert len(design_desc_terms) == 1
+    assert len(instrument_terms) == 1
+
+    design_desc_term = next(iter(design_desc_terms.values()))
+    instrument_term = next(iter(instrument_terms.values()))
+
+    assert design_desc_term.value == "Sequencing Library Platform Model Name"
+    assert instrument_term.value == "Sequencing Library Platform Model Name"
+    assert design_desc_term.origin_name == "caDSR"
+    assert instrument_term.origin_name == "caDSR"
+    assert design_desc_term.origin_id == "11529028"
+    assert instrument_term.origin_id == "6352164"
+    design_key = (
+        "sequencing_library_platform_model_name",
+        "caDSR",
+        "11529028",
+        "1.00",
+    )
+    instrument_key = (
+        "sequencing_library_platform_model_name",
+        "caDSR",
+        "6352164",
+        "1.00",
+    )
+
+    assert design_key in m.model.terms
+    assert instrument_key in m.model.terms
+
+    assert m.model.terms[design_key] is design_desc_term
+    assert m.model.terms[instrument_key] is instrument_term
+    assert design_desc_term is not instrument_term
+
+
+def test_terms_with_different_versions_are_distinct() -> None:
+    """
+    Test that terms with same Value/Origin/Code but different Versions are distinct.
+
+    Per MDB conventions, terms are unique by (origin_name, origin_id, origin_version).
+    """
+    m = MDF(TDIR / "samples" / "test-model-term-versions.yml", handle="test_versions")
+
+    status_v1_prop = m.model.props[("sample", "status_v1")]
+    status_v2_prop = m.model.props[("sample", "status_v2")]
+
+    v1_term = next(iter(status_v1_prop.concept.terms.values()))
+    v2_term = next(iter(status_v2_prop.concept.terms.values()))
+
+    assert v1_term.value == v2_term.value == "Patient Status"
+    assert v1_term.origin_name == v2_term.origin_name == "NCIt"
+    assert v1_term.origin_id == v2_term.origin_id == "C25688"
+    assert v1_term.origin_version == "1.0"
+    assert v2_term.origin_version == "2.0"
+    v1_key = ("patient_status", "NCIt", "C25688", "1.0")
+    v2_key = ("patient_status", "NCIt", "C25688", "2.0")
+
+    assert v1_key in m.model.terms
+    assert v2_key in m.model.terms
+    assert m.model.terms[v1_key] is not m.model.terms[v2_key]
+
+
+def test_lookup_term_by_handle() -> None:
+    """Test the lookup_term_by_handle helper method."""
+    m = MDF(TDIR / "samples" / "test-model-with-terms-a.yml", handle="test")
+
+    normal_term = m.lookup_term_by_handle("normal")
+    assert normal_term is not None
+    assert normal_term.value == "Normal"
+    assert normal_term.origin_name == "Fred"
+
+    nonexistent_term = m.lookup_term_by_handle("does_not_exist")
+    assert nonexistent_term is None
+
+
+def test_terms_with_no_code_use_none_in_key() -> None:
+    """
+    Test that terms without Code (origin_id) or Version correctly use None in keys.
+
+    This ensures backward compatibility with MDF files that only provide Value and Origin.
+    """
+    m = MDF(TDIR / "samples" / "test-model.yml", handle="test")
+
+    case_node = m.model.nodes["case"]
+
+    case_terms = case_node.concept.terms
+
+    case_term_key = ("case_term", "CTDC", None, None)
+    subject_term_key = ("subject", "caDSR", None, None)
+
+    assert case_term_key in case_terms
+    assert subject_term_key in case_terms
+
+    assert case_term_key in m.model.terms
+    assert subject_term_key in m.model.terms

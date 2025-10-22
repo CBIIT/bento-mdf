@@ -1,0 +1,30 @@
+Handle: test_collision
+Version: "1.0.0"
+Nodes:
+  sample:
+    Props:
+      - design_description
+      - instrument_model
+Relationships: {}
+PropDefinitions:
+  design_description:
+    Desc: Human-readable description of methods used to create sequencing library
+    Type: string
+    Req: Preferred
+    Term:
+      - Origin: caDSR
+        Original Source: NCI Std
+        Code: '11529028'
+        Value: Sequencing Library Platform Model Name
+        Version: '1.00'
+  instrument_model:
+    Desc: Instrument model
+    Type: string
+    Req: true
+    Term:
+      - Origin: caDSR
+        Original Source: NCI Std
+        Code: '6352164'
+        Value: Sequencing Library Platform Model Name
+        Version: '1.00'
+
