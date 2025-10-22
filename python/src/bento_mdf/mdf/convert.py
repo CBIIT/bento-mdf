@@ -267,6 +267,16 @@ def entity_to_spec(ent: Entity, spec: dict = None) -> dict:
             spec["Enum"] = domain_spec_to_typespec(ent)
         else:
             spec["Type"] = domain_spec_to_typespec(ent)
+        if "useNullCDE" in ent.tags and "Term" in spec:
+            use_null_cde = ent.tags["useNullCDE"].value
+            if "Tags" in spec and "useNullCDE" in spec["Tags"]:
+                del spec["Tags"]["useNullCDE"]
+                if not spec["Tags"]:
+                    del spec["Tags"]
+            for term_spec in spec["Term"]:
+                if term_spec.get("Origin") == "caDSR":
+                    term_spec["useNullCDE"] = use_null_cde
+                    break
     elif isinstance(ent, Edge):
         # note that edge mdf specs must be merged correctly in the caller
         if ent.is_required:
