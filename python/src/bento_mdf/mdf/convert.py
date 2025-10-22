@@ -15,6 +15,7 @@ from urllib.parse import unquote
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from pdb import set_trace
 
+USER_NULL_CDE = "useNullCDE"
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
 
@@ -56,6 +57,7 @@ mdf_to_meta = {
     "UniversalRelationshipProperites": None,
     "Value": "value",
     "Version": "origin_version",
+    USER_NULL_CDE: "use_null_cde"
 }
 
 # scalar types - shall match mdf_schema["defs"]["simpleType"]["enum"]
@@ -121,6 +123,8 @@ def process_term(init: dict, spec: dict, term: Term) -> None:
     if spec.get("definition"):
         term.definition = unquote(term, spec["definition"])
 
+    if USER_NULL_CDE in spec:
+        term.use_null_cde = spec.get(USER_NULL_CDE, "No")
 
 def process_tag(init: dict, spec: dict, tag: Tag):
     """Additional processing for tag entities."""
