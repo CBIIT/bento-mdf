@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 import requests
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
-from bento_meta.objects import Edge, Node, Property, Term
+from bento_meta.objects import Edge, Node, Property, Tag, Term
 from nanoid import generate
 from tqdm import tqdm
 
@@ -577,6 +577,19 @@ class MDFReader:
                     ent.handle,
                 )
                 spec["Origin"] = self.handle
+            if (
+                isinstance(ent, Property)
+                and "useNullCDE" not in ent.tags
+                and "useNullCDE" in spec
+                and spec["Origin"] == "caDSR"
+            ):  # Convert first caDSR term's useNullCDE to Property Tag
+                ent.tags["useNullCDE"] = Tag(
+                    {
+                        "key": "useNullCDE",
+                        "value": spec["useNullCDE"],
+                        "_commit": self._commit,
+                    }
+                )
             term = spec_to_entity(None, spec, {"_commit": self._commit}, Term)
             # merge or record term
             term_key = (
@@ -656,3 +669,7 @@ def convert_github_url(url: str) -> str:
     user, repo, _, branch = parts[:4]
     file_path = "/".join(parts[4:])
     return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"
+
+
+def set_property_null_cde(prop: Property, term: Term) -> None:
+    """Set the useNullCDE tag for a property based on the term."""
