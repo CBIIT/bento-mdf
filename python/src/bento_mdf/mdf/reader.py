@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 import requests
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
-from bento_meta.objects import Edge, Node, Property, Term
+from bento_meta.objects import Edge, Node, Property, Tag, Term
 from nanoid import generate
 from tqdm import tqdm
 
@@ -220,7 +220,13 @@ class MDFReader:
                     f"No Origin provided for term '{t_hdl}'",
                 )
             term = spec_to_entity(t_hdl, spec, {"_commit": self._commit}, Term)
-            self._terms[term.handle] = term
+            term_key = (
+                term.handle,
+                term.origin_name,
+                term.origin_id,
+                term.origin_version,
+            )
+            self._terms[term_key] = term
 
     def create_nodes(self) -> None:
         """Create nodes from loaded YAML."""
@@ -422,8 +428,9 @@ class MDFReader:
                 # merge terms references in enums into terms defined
                 # in a separate Terms: section
                 for t in prop.value_set.terms:
-                    if self._terms.get(t):
-                        terms.append(self._terms[t])
+                    term_from_terms_section = self.lookup_term_by_handle(t)
+                    if term_from_terms_section:
+                        terms.append(term_from_terms_section)
                     else:
                         terms.append(prop.value_set.terms[t])
                 # allow bento_meta.model machinery to create
@@ -479,7 +486,26 @@ class MDFReader:
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
         enum = self.load_enum_reference(prop.value_set.path or prop.value_set.url)
-        enum_values = enum.get("PropDefinitions", {}).get(prop.handle, [])
+        enum_prop_defs = enum.get("PropDefinitions", {})
+        if not enum_prop_defs:
+            self.logger.error(
+                "No PropDefinitions found in enum reference '%s'",
+                prop.value_set.path or prop.value_set.url,
+            )
+            self.create_model_success = False
+            return
+        enum_prop_handle = next(iter(enum_prop_defs.keys()))
+        if enum_prop_handle == prop.handle:
+            enum_values = enum_prop_defs.get(prop.handle, [])
+        else:
+            self.logger.warning(
+                "Property handle '%s' does not match enum key '%s' in reference '%s'. "
+                "Loading enum values at reference anyway.",
+                prop.handle,
+                enum_prop_handle,
+                prop.value_set.path or prop.value_set.url,
+            )
+            enum_values = enum_prop_defs.get(enum_prop_handle, [])
         enum_terms = enum.get("Terms", {})
         if not enum_values:
             self.logger.error(
@@ -513,6 +539,27 @@ class MDFReader:
         else:
             self.model.add_terms(prop, *terms)
 
+    def lookup_term_by_handle(self, handle: str) -> Term | None:
+        """
+        Look up a term by handle from the _terms dictionary.
+
+        Since _terms uses 4-tuple keys (handle, origin_name, origin_id, origin_version),
+        this method finds the first matching term where the handle matches.
+        If multiple terms exist with the same handle, logs a warning.
+        """
+        matches = [
+            term
+            for key, term in self._terms.items()
+            if isinstance(key, tuple) and key[0] == handle
+        ]
+        if len(matches) > 1:
+            self.logger.warning(
+                "Multiple terms found with handle '%s'. Using first match. "
+                "Consider using explicit Term references with Origin and Code.",
+                handle,
+            )
+        return matches[0] if matches else None
+
     def annotate_entity_from_mdf(self, ent: Entity, yterm_list: list) -> None:
         """Annotate an entity from a list of term references in MDF."""
         for spec in yterm_list:
@@ -530,12 +577,31 @@ class MDFReader:
                     ent.handle,
                 )
                 spec["Origin"] = self.handle
+            if (
+                isinstance(ent, Property)
+                and "useNullCDE" not in ent.tags
+                and "useNullCDE" in spec
+                and spec["Origin"] == "caDSR"
+            ):  # Convert first caDSR term's useNullCDE to Property Tag
+                ent.tags["useNullCDE"] = Tag(
+                    {
+                        "key": "useNullCDE",
+                        "value": spec["useNullCDE"],
+                        "_commit": self._commit,
+                    }
+                )
             term = spec_to_entity(None, spec, {"_commit": self._commit}, Term)
             # merge or record term
-            if not self._annotations.get((term.handle, term.origin_name)):
-                self._annotations[(term.handle, term.origin_name)] = term
+            term_key = (
+                term.handle,
+                term.origin_name,
+                term.origin_id,
+                term.origin_version,
+            )
+            if not self._annotations.get(term_key):
+                self._annotations[term_key] = term
             else:
-                term = self._annotations[(term.handle, term.origin_name)]
+                term = self._annotations[term_key]
 
             self.model.annotate(ent, term)
             if self._commit and not ent.concept._commit:
@@ -603,3 +669,7 @@ def convert_github_url(url: str) -> str:
     user, repo, _, branch = parts[:4]
     file_path = "/".join(parts[4:])
     return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"
+
+
+def set_property_null_cde(prop: Property, term: Term) -> None:
+    """Set the useNullCDE tag for a property based on the term."""

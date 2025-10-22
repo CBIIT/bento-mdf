@@ -1,0 +1,44 @@
+Handle: test_null_cde
+Nodes:
+  sample:
+    Props:
+      - sample_id
+      - imaging_software
+      - processing_method
+  case:
+    Props:
+      - case_id
+Relationships:
+  of_case:
+    Mul: many_to_one
+    Props: null
+    Ends:
+      - Src: sample
+        Dst: case
+
+PropDefinitions:
+  sample_id:
+    Type: string
+    Desc: Unique identifier for the sample
+  case_id:
+    Type: string
+    Desc: Unique identifier for the case
+  imaging_software:
+    Desc: The name of the software package that was used to capture, generate, and process the image.
+    Type: string
+    Term:
+      - Origin: caDSR
+        Code: '2413278'
+        Value: Equipment Software Version Text
+        Version: '1.20'
+        useNullCDE: Yes
+  processing_method:
+    Desc: Method used to process the sample with null CDE flag set to No
+    Type: string
+    Term:
+      - Origin: caDSR
+        Code: '9876543'
+        Value: Processing Method Text
+        Version: '2.00'
+        useNullCDE: No
+

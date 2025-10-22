@@ -8,12 +8,10 @@ Utilities for converting MDF YAML to bento-meta objects
 from __future__ import annotations
 
 import re
-import json
 from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
-from pdb import set_trace
 
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
@@ -106,13 +104,13 @@ def spec_to_entity(
 
 def process_node(init: dict, spec: dict, node: Node) -> None:
     """Additional processing for Node entities."""
-    if spec.get('CompKey'):
-        node.composite_key_props = spec['CompKey']
-    pass
+    if spec.get("CompKey"):
+        node.composite_key_props = spec["CompKey"]
+
 
 def process_reln(init: dict, spec: dict, edge: Edge) -> None:
     """Additional processing for Relationship entities."""
-    pass
+
 
 def process_term(init: dict, spec: dict, term: Term) -> None:
     """Additional processing for Term entities."""
@@ -124,7 +122,7 @@ def process_term(init: dict, spec: dict, term: Term) -> None:
 
 def process_tag(init: dict, spec: dict, tag: Tag):
     """Additional processing for tag entities."""
-    pass
+
 
 def process_prop(init: dict, spec: dict, prop: Property) -> None:
     """Additional processing for Property entities."""
@@ -223,13 +221,10 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
         # don't merge terms here, but in process_prop
         # list of term initializers returned
         #   term values == term handles
-        if (
-            len(spec) == 1
-            and isinstance(spec[0], str)
-        ):
-            if re.match("^[a-z][a-z]*://",spec[0]):
+        if len(spec) == 1 and isinstance(spec[0], str):
+            if re.match("^[a-z][a-z]*://", spec[0]):
                 return {"value_domain": "value_set", "url": spec[0]}
-            elif re.match("^/.*",spec[0]):
+            if re.match("^/.*", spec[0]):
                 return {"value_domain": "value_set", "path": spec[0]}
         vs = []
         for tm in spec:
@@ -241,16 +236,13 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
     return {"value_domain": Property.default("value_domain")}
 
 
-def entity_to_spec(
-        ent: Entity,
-        spec: dict = None
-) -> dict:
+def entity_to_spec(ent: Entity, spec: dict = None) -> dict:
     if spec is None:
         spec = {}
     if ent.tags:
         tags = {}
         for t in ent.tags.values():
-            entity_to_spec(t,tags)
+            entity_to_spec(t, tags)
         spec["Tags"] = tags
     if "concept" in ent.attspec and ent.concept and ent.concept.terms:
         spec["Term"] = [entity_to_spec(t) for t in ent.concept.terms.values()]
@@ -260,7 +252,6 @@ def entity_to_spec(
         spec["Props"] = sorted([x.handle for x in ent.props.values()])
         if len(spec["Props"]) == 0:
             spec["Props"] = None
-        pass
     elif isinstance(ent, Property):
         if ent.is_nullable is not None:
             spec["Nul"] = ent.is_nullable
@@ -272,11 +263,20 @@ def entity_to_spec(
             spec["Key"] = ent.is_key
         if ent.is_deprecated is not None:
             spec["Deprecated"] = ent.is_deprecated
-        if ent.value_domain == 'value_set':
+        if ent.value_domain == "value_set":
             spec["Enum"] = domain_spec_to_typespec(ent)
         else:
             spec["Type"] = domain_spec_to_typespec(ent)
-        pass
+        if "useNullCDE" in ent.tags and "Term" in spec:
+            use_null_cde = ent.tags["useNullCDE"].value
+            if "Tags" in spec and "useNullCDE" in spec["Tags"]:
+                del spec["Tags"]["useNullCDE"]
+                if not spec["Tags"]:
+                    del spec["Tags"]
+            for term_spec in spec["Term"]:
+                if term_spec.get("Origin") == "caDSR":
+                    term_spec["useNullCDE"] = use_null_cde
+                    break
     elif isinstance(ent, Edge):
         # note that edge mdf specs must be merged correctly in the caller
         if ent.is_required:
@@ -288,7 +288,6 @@ def entity_to_spec(
         spec["Props"] = sorted([x.handle for x in ent.props.values()])
         if len(spec["Props"]) == 0:
             spec["Props"] = None
-        pass
     elif isinstance(ent, Term):
         spec["Value"] = ent.value
         spec["Origin"] = ent.origin_name
@@ -298,26 +297,24 @@ def entity_to_spec(
             spec["Version"] = ent.origin_version
         if ent.origin_id:
             spec["Code"] = ent.origin_id
-        pass
     elif isinstance(ent, Tag):
         spec[ent.key] = ent.value
-        pass
     else:
-        raise RuntimeError(f'Cannot process Entity subtype: {ent}')
+        raise RuntimeError(f"Cannot process Entity subtype: {ent}")
     return spec
 
 
-def domain_spec_to_typespec(prop : Property) -> str | dict:
+def domain_spec_to_typespec(prop: Property) -> str | dict:
     ret = {}
-    if prop.value_domain == 'value_set':
+    if prop.value_domain == "value_set":
         if prop.value_set.url:
             ret = [prop.value_set.url]
         elif prop.value_set.path:
             ret = [prop.value_set.path]
         else:
             ret = [x for x in prop.terms]
-    elif prop.value_domain == 'list':
-        ret["value_type"] = 'list'
+    elif prop.value_domain == "list":
+        ret["value_type"] = "list"
         if prop.item_domain == "value_set":
             if prop.value_set.url:
                 ret["Enum"] = [prop.value_set.url]
@@ -325,14 +322,15 @@ def domain_spec_to_typespec(prop : Property) -> str | dict:
                 ret["Enum"] = [prop.value_set.path]
             else:
                 ret["Enum"] = [x for x in prop.terms]
+        elif prop.units:
+            ret["item_type"] = {
+                "value_type": prop.item_domain,
+                "units": prop.units.split(";"),
+            }
+        elif prop.pattern:
+            ret["item_type"] = {"pattern": prop.pattern}
         else:
-            if prop.units:
-                ret["item_type"] = {"value_type": prop.item_domain,
-                                    "units": prop.units.split(";")}
-            elif prop.pattern:
-                ret["item_type"] = {"pattern": prop.pattern}
-            else:
-                ret["item_type"] = prop.item_domain
+            ret["item_type"] = prop.item_domain
     elif prop.units:
         ret["value_type"] = prop.value_domain
         if prop.units == "regexp":

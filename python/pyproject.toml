@@ -28,19 +28,21 @@ include = ["templates/pymodel.py.jinja2"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-bento-meta = "^0.2.16"
+bento-meta = "^0.2.19"
 jsonschema = "^4.17.3"
 Jinja2 = "3.1.6"
 pyyaml = ">=6.0.1"
 pydantic = ">=2.10.4"
 delfick-project = "^0.7.9"
-requests = "^2.28.2"
+requests = "^2.32.4"
 tqdm = "^4.64.1"
 annotated-types = "^0.7.0"
 certifi = "^2025.4.26"
 setuptools = "^80.9.0"
 cryptography = "^45.0.3"
 tornado = "^6.5.1"
+urllib3 = "^2.5.0"
+jupyterlab = "^4.4.9"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
