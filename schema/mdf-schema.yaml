@@ -1,6 +1,5 @@
 $schema: http://json-schema.org/draft-06/schema#
 $id: https://github.com/CBIIT/bento-mdf/schema/mdf-schema.yaml#
-
 type: object
 properties:
   Nodes:
@@ -24,6 +23,10 @@ properties:
       type: string
     additionalProperties:
       $ref: "#/defs/termSpec"
+  TransformDefinitions:
+    additionalProperties:
+      $ref: "#/defs/transSpec"
+
   UniversalNodeProperties:
     type: object
     properties:
@@ -505,3 +508,217 @@ defs:
     required:
       - Value
       - Origin
+  paramSpec:
+    $id: "#paramSpec"
+    description: |
+      Params: can point to an array of scalar string, numeric, or boolean values
+      in order, or an object whose keys correspond to the params type of the first
+      transform step and values are scalar values, depending on the params type
+      defined in the code for the first transform step.
+    type:
+      oneOf:
+        - type: array
+          items:
+            type:
+              - string
+              - number
+              - boolean
+              - null
+        - type: object
+          additionalProperties:
+            type:
+              - string
+              - number
+              - boolean
+              - null
+    
+  transSpec:
+    $id: "#transSpec"
+    type: object
+    properties:
+      Default:
+        description: |
+          Used to set default package, input model, and output model to reduce
+          redundancy in specifying transformations.
+        type: object
+        properties:
+          Inputs:
+            description: |
+              Default model attributes for input or source Model
+            type: object
+            properties:
+              Model:
+                type: string
+              Version:
+                type: string
+              Node:
+                type: string
+          Outputs:
+            description: |
+              Default model attributes for output or target Model
+            type: object
+            properties:
+              Model:
+                type: string
+              Version:
+                type: string
+              Node:
+                type: string
+          Package:
+            description: |
+              Default PyPi-released Python package or GitHub URL to be used as
+              default source of transformation code or Pydantic type models (pymodels)
+              referenced in the TransformDefinitions section.
+            type:
+              oneOf:
+                - type: string
+                - $ref: "#/defs/url"
+              
+      Identities:
+        description: |
+          The value of Identities is a list of direct verbatim "liftover" mappings from
+          a single source model property value to a single destination model property
+          value. Each entry specifies the source and destination properties, in an
+          explicit form or a short form, a two-element array containing the source and
+          destination properties (in that order) using a dot notation:
+          [<model>.<version>.<node>.]<prop>. If Defaults is specified, the first 3 elements
+          are optional.
+          Note that any identity element could be expressed as a transform in the Transforms
+          section. Because identities are so common and simple, this section provides a 
+          more readable and less verbose shortcut for entering many such transforms.
+        type:
+          oneOf:
+            - type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                $ref: "#/defs/snake_case_id"
+            - type: object
+              properties:
+                From:
+                  type: object
+                  properties:
+                    Model:
+                      $ref: "#/defs/snake_case_id"
+                    Version:
+                      $ref: "#/defs/snake_case_id"
+                    Node:
+                      $ref: "#/defs/snake_case_id"
+                    Prop:
+                      $ref: "#/defs/snake_case_id"
+                  required:
+                    - Prop
+                To:
+                  type: object
+                  properties:
+                    Model:
+                      $ref: "#/defs/snake_case_id"
+                    Version:
+                      $ref: "#/defs/snake_case_id"
+                    Node:
+                      $ref: "#/defs/snake_case_id"
+                    Prop:
+                      $ref: "#/defs/snake_case_id"
+                  required:
+                    - Prop
+      Transforms:
+        description: |
+          Entries in the Transforms section each define a computed transform to apply
+          to specified Input (source) property values, to generate Output (destination,
+          target) property values. An additional Params section specifies actual parameter
+          values (isolated from the input values) that must be used as arguments to the
+          transformation code.
+          The code to use is specified as an array under the Steps: key. See the Steps
+          description for more info.
+        properties:
+          Inputs:
+            type: array
+            minItems: 1
+            items:
+              type: object
+              required:
+                - Props
+              properties:
+                Model:
+                  $ref: "#/defs/snake_case_id"
+                Version:
+                  $ref: "#/defs/snake_case_id"
+                Node:
+                  $ref: "#/defs/snake_case_id"
+                Props:
+                  description: |
+                    Depending on whether the first Step requires a list or a dict/pymodel,
+                    The Inputs Props: entry for transformation should be either an array of
+                    property handles (within the Node: specified), in the order they
+                    should be provided to the input transform Step, or an object (dict)
+                    with keys specifying the transform input and values specifying the
+                    property handle.
+                  oneOf:
+                    - type: array
+                      items:
+                        $ref: "#/defs/snake_case_id"
+                    - type: object
+                      propertyNames:
+                        $ref: "#/defs/snake_case_id"
+                      additionalProperties:
+                        $ref: "#/defs/snake_case_id"
+          Outputs:
+            type: array
+            minItems: 1
+            items:
+              type: object
+              required:
+                - Props
+              properties:
+                Model:
+                  $ref: "#/defs/snake_case_id"
+                Version:
+                  $ref: "#/defs/snake_case_id"
+                Node:
+                  $ref: "#/defs/snake_case_id"
+                Props:
+                  description: |
+                    Depending on whether the final Step outputs a list
+                    or a dict/pymodel, the Output Props: entry for transformation
+                    should be either an array
+                    of property handles (within the Node: specified), in the order they
+                    should map from the final transform Step output, or an object (dict)
+                    with keys specifying the transform output and values specifying the
+                    property handle. 
+                  oneOf:
+                    - type: array
+                      items:
+                        $ref: "#/defs/snake_case_id"
+                    - type: object
+                      propertyNames:
+                        $ref: "#/defs/snake_case_id"
+                      additionalProperties:
+                        $ref: "#/defs/snake_case_id"
+          Params:
+            $ref: "#/defs/paramSpec"
+          Steps:
+            description: |
+              Steps: specifies an array of objects defining the python package and the
+              function entrypoint. The first entrypoint will process source property
+              values as defined by Inputs, and the last entrypoint will emit destination
+              property values as defined by Outputs. Intermediate entrypoints must have
+              inputs that conform to the output of the previous step and outputs that
+              conform to the inputs of the subsequent step. Intermediate and final steps
+              can specify Params.
+              If Defaults:Package is set, and no steps require parameters (besides
+              Inputs:Params:), then you can simply provide a list of <modules>.<function>
+              strings in order of intended execution. Outputs must still conform to inputs.
+            type: array
+            items:
+              anyOf:
+                - type: object
+                  properties:
+                    Package:
+                      type: string
+                    Entrypoint:
+                      $ref: "#/defs/snake_case_id"
+                    Params:
+                      $ref: "#/defs/paramSpec"
+                - $ref: "#/defs/snake_case_id"
+                
+                        
