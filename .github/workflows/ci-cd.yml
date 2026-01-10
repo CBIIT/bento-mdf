@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   test-build:
-    uses: CBIIT/bento-workflows/.github/workflows/test-build.yml@v3.0.24
+    uses: CBIIT/bento-workflows/.github/workflows/test-build.yml@v3.0.25
     with:
       workdir: ./python
       versions: |
