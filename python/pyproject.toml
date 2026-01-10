@@ -80,5 +80,5 @@ version_source = "tag"                      # temp?
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::UserWarning"]
 
-[tool.uv.sources]
-bento-meta = { path = "../../bento-meta/python" }
+#[tool.uv.sources]
+#bento-meta = { path = "../../bento-meta/python" }
