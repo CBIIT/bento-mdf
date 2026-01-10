@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
+from bento_meta.tf_objects import Transform, TfStep
 
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
@@ -29,25 +30,33 @@ def to_snake_case(string: str) -> str:
 mdf_to_meta = {
     "Code": "origin_id",
     "CompKey": None,
+    "Defaults": None,
     "Definition": "origin_definition",
     "Deprecated": "is_deprecated",
     "Desc": "desc",
     "Dst": "dst",
     "Enum": "Enum",
     "Handle": "handle",
+    "Identities": None,
+    "Inputs": None,
     "Key": "is_key",
     "Mul": "multiplicity",
     "NanoID": "nanoid",
     "Nodes": None,
     "Nul": "is_nullable",
     "Origin": "origin_name",
+    "Outputs": None,
+    "Params": None,
     "PropDefinitions": None,
     "Relationships": None,
     "Req": "is_required",
     "Src": "src",
+    "Steps": None,
     "Strict": "is_strict",
     "Term": None,
     "Terms": None,
+    "Transforms": None,
+    "TransformDefinitions": None,
     # don't translate type spec in init - process in process_prop
     "Type": "Type",
     "UniversalNodeProperties": None,
@@ -80,7 +89,7 @@ def spec_to_entity(
     hdl: str | None,
     spec: dict,
     init: dict,
-    ent_cls: type[Node | Edge | Property | Term | Tag],
+    ent_cls: type[Node | Edge | Property | Term | Tag | Transform | TfStep],
 ) -> Entity:
     """Translate part of MDF YAML to bento-meta entity."""
     for k in spec:
@@ -174,6 +183,11 @@ def process_prop(init: dict, spec: dict, prop: Property) -> None:
         if getattr(prop, attr) is None:
             setattr(prop, attr, default)
 
+def process_transform(init: dict, spec: dict, tf: Transform) -> None:
+    """Additional processing for Transform entities."""
+
+def process_tf_step(init: dict, spec: dict, tf_step: TfStep) -> None:
+    """Additional processing for TfStep entities."""
 
 process = {
     Node: process_node,
@@ -181,6 +195,8 @@ process = {
     Property: process_prop,
     Term: process_term,
     Tag: process_tag,
+    Transform: process_transform,
+    TfStep: process_tf_step,
 }
 
 
@@ -342,3 +358,4 @@ def domain_spec_to_typespec(prop: Property) -> str | dict:
     else:
         ret = prop.value_domain
     return ret
+
