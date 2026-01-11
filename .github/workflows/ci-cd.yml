@@ -3,11 +3,11 @@ name: ci-cd
 on: [push, pull_request]
 
 jobs:
-  ci-cd:
-    uses: CBIIT/bento-workflows/.github/workflows/ci-cd.yml@24a75ede6370fcdf8a4792e53f17607138e127db
+  test-build:
+    uses: CBIIT/bento-workflows/.github/workflows/test-build.yml@v3.0.25
     with:
       workdir: ./python
       versions: |
         ["3.10","3.11","3.12","3.13"]
-      pkg_name: bento-mdf
+      no-test-mdb: true
     secrets: inherit

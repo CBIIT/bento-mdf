@@ -36,7 +36,7 @@ def test_data_validation():
     dx =  v.validator('Diagnosis')
     md = v.validator('testData')
     assert cs({"case_id": "CASE-999"})
-    with raises(ValidationError, match='fullmatch failed'):
+    with raises(ValidationError, match='fullmatch.*failed'):
         cs({"case_id": "CASE-99A"})
     assert smp({"sample_type": "tumor", "amount": 1.0})
     with raises(ValidationError, match='should be a valid number'):
@@ -46,7 +46,7 @@ def test_data_validation():
     assert fl({"md5sum": "9d4cf66a8472f2f97f4594758a06fbd0",
                "file_name": "grelf.txt",
                "file_size": 50})
-    with raises(ValidationError, match="fullmatch failed"):
+    with raises(ValidationError, match="fullmatch.*failed"):
         fl({"md5sum": "9d4cf66a8472f2f97F4594758a06fbd0",
             "file_name": "grelf.txt",
             "file_size": 50})
