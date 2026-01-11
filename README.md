@@ -1,4 +1,4 @@
-![Build Status](https://github.com/CBIIT/bento-mdf/actions/workflows/who-validates-the-validator.yml/badge.svg)
+![Build Status](https://github.com/CBIIT/bento-mdf/actions/workflows/ci-cd.yml/badge.svg)
 
 # Bento-MDF: Bento Graph Model Description Format
 
