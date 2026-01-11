@@ -58,7 +58,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
-include = ["templates/pymodel.py.jinja2"]
+include = ["src","templates/pymodel.py.jinja2"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/bento_mdf"]
@@ -68,7 +68,7 @@ sources = ["src"]
 version_variable = "pyproject.toml:version"
 branch = "master"
 changelog_file = "CHANGELOG.md"
-build_command = "poetry build"
+build_command = "uv build"
 dist_path = "dist/"
 upload_to_release = true
 upload_to_pypi = false
@@ -80,5 +80,3 @@ version_source = "tag"                      # temp?
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::UserWarning"]
 
-#[tool.uv.sources]
-#bento-meta = { path = "../../bento-meta/python" }
