@@ -5,7 +5,8 @@ from typing import Any
 from yaml.constructor import ConstructorError
 from yaml.loader import SafeLoader
 from yaml.nodes import MappingNode, SequenceNode
-
+from pdb import set_trace
+CHECK_SEQS_UNDER_KEYS = {'Props'}
 
 class MDFLoader(SafeLoader):
     """
@@ -13,16 +14,17 @@ class MDFLoader(SafeLoader):
 
     Adds methods to check for duplicate keys and elements.
     """
-
+    
     def __init__(self, *args: Any, **kwargs: Any) -> None:  # noqa: ANN401
         """Initialize the MDFLoader."""
         super().__init__(*args, **kwargs)
+        self._check_for_dupes = False
 
     def construct_mapping(
         self,
         node: MappingNode,
         *,
-        deep: bool = False,
+        deep: bool = True,
     ) -> dict:
         """Construct a mapping node with duplicate keys check."""
         if not isinstance(node, MappingNode):
@@ -45,7 +47,10 @@ class MDFLoader(SafeLoader):
                     "found unacceptable key (%s)" % exc,
                     key_node.start_mark,
                 ) from exc
+            if key in CHECK_SEQS_UNDER_KEYS:
+                self._check_for_dupes = True
             value = self.construct_object(value_node, deep=deep)
+            self._check_for_dupes = False
             if key in mapping:
                 raise ConstructorError(
                     "while constructing a mapping",
@@ -70,14 +75,15 @@ class MDFLoader(SafeLoader):
                 "expected a sequence node, but found %s" % node.id,
                 node.start_mark,
             )
-        elts = set()
-        for c in node.value:
-            if isinstance(c.value, str):  # just check lists of strings
-                if c.value in elts:
-                    raise ConstructorError(
-                        "while constructing a sequence",
-                        node.start_mark,
-                        "found duplicated element (%s)" % c.value,
-                    )
-                elts.add(c.value)
+        if self._check_for_dupes:
+            elts = set()
+            for c in node.value:
+                if isinstance(c.value, str):  # just check lists of strings
+                    if c.value in elts:
+                        raise ConstructorError(
+                            "while constructing a sequence",
+                            node.start_mark,
+                            "found duplicated element (%s)" % c.value,
+                        )
+                    elts.add(c.value)
         return [self.construct_object(child, deep=deep) for child in node.value]
