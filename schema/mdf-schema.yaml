@@ -24,8 +24,7 @@ properties:
     additionalProperties:
       $ref: "#/defs/termSpec"
   TransformDefinitions:
-    additionalProperties:
-      $ref: "#/defs/transSpec"
+    $ref: "#/defs/transdefSpec"
 
   UniversalNodeProperties:
     type: object
@@ -515,25 +514,139 @@ defs:
       in order, or an object whose keys correspond to the params type of the first
       transform step and values are scalar values, depending on the params type
       defined in the code for the first transform step.
-    type:
-      oneOf:
-        - type: array
-          items:
-            type:
-              - string
-              - number
-              - boolean
-              - null
-        - type: object
-          additionalProperties:
-            type:
-              - string
-              - number
-              - boolean
-              - null
-    
+    oneOf:
+      - type: "null"
+      - type: array
+        items:
+          type:
+            - string
+            - number
+            - boolean
+            - null
+      - type: object
+        additionalProperties:
+          type:
+            - string
+            - number
+            - boolean
+            - null
   transSpec:
     $id: "#transSpec"
+    type: object
+    description: |
+      Entries in the Transforms section each define a computed transform to apply
+      to specified Input (source) property values, to generate Output (destination,
+      target) property values. An additional Params section specifies actual parameter
+      values (isolated from the input values) that must be used as arguments to the
+      transformation code.
+      The code to use is specified as an array under the Steps: key. See the Steps
+      description for more info.
+    properties:
+      Inputs:
+        type: array
+        minItems: 1
+        items:
+          oneOf:
+          - $ref: "#/defs/snake_case_id"
+          - type: object
+            required:
+              - Props
+            properties:
+              Model:
+                $ref: "#/defs/snake_case_id"
+              Version:
+                $ref: "#/defs/snake_case_id"
+              Node:
+                $ref: "#/defs/snake_case_id"
+              Props:
+                description: |
+                  Depending on whether the first Step requires a list or a dict/pymodel,
+                  The Inputs Props: entry for transformation should be either an array of
+                  property handles (within the Node: specified), in the order they
+                  should be provided to the input transform Step, or an object (dict)
+                  with keys specifying the transform input and values specifying the
+                  property handle.
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: "#/defs/snake_case_id"
+                  - type: object
+                    propertyNames:
+                      $ref: "#/defs/snake_case_id"
+                    additionalProperties:
+                      $ref: "#/defs/snake_case_id"
+      Outputs:
+        type: array
+        minItems: 1
+        items:
+          oneOf:
+          - $ref: "#/defs/snake_case_id"
+          - type: object
+            required:
+              - Props
+            properties:
+              Model:
+                $ref: "#/defs/snake_case_id"
+              Version:
+                $ref: "#/defs/snake_case_id"
+              Node:
+                $ref: "#/defs/snake_case_id"
+              Props:
+                description: |
+                  Depending on whether the final Step outputs a list
+                  or a dict/pymodel, the Output Props: entry for transformation
+                  should be either an array
+                  of property handles (within the Node: specified), in the order they
+                  should map from the final transform Step output, or an object (dict)
+                  with keys specifying the transform output and values specifying the
+                  property handle. 
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: "#/defs/snake_case_id"
+                  - type: object
+                    propertyNames:
+                      $ref: "#/defs/snake_case_id"
+                    additionalProperties:
+                      $ref: "#/defs/snake_case_id"
+      Params:
+        $ref: "#/defs/paramSpec"
+      Steps:
+        description: |
+          Steps: specifies an array of objects defining the python package and the
+          function entrypoint. The first entrypoint will process source property
+          values as defined by Inputs, and the last entrypoint will emit destination
+          property values as defined by Outputs. Intermediate entrypoints must have
+          inputs that conform to the output of the previous step and outputs that
+          conform to the inputs of the subsequent step. Intermediate and final steps
+          can specify Params.
+          If Defaults:Package is set, and no steps require parameters (besides
+          Inputs:Params:), then you can simply provide a list of <modules>.<function>
+          strings in order of intended execution. Outputs must still conform to inputs.
+        type: array
+        items:
+          anyOf:
+            - type: object
+              required:
+                - Entrypoint
+              properties:
+                Package:
+                  oneOf:
+                    - type: string
+                    - type: object
+                      properties:
+                        Name:
+                          type: string
+                        Version:
+                          type: string
+                Entrypoint:
+                  $ref: "#/defs/snake_case_id"
+                Params:
+                  $ref: "#/defs/paramSpec"
+            - $ref: "#/defs/snake_case_id"
+    
+  transdefSpec:
+    $id: "#transdefSpec"
     type: object
     properties:
       Default:
@@ -573,6 +686,12 @@ defs:
               oneOf:
                 - type: string
                 - $ref: "#/defs/url"
+                - type: object
+                  properties:
+                    Name:
+                      type: string
+                    Version:
+                      type: string
               
       Identities:
         description: |
@@ -586,8 +705,9 @@ defs:
           Note that any identity element could be expressed as a transform in the Transforms
           section. Because identities are so common and simple, this section provides a 
           more readable and less verbose shortcut for entering many such transforms.
-        type:
-          oneOf:
+        type: array
+        items:
+          anyOf:
             - type: array
               minItems: 2
               maxItems: 2
@@ -595,6 +715,9 @@ defs:
                 $ref: "#/defs/snake_case_id"
             - type: object
               properties:
+                required:
+                  - From
+                  - To
                 From:
                   type: object
                   properties:
@@ -622,103 +745,8 @@ defs:
                   required:
                     - Prop
       Transforms:
-        description: |
-          Entries in the Transforms section each define a computed transform to apply
-          to specified Input (source) property values, to generate Output (destination,
-          target) property values. An additional Params section specifies actual parameter
-          values (isolated from the input values) that must be used as arguments to the
-          transformation code.
-          The code to use is specified as an array under the Steps: key. See the Steps
-          description for more info.
-        properties:
-          Inputs:
-            type: array
-            minItems: 1
-            items:
-              type: object
-              required:
-                - Props
-              properties:
-                Model:
-                  $ref: "#/defs/snake_case_id"
-                Version:
-                  $ref: "#/defs/snake_case_id"
-                Node:
-                  $ref: "#/defs/snake_case_id"
-                Props:
-                  description: |
-                    Depending on whether the first Step requires a list or a dict/pymodel,
-                    The Inputs Props: entry for transformation should be either an array of
-                    property handles (within the Node: specified), in the order they
-                    should be provided to the input transform Step, or an object (dict)
-                    with keys specifying the transform input and values specifying the
-                    property handle.
-                  oneOf:
-                    - type: array
-                      items:
-                        $ref: "#/defs/snake_case_id"
-                    - type: object
-                      propertyNames:
-                        $ref: "#/defs/snake_case_id"
-                      additionalProperties:
-                        $ref: "#/defs/snake_case_id"
-          Outputs:
-            type: array
-            minItems: 1
-            items:
-              type: object
-              required:
-                - Props
-              properties:
-                Model:
-                  $ref: "#/defs/snake_case_id"
-                Version:
-                  $ref: "#/defs/snake_case_id"
-                Node:
-                  $ref: "#/defs/snake_case_id"
-                Props:
-                  description: |
-                    Depending on whether the final Step outputs a list
-                    or a dict/pymodel, the Output Props: entry for transformation
-                    should be either an array
-                    of property handles (within the Node: specified), in the order they
-                    should map from the final transform Step output, or an object (dict)
-                    with keys specifying the transform output and values specifying the
-                    property handle. 
-                  oneOf:
-                    - type: array
-                      items:
-                        $ref: "#/defs/snake_case_id"
-                    - type: object
-                      propertyNames:
-                        $ref: "#/defs/snake_case_id"
-                      additionalProperties:
-                        $ref: "#/defs/snake_case_id"
-          Params:
-            $ref: "#/defs/paramSpec"
-          Steps:
-            description: |
-              Steps: specifies an array of objects defining the python package and the
-              function entrypoint. The first entrypoint will process source property
-              values as defined by Inputs, and the last entrypoint will emit destination
-              property values as defined by Outputs. Intermediate entrypoints must have
-              inputs that conform to the output of the previous step and outputs that
-              conform to the inputs of the subsequent step. Intermediate and final steps
-              can specify Params.
-              If Defaults:Package is set, and no steps require parameters (besides
-              Inputs:Params:), then you can simply provide a list of <modules>.<function>
-              strings in order of intended execution. Outputs must still conform to inputs.
-            type: array
-            items:
-              anyOf:
-                - type: object
-                  properties:
-                    Package:
-                      type: string
-                    Entrypoint:
-                      $ref: "#/defs/snake_case_id"
-                    Params:
-                      $ref: "#/defs/paramSpec"
-                - $ref: "#/defs/snake_case_id"
-                
+        propertyNames:
+          $ref: "#/defs/snake_case_id"
+        additionalProperties:
+          $ref: "#/defs/transSpec"          
                         
