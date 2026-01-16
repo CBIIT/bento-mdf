@@ -1,0 +1,752 @@
+$schema: http://json-schema.org/draft-06/schema#
+$id: https://github.com/CBIIT/bento-mdf/schema/mdf-schema.yaml#
+type: object
+properties:
+  Nodes:
+    propertyNames:
+      $ref: "#/defs/snake_case_id"
+    additionalProperties:
+      $ref: "#/defs/nodeSpec"
+  Relationships:
+    propertyNames:
+      $ref: "#/defs/snake_case_id"
+    additionalProperties:
+      $ref: "#/defs/relnSpec"
+  PropDefinitions:
+    propertyNames:
+      $ref: "#/defs/snake_case_id"
+    additionalProperties:
+      $ref: "#/defs/propSpec"
+  Terms:
+    propertyNames:
+      # $ref: "#/defs/snake_case_id"
+      type: string
+    additionalProperties:
+      $ref: "#/defs/termSpec"
+  TransformDefinitions:
+    $ref: "#/defs/transdefSpec"
+
+  UniversalNodeProperties:
+    type: object
+    properties:
+      mustHave:
+        desc: |
+          items are names of properties that every node *must* have;
+          properties are defined in PropDefinitions
+        type: array
+        items:
+          $ref: "#/defs/snake_case_id"
+      mayHave:
+        desc: |
+          items are names of properties that every node *may* have;
+          properties are defined in PropDefinitions
+        type: array
+        items:
+          $ref: "#/defs/snake_case_id"
+  UniversalRelationshipProperties:
+    type: object
+    properties:
+      mustHave:
+        desc: |
+          items are names of properties that every relationship *must* have;
+          properties are defined in PropDefinitions      
+        type: array
+        items:
+          $ref: "#/defs/snake_case_id"
+      mayHave:
+        desc: |
+          items are names of properties that every relationship *may* have;
+          properties are defined in PropDefinitions      
+        type: array
+        items:
+          $ref: "#/defs/snake_case_id"
+  Tags:
+    $ref: "#/defs/tagsSpec"
+  Handle:
+    type: string
+    desc: |
+      This is a human-readable short name for the model described in the MDF, that
+      should also be understood as a token that can be used to extract the model
+      from a Metamodel Database
+  Version:
+    type: string
+    desc: |
+      This is a human-readable version string (e.g., v1.7.2) for the model described
+      in the MDF. Best practice is to keep it in sync with a git tag for which a
+      GitHub release has been made.
+  URI:
+    $ref: "#/defs/url"
+    desc: |
+      If present, this should be a resolving URL that can provide further detailed information
+      about the model described in the MDF instance. Ideally, it should be the base URL for a
+      terminology server (like the Simple Terminology Server), that can be concatenated with
+      path information in the MDF to return details. Currently, an enumerated value set can
+      be included "by reference" in the MDF, using a path. Joining the URL value and the
+      path value with a backslash should create a url that resolves to a REST GET access of
+      an STS that can return the actual list of enumerated values.
+    
+      
+    
+required:
+  - Nodes
+  - Relationships
+
+propertyNames:
+  $ref: "#/defs/camelCaseId"
+
+additionalProperties: true
+
+defs:
+  snake_case_id:
+    $id: "#snake_case_id"
+    type: string
+    pattern: "^[A-Za-z_0-9][A-Za-z0-9_.]*$"
+  camelCaseId:
+    $id: "#camelCaseId"
+    type: string
+    pattern: "^[A-Z][A-Za-z]*$"
+  fileNameId:
+    $id: "#fileNameId"
+    type: string
+    pattern: "^[A-Za-z0-9_-~/.]+\\.json|jsn|yml|yaml$"
+  nanoid:
+    $id: "#nanoid"
+    type: string
+    pattern: "^[abcdefghijkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ0123456789]{6}$"
+  url:
+    $id: "#url"
+    type: string
+    pattern: ((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)
+  path:
+    $id: "#path"
+    type: string
+    description: |
+      The \'path\' is intended to describe a string that can be appended to the
+      base url of a terminology service endpoint. The expected response from
+      the server is a simple array of acceptable values as strings (possibly
+      embedded somewhere in a response structure).
+      A path must start with a forward slash. If the base url ends with a forward slash,
+      the concatenation should replace two consecutive forward slashes with one.
+    pattern: /^[/][A-Za-z0-9_][A-Za-z0-9._-~]*(?:[/&?][A-Za-z0-9_][A-Za-z0-9._-~=%]*)*/
+  regex:
+    $id: "#regex"
+    type: object
+    properties:
+      pattern:
+        type: string
+      flavor:
+        description: |
+          Can tag as JS, Perl, egrep, whatever, here (optional)
+        type: string
+    required:
+      - pattern
+  simpleType:
+    description: |
+      simpleType (a scalar)
+    type: string
+    enum:
+      - number
+      - integer
+      - string
+      - datetime
+      - url
+      - boolean
+      - TBD
+  enumType:
+    type:
+      array
+    description: |
+      enumType (an array - could be size 1; or a reference to value
+      domain api). Reference to value domain could be a URL or a path
+      that points to either a list of acceptable values or part of a
+      set of MDF yaml files that define the value domain (term list and defs)
+    items:
+      anyOf:
+        -
+          type:
+            string
+        -
+          $ref:
+            "#/defs/url"
+        -
+          $ref:
+            "#/defs/path"
+    uniqueItems: true
+  numberWithUnits:
+    $id: "#numberWithUnits"
+    type: object
+    description: |
+      numberWithUnits must have a "value_type" which is either "integer" or
+      "number", and a "units" property,which can be a singleton array of a simple string (e.g. "mg"),
+      or a regex ( "pattern" : ^<regexp>$ ), or an enumeration (array of allowed
+      units strings, or ref to the term server)
+    properties:
+      value_type:
+        type: string
+        enum:
+          - integer
+          - number
+      units:
+        oneOf:
+          -
+            type: array
+            items:
+              -
+                $ref: "#/defs/regex"
+            minItems: 1
+            maxItems: 1
+          -
+            $ref: "#/defs/enumType"
+      Tags:
+        $ref: "#/defs/tagsSpec"
+    required:
+      - value_type
+      - units
+  listType:
+    $id: "#listType"
+    type: object
+    description: |
+      listType indicates that such a value should be instantiated as a list or array of
+      scalar values. The type each of the scalar values should take is provided by the
+      "item_type" property defined here. The item_type can be any of the scalar types
+      defined in this schema. A listType of { "value_type":"list", "items": <an enumType> }
+      would indicate that the data value should consist of an array of strings, each
+      string coming from the specified enum of acceptable values.
+    properties:
+      value_type:
+        const: list
+      item_type:
+        oneOf:
+          -
+            $ref: "#/defs/simpleType"
+          -
+            $ref: "#/defs/enumType"
+          -
+            $ref: "#/defs/numberWithUnits"
+      Enum:
+        $ref: "#/defs/enumType"
+      Tags:
+        $ref: "#/defs/tagsSpec"
+    oneOf:
+      -
+        required:
+          - value_type
+          - item_type
+      -
+        required:
+          - value_type
+          - Enum
+  tagsSpec:
+    $id: "#tagsSpec"
+    type: object
+    additionalProperties:
+      oneOf:
+        - type: string
+        - type: number
+        - type: boolean
+  nodeSpec:
+    $id: "#nodeSpec"
+    type: object
+    properties:
+      Props:
+        oneOf:
+          -
+            type: array
+            items:
+              $ref: "#/defs/snake_case_id"
+            uniqueItems: true
+          -
+            type:
+              "null"
+      Desc:
+        description: |
+          Human-readable description of the node.
+        type: string
+      Tags:
+        $ref: "#/defs/tagsSpec"
+      Term:
+        description: |
+          If a Node is representative of an entity or concept in an 
+          external authority, the terminology, code, and authority
+          can be noted in this entry.
+          This field is list-valued - multiple terms may be provided.
+        type: array
+        items:
+          $ref: "#/defs/termSpec"
+        uniqueItems: true
+      NanoID:
+        $ref: "#/defs/nanoid"
+      CompKey:
+        description: |
+          This is a list of of properties that whose values can serve to uniquely
+          identify the Node instance in a given context. For example, for data submitted
+          under the model as TSV files (tables), the CompKey list indicated columns that
+          for a composite key on a table of records corresponding to Node instances.
+        type: array
+        items:
+          $ref: "#/defs/snake_case_id"
+    required:
+      - Props
+  relnSpec:
+    $id: "#relnSpec"
+    type: object
+    properties:
+      Desc:
+        description: |
+          Human-readable description of the relationship.
+        type: string
+      Mul:
+        # here, the "default" multiplicity for all Src->Dst pairs
+        type: string
+        enum:
+          - one_to_one
+          - one_to_many
+          - many_to_one
+          - many_to_many
+      Props:
+        oneOf:
+          -
+            type: array
+            items:
+              $ref: "#/defs/snake_case_id"
+            uniqueItems: true
+          -
+            type:
+              "null"
+      Ends:
+        type: array
+        items:
+          type: object
+          properties:
+            Src:
+              $ref: "#/defs/snake_case_id"
+              # and need to be nodes defined in Nodes:
+            Dst:
+              $ref: "#/defs/snake_case_id"
+              # and need to be nodes defined in Nodes:
+            Mul:
+              # here, Src->Dst specific multiplicity
+              # overrides default above
+              type: string
+              enum:
+                - one_to_one
+                - one_to_many
+                - many_to_one
+                - many_to_many
+            Tags:
+              $ref: "#/defs/tagsSpec"
+          uniqueItems: true
+          required:
+            - Src
+            - Dst
+      Tags:
+        $ref: "#/defs/tagsSpec"
+      Term:
+        description: |
+          If a Relationship is representative of an entity or concept in an 
+          external authority, the terminology, code, and authority
+          can be noted in this entry.
+          This field is list-valued - multiple terms may be provided.
+        type: array
+        items:
+          $ref: "#/defs/termSpec"
+        uniqueItems: true
+      NanoID:
+        $ref: "#/defs/nanoid"
+    required:
+      - Props
+      - Mul
+      - Ends
+  propSpec: 
+    $id: "#propSpec"
+    type: object
+    properties:
+      Desc:
+        description: |
+          Human-readable description of the property.
+        type: string
+      Src:
+        description: |
+          Source of data values: external submitter, internal curation, or
+          automatically computed.
+        type: string
+      Key:
+        description: |
+          A boolean value. True indicates that the containing property is
+          or can be used as a unique identifier for the containing node
+          instances. Useful for downstream data applications (database
+          loading, e.g.).
+      Nul:
+        type: boolean
+        description: |
+          A boolean value (default False). Whether or not a property can accept
+          null as a valid value.
+      Req:
+        description: |
+          A boolean value (default False or \'No\'). Whether or not data _must_ include a
+          value for the property. The value \'Preferred\' indicates that submitters should
+          submit data for the property if they have the data.
+        oneOf:
+          -
+            type: boolean
+          -
+            type: string
+            enum:
+              - "Yes"
+              - "No"
+              - "Preferred"
+      Deprecated:
+        description: |
+          True if this property is being retained for backward compatibility,
+          but should not be used in new models.
+        type: boolean
+      Strict:
+        description: |
+          A boolean value (default True). This attribute is intended as a hint to validation
+          code. If True, data values should adhere strictly to the Type/Enum specified for
+          the property. If False, the validation should be \'less strict\', the interpretation
+          of which is use case-dependent. The primary reason for this attribute is to indicate
+          that validation should not fail on an Enum-valued property when the data value is not
+          found in the specified Enum. This is useful when the acceptable value list has not
+          been solidified in initial development.
+        type: boolean
+      Type:
+        description: |
+              Property values can have (1) simple types (number, integer, string
+              datetime, or --if necessary-- \'TBD\'; (2) a number_with_units type
+              (e.g., { \"value_type\":\"integer\", \"units\":\"mm\" }); (3) a regular
+              expression that a (string) value must match; (4) an enumeration
+              of acceptable values, or a url or path fragment to an api that will validate against
+              such a list.
+        oneOf:
+          -
+            $ref: "#/defs/simpleType"
+          -
+            $ref: "#/defs/numberWithUnits"
+          -
+            $ref: "#/defs/regex"
+          -
+            $ref: "#/defs/url"
+          -
+            $ref: "#/defs/listType"
+          -
+            $ref: "#/defs/enumType"
+      Enum:
+        description: |
+              Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
+              readability. Either one of Type or Enum may be present in a property definition,
+              but not both.
+        $ref: "#/defs/enumType" 
+      Tags:
+        $ref: "#/defs/tagsSpec"
+      Term:
+        description: |
+          If a Property is representative of an entity or concept in an 
+          external authority, the terminology, code, and authority
+          can be noted in this entry.
+          This field is list-valued - multiple terms may be provided.
+        type: array
+        items:
+          $ref: "#/defs/termSpec"
+        uniqueItems: true
+      NanoID: 
+        $ref: "#/defs/nanoid"
+    oneOf:
+      -
+        required:
+          - Type
+      -
+        required:
+          - Enum
+  termSpec:
+    $id: "#termSpec"
+    type: object
+    properties:
+      Handle:
+        description: |
+          This is a human-readable short name for the Term, that can be but is not
+          necessarily the Value; it should be understood as a token that can be used
+          to refer to this Term object. In the Terms subsection, the Handle should be
+          inferred from the key assigned to the Term object. For the Term attribute of
+          entities, the Handle may be explictly defined with the Handle key, otherwise
+          the implicit handle should be identical with the Value.
+      Desc:
+        description: |
+          Human-readable, non-normative description of this term.
+        type: string
+      Value:
+        description: |
+          The string value used in data representations of the term. Can be, but is not
+          necessarily, the term "handle", i.e. the key for the term in the Terms object.
+          See Handle key above.
+        type: string
+      Origin:
+        description: |
+          A (standardized) abbreviation desiginating the authority, source, or "coiner"
+          of the term, reponsible for maintaining its definition and value representation.
+          Example: NCIt for the NCI Thesaurus, DICOM.
+        type: string
+      Code:
+        description: |
+          An identifier assigned to the term by the authority given in the Origin field.
+          Examples: NCIt concept code, ontology CURIE, caDSR CDE ID.
+        type: string
+      Version:
+        description: |
+          Version of this term according to the authority given in the Origin field.
+        type: string
+      Tags:
+        $ref: "#/defs/tagsSpec"
+      Definition:
+        description: |
+          Text definition for the term, ideally as provided by the authority
+          given in the Origin field.
+        type: string
+      NanoID:
+        $ref: "#/defs/nanoid"
+    required:
+      - Value
+      - Origin
+  paramSpec:
+    $id: "#paramSpec"
+    description: |
+      Params: can point to an array of scalar string, numeric, or boolean values
+      in order, or an object whose keys correspond to the params type of the first
+      transform step and values are scalar values, depending on the params type
+      defined in the code for the first transform step.
+    oneOf:
+      - type: "null"
+      - type: array
+        items:
+          type:
+            - string
+            - number
+            - boolean
+            - null
+      - type: object
+        additionalProperties:
+          type:
+            - string
+            - number
+            - boolean
+            - null
+  transSpec:
+    $id: "#transSpec"
+    type: object
+    description: |
+      Entries in the Transforms section each define a computed transform to apply
+      to specified Input (source) property values, to generate Output (destination,
+      target) property values. An additional Params section specifies actual parameter
+      values (isolated from the input values) that must be used as arguments to the
+      transformation code.
+      The code to use is specified as an array under the Steps: key. See the Steps
+      description for more info.
+    properties:
+      Inputs:
+        type: array
+        minItems: 1
+        items:
+          oneOf:
+          - $ref: "#/defs/snake_case_id"
+          - type: object
+            required:
+              - Props
+            properties:
+              Model:
+                $ref: "#/defs/snake_case_id"
+              Version:
+                $ref: "#/defs/snake_case_id"
+              Node:
+                $ref: "#/defs/snake_case_id"
+              Props:
+                description: |
+                  Depending on whether the first Step requires a list or a dict/pymodel,
+                  The Inputs Props: entry for transformation should be either an array of
+                  property handles (within the Node: specified), in the order they
+                  should be provided to the input transform Step, or an object (dict)
+                  with keys specifying the transform input and values specifying the
+                  property handle.
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: "#/defs/snake_case_id"
+                  - type: object
+                    propertyNames:
+                      $ref: "#/defs/snake_case_id"
+                    additionalProperties:
+                      $ref: "#/defs/snake_case_id"
+      Outputs:
+        type: array
+        minItems: 1
+        items:
+          oneOf:
+          - $ref: "#/defs/snake_case_id"
+          - type: object
+            required:
+              - Props
+            properties:
+              Model:
+                $ref: "#/defs/snake_case_id"
+              Version:
+                $ref: "#/defs/snake_case_id"
+              Node:
+                $ref: "#/defs/snake_case_id"
+              Props:
+                description: |
+                  Depending on whether the final Step outputs a list
+                  or a dict/pymodel, the Output Props: entry for transformation
+                  should be either an array
+                  of property handles (within the Node: specified), in the order they
+                  should map from the final transform Step output, or an object (dict)
+                  with keys specifying the transform output and values specifying the
+                  property handle. 
+                oneOf:
+                  - type: array
+                    items:
+                      $ref: "#/defs/snake_case_id"
+                  - type: object
+                    propertyNames:
+                      $ref: "#/defs/snake_case_id"
+                    additionalProperties:
+                      $ref: "#/defs/snake_case_id"
+      Params:
+        $ref: "#/defs/paramSpec"
+      Steps:
+        description: |
+          Steps: specifies an array of objects defining the python package and the
+          function entrypoint. The first entrypoint will process source property
+          values as defined by Inputs, and the last entrypoint will emit destination
+          property values as defined by Outputs. Intermediate entrypoints must have
+          inputs that conform to the output of the previous step and outputs that
+          conform to the inputs of the subsequent step. Intermediate and final steps
+          can specify Params.
+          If Defaults:Package is set, and no steps require parameters (besides
+          Inputs:Params:), then you can simply provide a list of <modules>.<function>
+          strings in order of intended execution. Outputs must still conform to inputs.
+        type: array
+        items:
+          anyOf:
+            - type: object
+              required:
+                - Entrypoint
+              properties:
+                Package:
+                  oneOf:
+                    - type: string
+                    - type: object
+                      properties:
+                        Name:
+                          type: string
+                        Version:
+                          type: string
+                Entrypoint:
+                  $ref: "#/defs/snake_case_id"
+                Params:
+                  $ref: "#/defs/paramSpec"
+            - $ref: "#/defs/snake_case_id"
+    
+  transdefSpec:
+    $id: "#transdefSpec"
+    type: object
+    properties:
+      Default:
+        description: |
+          Used to set default package, input model, and output model to reduce
+          redundancy in specifying transformations.
+        type: object
+        properties:
+          Inputs:
+            description: |
+              Default model attributes for input or source Model
+            type: object
+            properties:
+              Model:
+                type: string
+              Version:
+                type: string
+              Node:
+                type: string
+          Outputs:
+            description: |
+              Default model attributes for output or target Model
+            type: object
+            properties:
+              Model:
+                type: string
+              Version:
+                type: string
+              Node:
+                type: string
+          Package:
+            description: |
+              Default PyPi-released Python package or GitHub URL to be used as
+              default source of transformation code or Pydantic type models (pymodels)
+              referenced in the TransformDefinitions section.
+            type:
+              oneOf:
+                - type: string
+                - $ref: "#/defs/url"
+                - type: object
+                  properties:
+                    Name:
+                      type: string
+                    Version:
+                      type: string
+              
+      Identities:
+        description: |
+          The value of Identities is a list of direct verbatim "liftover" mappings from
+          a single source model property value to a single destination model property
+          value. Each entry specifies the source and destination properties, in an
+          explicit form or a short form, a two-element array containing the source and
+          destination properties (in that order) using a dot notation:
+          [<model>.<version>.<node>.]<prop>. If Defaults is specified, the first 3 elements
+          are optional.
+          Note that any identity element could be expressed as a transform in the Transforms
+          section. Because identities are so common and simple, this section provides a 
+          more readable and less verbose shortcut for entering many such transforms.
+        type: array
+        items:
+          anyOf:
+            - type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                $ref: "#/defs/snake_case_id"
+            - type: object
+              properties:
+                required:
+                  - From
+                  - To
+                From:
+                  type: object
+                  properties:
+                    Model:
+                      $ref: "#/defs/snake_case_id"
+                    Version:
+                      $ref: "#/defs/snake_case_id"
+                    Node:
+                      $ref: "#/defs/snake_case_id"
+                    Prop:
+                      $ref: "#/defs/snake_case_id"
+                  required:
+                    - Prop
+                To:
+                  type: object
+                  properties:
+                    Model:
+                      $ref: "#/defs/snake_case_id"
+                    Version:
+                      $ref: "#/defs/snake_case_id"
+                    Node:
+                      $ref: "#/defs/snake_case_id"
+                    Prop:
+                      $ref: "#/defs/snake_case_id"
+                  required:
+                    - Prop
+      Transforms:
+        propertyNames:
+          $ref: "#/defs/snake_case_id"
+        additionalProperties:
+          $ref: "#/defs/transSpec"          
+                        
