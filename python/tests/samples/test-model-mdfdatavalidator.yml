@@ -1,0 +1,91 @@
+Handle: test_collision
+Version: "1.0.0"
+Nodes:
+  participant:
+    Props:
+      - guid
+      - participant_id
+      - race
+      - sex_at_birth
+      - occupation
+Relationships: {}
+PropDefinitions:
+  participant_id:
+    Desc: A sequence of letters, numbers, or characters that uniquely identifies the subject who has taken part in the investigation or research study.    
+    Term:
+      - Origin: caDSR
+        Code: '12220014'
+        Value: Subject Alternate Data Origin Identifier
+        Version: '1'
+    Type: string
+    Req: true
+    Private: false
+    Key: true
+  race: 
+    Desc: The text for reporting information about race based on the Office of Management and Budget (OMB) categories SPD 15 (spd15revision.gov).
+    Term:
+      - Origin: caDSR
+        Code: '2192199'
+        Value: Race Category Text
+        Version: "1.00"
+    Type:
+      value_type: list
+      item_type:
+        - "American Indian or Alaska Native"
+        - "Asian"
+        - "Black or African American"
+        - "Hispanic or Latino"
+        - "Middle Eastern or North African"
+        - "Native Hawaiian or other Pacific Islander"
+        - "Not Allowed to Collect"
+        - "Not Reported"
+        - "Unknown"
+        - "White"
+    Req: true
+    Strict: false
+    Private: false
+  sex_at_birth:
+    Desc: "A textual description of a person's sex at birth."
+    Term:
+      - Origin: caDSR
+        Code: '7572817'
+        Value: Person Sex at Birth Category
+        Version: "2.0"
+    Enum:
+      - "Female"
+      - "Intersex"
+      - "Male"
+      - "Not Reported"
+      - "Unknown"
+      - "Don't Know"
+      - "Decline to answer"
+      - "None of These Describe Me"
+      - "Prefer Not to Answer"
+    Req: true
+    Strict: false
+    Private: false
+  occupation:
+    Desc: "The text term that describes a person's occupation."
+    Term:
+      - Origin: caDSR
+        Code: '10156751'
+        Value: Person Occupation Category
+        Version: "1.0"
+    Enum:
+      - "Physician Assistant"
+      - "Nurse Practitioner"
+      - "Registered Nurse"
+    Req: false
+    Strict: false
+    Private: false
+  guid:
+    Desc: A unique sequence of characters used to identify, name, or characterize an attribute shared by all members of a class.
+    Term:
+      - Origin: caDSR
+        Code: '14534325'
+        Value: CCDI Property Unique Identifier
+        Version: "1.00"
+    Type: string
+    Req: false
+    Key: false
+    Private: false

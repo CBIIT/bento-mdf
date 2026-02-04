@@ -13,44 +13,91 @@ from datetime import datetime
 from pydantic import BaseModel, TypeAdapter, ValidationError, AnyUrl
 from pydantic.json_schema import GenerateJsonSchema
 from pdb import set_trace
+import keyword
 
 jenv = Environment(
     loader=PackageLoader("bento_mdf", package_path="mdf/templates"),
     trim_blocks=True,
 )
 
-# jinja helpers    
-
+# jinja helpers
 def toCamelCase(val : str) -> str:
     return "".join([x.capitalize() for x in val.split("_")])
 
+def normalize_operators(val: str) -> str:
+    """Given a string, replace common operator characters with word equivalents.
 
-def to_snakecase(val : str) -> str:
-    return re.sub("\\W", "_", val).lower()
+    Args:
+        val (str): input string
 
+    Returns:
+        str: normalized string
+    """
+    return (
+        val.replace("+", " plus ")
+        .replace("-", " minus ")
+        .replace("/", " per ")
+        .replace("#", " number ")
+        .replace("%", " percent ")
+        .replace("&", " and ")
+        .replace("*", " asterisk ")
+        .replace(",", " comma ")
+        .replace(".", " dot ")
+        .replace(";", " semicolon ")
+        .replace(":", " colon ")
+        .replace("!", " exclamation ")
+        .replace("?", " question ")
+        .replace("=", " equals ")
+        .replace("<", " less_than ")
+        .replace(">", " greater_than ")
+    )
+
+def to_snakecase(
+    val: str, prefix_if_digit: str = "digit", empty_fallback: str = "unspecified"
+) -> str:
+    name = normalize_operators(val)
+    name = re.sub(r"\W+", "_", name).lower()
+    # Trim underscores at ends (prevents sunder-ish shapes and ugliness)
+    name = name.strip("_")
+    # Handle leading digit
+    if name and name[0].isdigit():
+        name = f"{prefix_if_digit}_{name}"
+    # Handle Python keywords
+    if keyword.iskeyword(name):
+        name = name + "_"
+    # Handle empty str
+    if name == "":
+        name = empty_fallback
+    return name
 
 def to_unit_types(unitstr : str, typ : type(int) | type(float)) -> List[str]:
     return [f"Annotated[{typ.__name__}, Unit('{u}')]" for u in unitstr.split(';')]
-
 
 def maybe_optional(val : str, prop : Property):
     if prop.is_required:
         return val
     else:
-        return f"Optional[{val}]"
+        # the field is still required in pydantic unless we set a default None value
+        return f"Optional[{val}] = None"
 
-def maybe_list(val : str, prop : PropertyO):
+def maybe_list(val : str, prop : Property):
     if prop.value_domain == "list":
         return f"List[{val}]"
     else:
         return val
 
+def pv_enum_fail(msg : str) -> NoReturn:
+    raise ValueError(msg)
 
-jenv.filters['toCamelCase'] = toCamelCase
-jenv.filters['to_snakecase'] = to_snakecase
-jenv.filters['to_unit_types'] = to_unit_types
-jenv.filters['maybe_optional'] = maybe_optional
-jenv.filters['maybe_list'] = maybe_list
+# register jinja filters and globals
+jenv.filters["toCamelCase"] = toCamelCase
+jenv.filters["to_snakecase"] = to_snakecase
+jenv.filters["to_unit_types"] = to_unit_types
+jenv.filters["maybe_optional"] = maybe_optional
+jenv.filters["maybe_list"] = maybe_list
+jenv.filters["pyrepr"] = repr
+jenv.globals["pv_enum_fail"] = pv_enum_fail
+
 
 class GenerateQualJsonSchema(GenerateJsonSchema):
     # override to add $schema tag
@@ -79,9 +126,10 @@ class MDFDataValidator:
         self._node_classes = []
         self._enum_classes = []
         self._validation_errors = None
+        self._validation_warnings = None # warnings separate from errors
         self.generate_data_model()
         self.import_data_model()
-        
+
     @property
     def data_model(self) -> str:
         return self._pymodel
@@ -105,7 +153,11 @@ class MDFDataValidator:
     @property
     def last_validation_errors(self) -> dict | None:
         return self._validation_errors
-    
+
+    @property
+    def last_validation_warnings(self) -> dict | None:
+        return self._validation_warnings
+
     def generate_data_model(self) -> NoReturn:
         """
         Generates Pydantic classes for each node in the MDF model.
@@ -158,7 +210,7 @@ class MDFDataValidator:
 
     def props_of(self, clsname : str) -> List[str]:
         return self.fields_of(clsname)
-    
+
     @cache
     def validator(self, clsname : str):
         """
@@ -169,7 +221,7 @@ class MDFDataValidator:
             return model.model_validate
         else:
             return TypeAdapter(model).validate_python
-        
+
     def json_schema(self, clsname : str) -> dict | list:
         """
         Return a jsonable object representing a JSONSchema that can validate
@@ -183,8 +235,8 @@ class MDFDataValidator:
         else:
             return TypeAdapter(model).json_schema(
                 schema_generator=GenerateQualJsonSchema)
-        
-    def validate(self, clsname : str, data : dict | List[dict], strict : bool = False,
+
+    def validate(self, node_name : str, data : dict | List[dict], strict : bool = False,
                  verbose : bool = False) -> bool:
         """
         Validate a dict or list of dicts against a given model class.
@@ -193,10 +245,18 @@ class MDFDataValidator:
         a dict whose keys are the index of the item in the submitted data list, and values
         which are lists of specific errors found in the item.
         ('last_validation_errors' is reset to None if validation succeeds.)
+        
+        Arguments:
+            node_name: the name of the node to validate against
+            data: a dict or list of dicts to validate
+            strict: if True, enforce strict validation on all fields/properties. Default is False.
+            verbose: if True, print validation errors to stderr. Default is False.
         """
         dta = []
         result = True
         self._validation_errors = {}
+        self._validation_warnings = {}
+        clsname = toCamelCase(node_name)
         if isinstance(data, dict):
             dta = [data]
         else:
@@ -209,8 +269,28 @@ class MDFDataValidator:
                 result = False
                 if verbose:
                     print(e.title, file=sys.stderr)
-                self._validation_errors[i] = e.errors()
+                warnings = []
+                errs = []
+                for err in e.errors():
+                    # handle enum violations if the enum is non-strict, treat as warning instead of error
+                    if err['type'] == "enum": 
+                        prop_name = err["loc"][0]
+                        prop_instance = self.model.nodes[node_name].props[prop_name]
+                        if not prop_instance.is_strict:
+                            # non-strict enum violation, treat as warning
+                            # add level key
+                            err = {"level": "warning", **err}
+                            warnings.append(err)
+                        else:
+                            err = {"level": "error", **err}
+                            errs.append(err)
+                    else:
+                        err = {"level": "error", **err}
+                        errs.append(err)            
+                self._validation_errors[i] = errs
+                if len(warnings) > 0:
+                    self._validation_warnings[i] = warnings
         if result:
             self._validation_errors = None
+            self._validation_warnings = None
         return result
-
