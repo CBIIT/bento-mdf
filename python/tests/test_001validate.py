@@ -96,6 +96,19 @@ def test_instance_not_valid_wrt_schema():
         v.validate_instance_with_schema()
 
 
+def test_validation_errors_include_line_numbers(caplog):
+    v = MDFValidator(
+        test_schema_file,
+        *test_mdf_files_invalid_wrt_schema,
+    )
+    assert v.load_and_validate_schema()
+    assert v.load_and_validate_yaml()
+    with caplog.at_level("ERROR"):
+        result = v.validate_instance_with_schema()
+    assert result is None
+    assert any("line" in rec.message for rec in caplog.records)
+
+
 def test_list_type():
     v = MDFValidator(test_latest_schema, *test_list_type_files)
     assert v
