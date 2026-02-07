@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import collections.abc
 import logging
 from io import BufferedRandom, TextIOWrapper
 from pathlib import Path
@@ -14,6 +15,7 @@ from delfick_project.option_merge.merge import MergedOptions
 from jsonschema import Draft6Validator, SchemaError, ValidationError, validate
 from referencing.exceptions import Unresolvable
 from yaml.constructor import ConstructorError
+from yaml.nodes import MappingNode, SequenceNode
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
@@ -204,7 +206,62 @@ class MDFValidator:
             return None
         return self.instance
 
-    def validate_instance_with_schema(self) -> MergedOptions | None:
+    def _find_node_at_path(
+        self,
+        root: MappingNode | SequenceNode,
+        path: collections.abc.Sequence,
+    ) -> MappingNode | SequenceNode | None:
+        """Walk a YAML node tree following the given path."""
+        node = root
+        for key in path:
+            if isinstance(node, MappingNode):
+                for key_node, value_node in node.value:
+                    if key_node.value == str(key):
+                        node = value_node
+                        break
+                else:
+                    return None
+            elif isinstance(node, SequenceNode):
+                if isinstance(key, int) and key < len(node.value):
+                    node = node.value[key]
+                else:
+                    return None
+            else:
+                return None
+        return node
+
+    def _find_yaml_location(
+        self,
+        path: collections.abc.Sequence,
+    ) -> tuple[str, int, int] | None:
+        """Find the YAML source file, line number, and column for a given instance path."""
+        for inst_file in self.inst_files:
+            try:
+                if isinstance(inst_file, (str, Path)):
+                    with Path(inst_file).open(encoding="UTF-8") as f:
+                        root = yaml.compose(f, Loader=yaml.SafeLoader)
+                elif hasattr(inst_file, "seek"):
+                    inst_file.seek(0)
+                    root = yaml.compose(inst_file, Loader=yaml.SafeLoader)
+                else:
+                    continue
+                if root is None:
+                    continue
+                node = self._find_node_at_path(root, path)
+                if node is not None:
+                    return (
+                        node.start_mark.name,
+                        node.start_mark.line + 1,
+                        node.start_mark.column + 1,
+                    )
+            except Exception:  # noqa: BLE001
+                continue
+        return None
+
+    def validate_instance_with_schema(
+        self,
+        verbose: bool = False,
+    ) -> MergedOptions | None:
         """Validate the instance with the schema."""
         if not self.schema:
             self.logger.warning("No valid schema; skipping this validation")
@@ -217,7 +274,20 @@ class MDFValidator:
             validate(instance=self.instance.as_dict(), schema=self.schema)
         except ValidationError:
             for e in Draft6Validator(self.schema).iter_errors(self.instance.as_dict()):
-                self.logger.exception(e)
+                loc = self._find_yaml_location(e.absolute_path)
+                if loc:
+                    self.logger.error(
+                        "%s (in %s, line %d, col %d)",
+                        e.message,
+                        loc[0],
+                        loc[1],
+                        loc[2],
+                    )
+                else:
+                    self.logger.error(e.message)
+                if verbose:
+                    for line in str(e).splitlines():
+                        self.logger.error("[detail] %s", line)
             if self.raise_error:
                 raise
             return None
