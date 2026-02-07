@@ -28,6 +28,13 @@ ap.add_argument(
     help="MDF yaml files for validation",
 )
 ap.add_argument("--log-file", help="Log file name")
+ap.add_argument(
+    "-v",
+    "--verbose",
+    help="Emit detailed schema validation error information",
+    action="store_true",
+    dest="verbose",
+)
 
 
 def test(args, logger):
@@ -37,7 +44,7 @@ def test(args, logger):
         retval += 1
     if not v.load_and_validate_yaml():
         retval += 1
-    if not v.validate_instance_with_schema():
+    if not v.validate_instance_with_schema(verbose=args.verbose):
         retval += 1
     if not retval:
         for f in args.mdf_files:

@@ -258,7 +258,10 @@ class MDFValidator:
                 continue
         return None
 
-    def validate_instance_with_schema(self) -> MergedOptions | None:
+    def validate_instance_with_schema(
+        self,
+        verbose: bool = False,
+    ) -> MergedOptions | None:
         """Validate the instance with the schema."""
         if not self.schema:
             self.logger.warning("No valid schema; skipping this validation")
@@ -282,6 +285,9 @@ class MDFValidator:
                     )
                 else:
                     self.logger.error(e.message)
+                if verbose:
+                    for line in str(e).splitlines():
+                        self.logger.error("[detail] %s", line)
             if self.raise_error:
                 raise
             return None
