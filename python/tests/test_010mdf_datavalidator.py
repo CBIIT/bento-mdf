@@ -42,7 +42,7 @@ class TestMDFDataValidatorInit:
 
     def test_module_name_matches_handle(self, simple_validator):
         """Test that generated module name matches model handle."""
-        assert simple_validator.model_class == "test_validatorData"
+        assert simple_validator.model_class == "TestvalidatorData"
 
 
 class TestMDFDataValidatorProperties:
