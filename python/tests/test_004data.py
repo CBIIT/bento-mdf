@@ -18,11 +18,11 @@ def test_data_validator():
     v = MDFDataValidator(m)
     compile(v.data_model, '<string>', 'exec')
     assert v.module
-    assert v.model_class == 'testData'
+    assert v.model_class == 'TestData'
     assert set(v.node_classes) == {'Case', 'Sample', 'File', 'Diagnosis'}
     assert set(v.enum_classes) == {'SampleTypeEnum'}
-    assert issubclass(v.model_of('testData'), BaseModel)
-    assert issubclass(v.model_of('Case'), BaseModel)
+    assert issubclass(v.model_of('TestData'), BaseModel)
+    assert issubclass(v.model_of('Case'), v.module.MDFBaseModel)
     assert issubclass(v.model_of('SampleTypeEnum'), Enum)
 
 
@@ -34,7 +34,7 @@ def test_data_validation():
     smp = v.validator('Sample')
     fl = v.validator('File')
     dx =  v.validator('Diagnosis')
-    md = v.validator('testData')
+    md = v.validator('TestData')
     assert cs({"case_id": "CASE-999"})
     with raises(ValidationError, match='fullmatch.*failed'):
         cs({"case_id": "CASE-99A"})
@@ -67,7 +67,7 @@ def test_data_validation():
          "file_name": "grilf.txt",
          "file_size": "big"}
         ]
-    assert not v.validate('File', data)
+    assert not v.validate('file', data)
     assert v.last_validation_errors
     assert {x for x in v.last_validation_errors} == {1, 2}
 
@@ -80,7 +80,7 @@ def test_data_validation():
         "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": "normal"},
         }
-    assert v.validate('testData', data)
+    assert v.validate('test', data, validate_level="model")
     data_nulls = {
         "case": {"case_id": "CASE-22"},
         "diagnosis": {
@@ -90,7 +90,7 @@ def test_data_validation():
         "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": None},
         }
-    assert v.validate('testData', data_nulls)
+    assert v.validate('test', data_nulls, validate_level="model")
     data_nulled_req = {
         "case": {"case_id": None},
         "diagnosis": {
@@ -100,7 +100,7 @@ def test_data_validation():
         "file": {"file_size": None, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": None},
         }
-    assert not v.validate('testData', data_nulled_req)
+    assert not v.validate('test', data_nulled_req, validate_level="model")
     assert re.match(".*should be a valid string", v.last_validation_errors[0][0]['msg'])
     data_bad_url_and_date = {
         "case": {"case_id": "CASE-22"},
@@ -111,7 +111,7 @@ def test_data_validation():
         "file": {"file_size": 150342, "md5sum": "9d4cf66a8472f2f97c4594758a06fbd0"},
         "sample": {"amount": 4.0, "sample_type": "normal"},
         }
-    assert not v.validate('testData', data_bad_url_and_date)
+    assert not v.validate('test', data_bad_url_and_date, validate_level="model")
     assert re.match(".*should be a valid URL", v.last_validation_errors[0][0]['msg'])
     assert re.match(".*should be a valid date", v.last_validation_errors[0][1]['msg'])
     pass
@@ -120,7 +120,7 @@ def test_data_validation():
 def test_jsonschema():
     m = MDFReader(TDIR / "samples" / "test-model.yml", handle="test")
     v = MDFDataValidator(m)
-    js = v.json_schema('testData')
+    js = v.json_schema('TestData')
     assert js['$schema']
     data = {
         "case": {"case_id": "CASE-22"},
@@ -153,6 +153,7 @@ def test_list_type_validation():
         "file_name": "file.txt",
         "date": "2024-04-30T00:14:00",
         "file_id": None,
+        "id": "testID",
         "file_size": 50000,
         "list_of_integers": [1, 2, 3],
         "list_of_numbers": [1, 2.0, 4.5],
@@ -162,12 +163,12 @@ def test_list_type_validation():
         "list_of_urls": ["https://google.com", "http://mdb.ctos-data-team.org/v1/",
                          "ftp://data.net"]
         }
-    assert v.validate('File', data)
+    assert v.validate('file', data)
     data['list_of_numbers'].append("wrong")
     data['list_of_datetimes'].append("2000-04-31T12:00:05") # day DNE
     data['list_of_urls'] = "https://google.com" # not a list
 
-    assert not v.validate('File', data)
+    assert not v.validate('file', data)
     assert re.match(".*should be a valid number", v.last_validation_errors[0][0]['msg'])
     assert re.match(".*value is outside expected range", v.last_validation_errors[0][1]['msg'])
     assert re.match(".*should be a valid list", v.last_validation_errors[0][2]['msg'])
