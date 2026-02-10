@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.12.1"
+version = "0.13.0"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
   { name = "Mark A. Jensen", email = "mark.jensen@nih.gov" },

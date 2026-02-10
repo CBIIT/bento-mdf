@@ -14,6 +14,7 @@ TEST_ERR_MODEL_FILE = TDIR / "samples" / "test-missing-prop-defn.yml"
 def test_missing_defn() -> None:
     args = Namespace()
     args.schema = None
+    args.verbose = False
     args.mdf_files = [open(TEST_MODEL_BB_FILE)]
     logger = logging.getLogger("test-mdf")
     assert test(args, logger) == 0
