@@ -1,0 +1,87 @@
+Traceback (most recent call last):
+  File "/home/runner/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+  File "/home/runner/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/nbclient/client.py", line 1323, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/runner/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+  File "/home/runner/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/home/runner/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from bento_mdf import MDFReader, MDFDataValidator
+mdf = MDFReader("./sample-model.yml")
+val = MDFDataValidator(mdf)
+result = val.validate('Sample', 
+                      [{"sample_type": "normal", "amount": 0.50},
+                       {"sample_type": "tumor", "amount": 1.0},
+                       {"sample_type": "wrong", "amount": "fred"}])
+assert result is False # at least one record was invalid
+assert val.last_validation_errors[2] # the last record has error info
+
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mValidationError[39m                           Traceback (most recent call last)
+[36mFile [39m[32m~/work/bento-mdf/bento-mdf/python/src/bento_mdf/mdf/validator.py:305[39m, in [36mMDFDataValidator.validate[39m[34m(self, handle_name, data, validate_level, strict, verbose)[39m
+[32m    304[39m [38;5;28;01mtry[39;00m:
+[32m--> [39m[32m305[39m     [43mvalf[49m[43m([49m[43mrec[49m[43m,[49m[43m [49m[43mstrict[49m[43m=[49m[43mstrict[49m[43m)[49m
+[32m    306[39m [38;5;28;01mexcept[39;00m ValidationError [38;5;28;01mas[39;00m e:
+
+[36mFile [39m[32m~/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/pydantic/main.py:716[39m, in [36mBaseModel.model_validate[39m[34m(cls, obj, strict, extra, from_attributes, context, by_alias, by_name)[39m
+[32m    711[39m     [38;5;28;01mraise[39;00m PydanticUserError(
+[32m    712[39m         [33m'[39m[33mAt least one of `by_alias` or `by_name` must be set to True.[39m[33m'[39m,
+[32m    713[39m         code=[33m'[39m[33mvalidate-by-alias-and-name-false[39m[33m'[39m,
+[32m    714[39m     )
+[32m--> [39m[32m716[39m [38;5;28;01mreturn[39;00m [38;5;28;43mcls[39;49m[43m.[49m[43m__pydantic_validator__[49m[43m.[49m[43mvalidate_python[49m[43m([49m
+[32m    717[39m [43m    [49m[43mobj[49m[43m,[49m
+[32m    718[39m [43m    [49m[43mstrict[49m[43m=[49m[43mstrict[49m[43m,[49m
+[32m    719[39m [43m    [49m[43mextra[49m[43m=[49m[43mextra[49m[43m,[49m
+[32m    720[39m [43m    [49m[43mfrom_attributes[49m[43m=[49m[43mfrom_attributes[49m[43m,[49m
+[32m    721[39m [43m    [49m[43mcontext[49m[43m=[49m[43mcontext[49m[43m,[49m
+[32m    722[39m [43m    [49m[43mby_alias[49m[43m=[49m[43mby_alias[49m[43m,[49m
+[32m    723[39m [43m    [49m[43mby_name[49m[43m=[49m[43mby_name[49m[43m,[49m
+[32m    724[39m [43m[49m[43m)[49m
+
+[31mValidationError[39m: 2 validation errors for Sample
+sample_type
+  Input should be 'normal' or 'tumor' [type=enum, input_value='wrong', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/enum
+amount
+  Input should be a valid number, unable to parse string as a number [type=float_parsing, input_value='fred', input_type=str]
+    For further information visit https://errors.pydantic.dev/2.12/v/float_parsing
+
+During handling of the above exception, another exception occurred:
+
+[31mKeyError[39m                                  Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[2][39m[32m, line 4[39m
+[32m      2[39m mdf = MDFReader([33m"[39m[33m./sample-model.yml[39m[33m"[39m)
+[32m      3[39m val = MDFDataValidator(mdf)
+[32m----> [39m[32m4[39m result = [43mval[49m[43m.[49m[43mvalidate[49m[43m([49m[33;43m'[39;49m[33;43mSample[39;49m[33;43m'[39;49m[43m,[49m[43m [49m
+[32m      5[39m [43m                      [49m[43m[[49m[43m{[49m[33;43m"[39;49m[33;43msample_type[39;49m[33;43m"[39;49m[43m:[49m[43m [49m[33;43m"[39;49m[33;43mnormal[39;49m[33;43m"[39;49m[43m,[49m[43m [49m[33;43m"[39;49m[33;43mamount[39;49m[33;43m"[39;49m[43m:[49m[43m [49m[32;43m0.50[39;49m[43m}[49m[43m,[49m
+[32m      6[39m [43m                       [49m[43m{[49m[33;43m"[39;49m[33;43msample_type[39;49m[33;43m"[39;49m[43m:[49m[43m [49m[33;43m"[39;49m[33;43mtumor[39;49m[33;43m"[39;49m[43m,[49m[43m [49m[33;43m"[39;49m[33;43mamount[39;49m[33;43m"[39;49m[43m:[49m[43m [49m[32;43m1.0[39;49m[43m}[49m[43m,[49m
+[32m      7[39m [43m                       [49m[43m{[49m[33;43m"[39;49m[33;43msample_type[39;49m[33;43m"[39;49m[43m:[49m[43m [49m[33;43m"[39;49m[33;43mwrong[39;49m[33;43m"[39;49m[43m,[49m[43m [49m[33;43m"[39;49m[33;43mamount[39;49m[33;43m"[39;49m[43m:[49m[43m [49m[33;43m"[39;49m[33;43mfred[39;49m[33;43m"[39;49m[43m}[49m[43m][49m[43m)[49m
+[32m      8[39m [38;5;28;01massert[39;00m result [38;5;129;01mis[39;00m [38;5;28;01mFalse[39;00m [38;5;66;03m# at least one record was invalid[39;00m
+[32m      9[39m [38;5;28;01massert[39;00m val.last_validation_errors[[32m2[39m] [38;5;66;03m# the last record has error info[39;00m
+
+[36mFile [39m[32m~/work/bento-mdf/bento-mdf/python/src/bento_mdf/mdf/validator.py:321[39m, in [36mMDFDataValidator.validate[39m[34m(self, handle_name, data, validate_level, strict, verbose)[39m
+[32m    319[39m     node_name = handle_name
+[32m    320[39m     prop_name = err[[33m"[39m[33mloc[39m[33m"[39m][[32m0[39m]
+[32m--> [39m[32m321[39m prop_instance = [38;5;28;43mself[39;49m[43m.[49m[43mmodel[49m[43m.[49m[43mnodes[49m[43m[[49m[43mnode_name[49m[43m][49m.props[prop_name]
+[32m    322[39m [38;5;28;01mif[39;00m [38;5;129;01mnot[39;00m prop_instance.is_strict:
+[32m    323[39m     [38;5;66;03m# non-strict enum violation, treat as warning[39;00m
+[32m    324[39m     [38;5;66;03m# add level key[39;00m
+[32m    325[39m     err = {[33m"[39m[33mlevel[39m[33m"[39m: [33m"[39m[33mwarning[39m[33m"[39m, **err}
+
+[31mKeyError[39m: 'Sample'
+

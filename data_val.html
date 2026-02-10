@@ -1,0 +1,483 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Validation with MDF &mdash; MDF Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Drivers and Tools" href="mdf_tools.html" />
+    <link rel="prev" title="Model Description Files (MDF)" href="mdf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            bento-mdf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html#make-changes-to-the-underlying-model">Make changes to the underlying model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdf.html">Model Description Files (MDF)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Validation with MDF</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#available-validation-classes-and-data-fields">Available validation classes and data fields</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-model-class">The “Model Class”</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inspecting-validation-errors">Inspecting validation errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generated-validation-classes">Generated Validation Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#json-schema-representations">JSON Schema Representations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mdf_tools.html">Drivers and Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conduct.html">Code of Conduct</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bento-mdf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Data Validation with MDF</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/data_val.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="data-validation-with-mdf">
+<h1>Data Validation with MDF<a class="headerlink" href="#data-validation-with-mdf" title="Link to this heading"></a></h1>
+<p>The MDF <a class="reference internal" href="#property-definitions"><span class="xref myst">PropDefinitions</span></a> section describes properties (slots or variables), along with the data types that consitute valid values for those properties. Using this information, one can validate data that are meant to comply with these conditions.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">MDFDataValidator</span></code> class uses the <a class="reference external" href="https://docs.pydantic.dev/latest/">Pydantic</a> data validation library to interpret MDF nodes and properties as Python classes which have attributes whose values are automatically validated. This provides several options for performing data validation against an MDF model. Data to be validated simply needs to be expressed as a Python dict or as JSON.</p>
+<p>Example: Suppose you have defined a node called <code class="docutils literal notranslate"><span class="pre">sample</span></code> in MDF, with properties <code class="docutils literal notranslate"><span class="pre">sample_type</span></code> and <code class="docutils literal notranslate"><span class="pre">amount</span></code>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">bento_mdf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span> <span class="c1"># check package version</span>
+
+<span class="n">version</span><span class="p">(</span><span class="s2">&quot;bento_mdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;0.13.0&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># sample-model.yml                                                                              </span>
+<span class="nt">Handle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="nt">Nodes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sample</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Props</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample_type</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amount</span>
+<span class="nt">Relationships</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">is_subsample_of</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Mul</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">many_to_one</span>
+<span class="w">    </span><span class="nt">Ends</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">-	Src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">Dst</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample</span>
+<span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">Props</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">~</span>
+<span class="nt">PropDefinitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sample_type</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Enum</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">normal</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tumor</span>
+<span class="w">  </span><span class="nt">amount</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">units</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mg</span>
+<span class="w">      </span><span class="nt">value_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">number</span>
+</pre></div>
+</div>
+<p>You can then validate a list of dicts of <code class="docutils literal notranslate"><span class="pre">sample</span></code> data using <code class="docutils literal notranslate"><span class="pre">validate()</span></code> as follows:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bento_mdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">MDFReader</span><span class="p">,</span> <span class="n">MDFDataValidator</span>
+<span class="n">mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="s2">&quot;./sample-model.yml&quot;</span><span class="p">)</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">MDFDataValidator</span><span class="p">(</span><span class="n">mdf</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;Sample&#39;</span><span class="p">,</span> 
+                      <span class="p">[{</span><span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mf">0.50</span><span class="p">},</span>
+                       <span class="p">{</span><span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;tumor&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                       <span class="p">{</span><span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;wrong&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="s2">&quot;fred&quot;</span><span class="p">}])</span>
+<span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">False</span> <span class="c1"># at least one record was invalid</span>
+<span class="k">assert</span> <span class="n">val</span><span class="o">.</span><span class="n">last_validation_errors</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># the last record has error info</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">ValidationError</span><span class="g g-Whitespace">                           </span>Traceback (most recent call last)
+<span class="nn">File ~/work/bento-mdf/bento-mdf/python/src/bento_mdf/mdf/validator.py:305,</span> in <span class="ni">MDFDataValidator.validate</span><span class="nt">(self, handle_name, data, validate_level, strict, verbose)</span>
+<span class="g g-Whitespace">    </span><span class="mi">304</span> <span class="k">try</span><span class="p">:</span>
+<span class="ne">--&gt; </span><span class="mi">305</span>     <span class="n">valf</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+<span class="g g-Whitespace">    </span><span class="mi">306</span> <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+<span class="nn">File ~/work/bento-mdf/bento-mdf/python/.venv/lib/python3.12/site-packages/pydantic/main.py:716,</span> in <span class="ni">BaseModel.model_validate</span><span class="nt">(cls, obj, strict, extra, from_attributes, context, by_alias, by_name)</span>
+<span class="g g-Whitespace">    </span><span class="mi">711</span>     <span class="k">raise</span> <span class="n">PydanticUserError</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">712</span>         <span class="s1">&#39;At least one of `by_alias` or `by_name` must be set to True.&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">713</span>         <span class="n">code</span><span class="o">=</span><span class="s1">&#39;validate-by-alias-and-name-false&#39;</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">714</span>     <span class="p">)</span>
+<span class="ne">--&gt; </span><span class="mi">716</span> <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__pydantic_validator__</span><span class="o">.</span><span class="n">validate_python</span><span class="p">(</span>
+<span class="g g-Whitespace">    </span><span class="mi">717</span>     <span class="n">obj</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">718</span>     <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">719</span>     <span class="n">extra</span><span class="o">=</span><span class="n">extra</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">720</span>     <span class="n">from_attributes</span><span class="o">=</span><span class="n">from_attributes</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">721</span>     <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">722</span>     <span class="n">by_alias</span><span class="o">=</span><span class="n">by_alias</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">723</span>     <span class="n">by_name</span><span class="o">=</span><span class="n">by_name</span><span class="p">,</span>
+<span class="g g-Whitespace">    </span><span class="mi">724</span> <span class="p">)</span>
+
+<span class="ne">ValidationError</span>: 2 validation errors for Sample
+<span class="n">sample_type</span>
+  <span class="n">Input</span> <span class="n">should</span> <span class="n">be</span> <span class="s1">&#39;normal&#39;</span> <span class="ow">or</span> <span class="s1">&#39;tumor&#39;</span> <span class="p">[</span><span class="nb">type</span><span class="o">=</span><span class="n">enum</span><span class="p">,</span> <span class="n">input_value</span><span class="o">=</span><span class="s1">&#39;wrong&#39;</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">For</span> <span class="n">further</span> <span class="n">information</span> <span class="n">visit</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">errors</span><span class="o">.</span><span class="n">pydantic</span><span class="o">.</span><span class="n">dev</span><span class="o">/</span><span class="mf">2.12</span><span class="o">/</span><span class="n">v</span><span class="o">/</span><span class="n">enum</span>
+<span class="n">amount</span>
+  <span class="n">Input</span> <span class="n">should</span> <span class="n">be</span> <span class="n">a</span> <span class="n">valid</span> <span class="n">number</span><span class="p">,</span> <span class="n">unable</span> <span class="n">to</span> <span class="n">parse</span> <span class="n">string</span> <span class="k">as</span> <span class="n">a</span> <span class="n">number</span> <span class="p">[</span><span class="nb">type</span><span class="o">=</span><span class="n">float_parsing</span><span class="p">,</span> <span class="n">input_value</span><span class="o">=</span><span class="s1">&#39;fred&#39;</span><span class="p">,</span> <span class="n">input_type</span><span class="o">=</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">For</span> <span class="n">further</span> <span class="n">information</span> <span class="n">visit</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">errors</span><span class="o">.</span><span class="n">pydantic</span><span class="o">.</span><span class="n">dev</span><span class="o">/</span><span class="mf">2.12</span><span class="o">/</span><span class="n">v</span><span class="o">/</span><span class="n">float_parsing</span>
+
+<span class="n">During</span> <span class="n">handling</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">exception</span><span class="p">,</span> <span class="n">another</span> <span class="n">exception</span> <span class="n">occurred</span><span class="p">:</span>
+
+<span class="ne">KeyError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="s2">&quot;./sample-model.yml&quot;</span><span class="p">)</span>
+<span class="g g-Whitespace">      </span><span class="mi">3</span> <span class="n">val</span> <span class="o">=</span> <span class="n">MDFDataValidator</span><span class="p">(</span><span class="n">mdf</span><span class="p">)</span>
+<span class="ne">----&gt; </span><span class="mi">4</span> <span class="n">result</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;Sample&#39;</span><span class="p">,</span> 
+<span class="g g-Whitespace">      </span><span class="mi">5</span>                       <span class="p">[{</span><span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mf">0.50</span><span class="p">},</span>
+<span class="g g-Whitespace">      </span><span class="mi">6</span>                        <span class="p">{</span><span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;tumor&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+<span class="g g-Whitespace">      </span><span class="mi">7</span>                        <span class="p">{</span><span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;wrong&quot;</span><span class="p">,</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="s2">&quot;fred&quot;</span><span class="p">}])</span>
+<span class="g g-Whitespace">      </span><span class="mi">8</span> <span class="k">assert</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">False</span> <span class="c1"># at least one record was invalid</span>
+<span class="g g-Whitespace">      </span><span class="mi">9</span> <span class="k">assert</span> <span class="n">val</span><span class="o">.</span><span class="n">last_validation_errors</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># the last record has error info</span>
+
+<span class="nn">File ~/work/bento-mdf/bento-mdf/python/src/bento_mdf/mdf/validator.py:321,</span> in <span class="ni">MDFDataValidator.validate</span><span class="nt">(self, handle_name, data, validate_level, strict, verbose)</span>
+<span class="g g-Whitespace">    </span><span class="mi">319</span>     <span class="n">node_name</span> <span class="o">=</span> <span class="n">handle_name</span>
+<span class="g g-Whitespace">    </span><span class="mi">320</span>     <span class="n">prop_name</span> <span class="o">=</span> <span class="n">err</span><span class="p">[</span><span class="s2">&quot;loc&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="ne">--&gt; </span><span class="mi">321</span> <span class="n">prop_instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_name</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span>
+<span class="g g-Whitespace">    </span><span class="mi">322</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">prop_instance</span><span class="o">.</span><span class="n">is_strict</span><span class="p">:</span>
+<span class="g g-Whitespace">    </span><span class="mi">323</span>     <span class="c1"># non-strict enum violation, treat as warning</span>
+<span class="g g-Whitespace">    </span><span class="mi">324</span>     <span class="c1"># add level key</span>
+<span class="g g-Whitespace">    </span><span class="mi">325</span>     <span class="n">err</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;level&quot;</span><span class="p">:</span> <span class="s2">&quot;warning&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">err</span><span class="p">}</span>
+
+<span class="ne">KeyError</span>: &#39;Sample&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<section id="available-validation-classes-and-data-fields">
+<h2>Available validation classes and data fields<a class="headerlink" href="#available-validation-classes-and-data-fields" title="Link to this heading"></a></h2>
+<p>The first argument of <code class="docutils literal notranslate"><span class="pre">validate</span></code> is a string, the class name, that represents a particular model node. Class names are created by CamelCasing the Node handles that appear in the MDF. Properties for Nodes become data fields within the node validation class. These are snake_case strings given by the MDF property handles.</p>
+<p>Available node class names are found in the MDFDataValidator <code class="docutils literal notranslate"><span class="pre">node_classes</span></code> attribute. Available field (property) names for a node class can be retrieved with the <code class="docutils literal notranslate"><span class="pre">fields_of()</span></code> or <code class="docutils literal notranslate"><span class="pre">props_of()</span></code> method.</p>
+<p>For example, using <a class="reference internal" href="#/python/tests/samples/test-model.yml"><span class="xref myst">test-model.yml</span></a>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="s2">&quot;../tests/samples/test-model.yml&quot;</span><span class="p">)</span>
+<span class="n">val</span> <span class="o">=</span> <span class="n">MDFDataValidator</span><span class="p">(</span><span class="n">mdf</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span> <span class="n">val</span><span class="o">.</span><span class="n">node_classes</span> <span class="p">)</span>
+<span class="c1"># [&#39;Case&#39;, &#39;Diagnosis&#39;, &#39;File&#39;, &#39;Sample&#39;]</span>
+<span class="nb">print</span><span class="p">(</span> <span class="n">val</span><span class="o">.</span><span class="n">fields_of</span><span class="p">(</span><span class="s1">&#39;Sample&#39;</span><span class="p">))</span>
+<span class="c1"># [&#39;sample_type&#39;, &#39;amount&#39;]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|██████████████████████████████████████████████████████████| 7/7 [00:00&lt;00:00, 14061.36it/s]
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;Case&#39;, &#39;Diagnosis&#39;, &#39;File&#39;, &#39;Sample&#39;]
+[&#39;sample_type&#39;, &#39;amount&#39;]
+</pre></div>
+</div>
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The second argument to <code class="docutils literal notranslate"><span class="pre">validate()</span></code> is the data to be validated against the given class. It is a dict or a list of dicts, whose keys are names of properties defined in the MDF for the given node, and whose values are actual data values to be validated. If all data records in the list are valid, <code class="docutils literal notranslate"><span class="pre">validate()</span></code> returns True; otherwise, it retuns False.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">val</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;Sample&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;sample_type&#39;</span><span class="p">:</span> <span class="s1">&#39;normal&#39;</span><span class="p">,</span> <span class="s1">&#39;amount&#39;</span><span class="p">:</span><span class="mf">1.0</span><span class="p">}):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Valid!&quot;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Invalid.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Valid!
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="the-model-class">
+<h2>The “Model Class”<a class="headerlink" href="#the-model-class" title="Link to this heading"></a></h2>
+<p>An additional validation class is created that aggregates all Node classes. This can be used to validate a dict containing a data record for all model Nodes. The model class is named by appending ‘Data’ to the model handle. This name is found in <code class="docutils literal notranslate"><span class="pre">val.model_class</span></code>.</p>
+<p>For example, <a class="reference internal" href="#/python/tests/samples/test-model.yml"><span class="xref myst">test-model.yml</span></a> has handle <code class="docutils literal notranslate"><span class="pre">test</span></code> and its model class is named <code class="docutils literal notranslate"><span class="pre">testData</span></code>. An example validation:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;case&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;case_id&quot;</span><span class="p">:</span> <span class="s2">&quot;CASE-22&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;diagnosis&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;disease&quot;</span><span class="p">:</span> <span class="s2">&quot;http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_of_dx&quot;</span><span class="p">:</span> <span class="s2">&quot;1965-05-04T00:00:00&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;file_size&quot;</span><span class="p">:</span> <span class="mi">150342</span><span class="p">,</span> <span class="s2">&quot;md5sum&quot;</span><span class="p">:</span> <span class="s2">&quot;9d4cf66a8472f2f97c4594758a06fbd0&quot;</span><span class="p">},</span>
+    <span class="s2">&quot;sample&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">,</span> <span class="s2">&quot;sample_type&quot;</span><span class="p">:</span> <span class="s2">&quot;normal&quot;</span><span class="p">},</span>
+    <span class="p">}</span>
+<span class="k">assert</span> <span class="n">val</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;testData&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that the Node keys for data are in lower case.</p>
+</section>
+<section id="inspecting-validation-errors">
+<h2>Inspecting validation errors<a class="headerlink" href="#inspecting-validation-errors" title="Link to this heading"></a></h2>
+<p>If <code class="docutils literal notranslate"><span class="pre">validate()</span></code> returns False, the attribute <code class="docutils literal notranslate"><span class="pre">last_validation_errors</span></code> will contain a dict of error lists emitted by Pydantic. The keys of the dict are the indexes in the data list of the records that errored; the values are a list of Pydantic <a class="reference external" href="https://docs.pydantic.dev/latest/api/pydantic_core/#pydantic_core.ValidationError">ValidationError</a> objects detailing the nature of the errors.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s2">&quot;md5sum&quot;</span><span class="p">:</span> <span class="s2">&quot;9d4cf66a8472f2f97c4594758a06fbd0&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="s2">&quot;grelf.txt&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;file_size&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;md5sum&quot;</span><span class="p">:</span> <span class="s2">&quot;9d4cf66a8472f2f97c4594758a06Fbd0&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="s2">&quot;grolf.txt&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;file_size&quot;</span><span class="p">:</span> <span class="mf">50.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s2">&quot;md5sum&quot;</span><span class="p">:</span> <span class="s2">&quot;9d4cf66a8472f2f97c4594758a06Fbd0&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="s2">&quot;grilf.txt&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;file_size&quot;</span><span class="p">:</span> <span class="s2">&quot;big&quot;</span><span class="p">}</span>
+    <span class="p">]</span>
+<span class="n">val</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="s1">&#39;File&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">last_validation_errors</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{
+    &quot;1&quot;: [
+        {
+            &quot;type&quot;: &quot;predicate_failed&quot;,
+            &quot;loc&quot;: [
+                &quot;md5sum&quot;
+            ],
+            &quot;msg&quot;: &quot;Predicate Pattern.fullmatch failed&quot;,
+            &quot;input&quot;: &quot;9d4cf66a8472f2f97c4594758a06Fbd0&quot;
+        }
+    ],
+    &quot;2&quot;: [
+        {
+            &quot;type&quot;: &quot;predicate_failed&quot;,
+            &quot;loc&quot;: [
+                &quot;md5sum&quot;
+            ],
+            &quot;msg&quot;: &quot;Predicate Pattern.fullmatch failed&quot;,
+            &quot;input&quot;: &quot;9d4cf66a8472f2f97c4594758a06Fbd0&quot;
+        },
+        {
+            &quot;type&quot;: &quot;int_parsing&quot;,
+            &quot;loc&quot;: [
+                &quot;file_size&quot;,
+                &quot;int&quot;
+            ],
+            &quot;msg&quot;: &quot;Input should be a valid integer, unable to parse string as an integer&quot;,
+            &quot;input&quot;: &quot;big&quot;,
+            &quot;url&quot;: &quot;https://errors.pydantic.dev/2.10/v/int_parsing&quot;
+        },
+        {
+            &quot;type&quot;: &quot;int_parsing&quot;,
+            &quot;loc&quot;: [
+                &quot;file_size&quot;,
+                &quot;int&quot;
+            ],
+            &quot;msg&quot;: &quot;Input should be a valid integer, unable to parse string as an integer&quot;,
+            &quot;input&quot;: &quot;big&quot;,
+            &quot;url&quot;: &quot;https://errors.pydantic.dev/2.10/v/int_parsing&quot;
+        }
+    ]
+}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="generated-validation-classes">
+<h2>Generated Validation Classes<a class="headerlink" href="#generated-validation-classes" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">MDFDataValidator</span></code> generates a Python module containing Pydantic classes (generally known as “<a class="reference external" href="https://docs.pydantic.dev/latest/concepts/models/">models</a>”). The module code is contained in <code class="docutils literal notranslate"><span class="pre">val.data_model</span></code>; it can be printed to a file and used as an independent package in other applications.</p>
+<p>The validator object creates this code using a <a class="reference external" href="https://jinja.palletsprojects.com/en/stable/templates/">Jinja</a> template and imports it back dynamically with <a class="reference external" href="https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly"><code class="docutils literal notranslate"><span class="pre">importlib</span></code></a>.</p>
+<p>There is no need to deal directly with this machinery in the simplest case of data validation (above). However, you can take advantage of Pydantic features available to these classes by accessing them using <code class="docutils literal notranslate"><span class="pre">val.model_of()</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># instantiate a validated object:</span>
+<span class="n">sample1</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">model_of</span><span class="p">(</span><span class="s1">&#39;Sample&#39;</span><span class="p">)(</span><span class="n">sample_type</span><span class="o">=</span><span class="s2">&quot;normal&quot;</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
+<span class="c1"># get more detail on field types and validations (Pydantic BaseModel methods)</span>
+<span class="n">pydantic_fields</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">model_of</span><span class="p">(</span><span class="s1">&#39;Sample&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">pydantic_fields</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;sample_type&#39;: FieldInfo(annotation=Union[SampleTypeEnum, NoneType], required=True), &#39;amount&#39;: FieldInfo(annotation=Union[Annotated[float, Unit], NoneType], required=True)}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="json-schema-representations">
+<h2>JSON Schema Representations<a class="headerlink" href="#json-schema-representations" title="Link to this heading"></a></h2>
+<p>Pydantic has extensive JSON Schema generation facilities. For any validation class, a JSON Schema representation can be created that may be used for for data validation across many programming environments and languages, including Python and Javascript. For example, data validation schemas can be stored along side MDF models in their repos, and general tools using JSON Schema can be developed to enable external submitters to validate their data prior to submission.</p>
+<p>JSON Schema for any available validation class can be generated with the <code class="docutils literal notranslate"><span class="pre">json_schema()</span></code> method:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">json_schema</span><span class="p">(</span><span class="s1">&#39;Diagnosis&#39;</span><span class="p">),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{
+    &quot;$schema&quot;: &quot;https://json-schema.org/draft/2020-12/schema&quot;,
+    &quot;properties&quot;: {
+        &quot;disease&quot;: {
+            &quot;anyOf&quot;: [
+                {
+                    &quot;format&quot;: &quot;uri&quot;,
+                    &quot;minLength&quot;: 1,
+                    &quot;type&quot;: &quot;string&quot;
+                },
+                {
+                    &quot;type&quot;: &quot;null&quot;
+                }
+            ],
+            &quot;title&quot;: &quot;Disease&quot;
+        },
+        &quot;date_of_dx&quot;: {
+            &quot;anyOf&quot;: [
+                {
+                    &quot;format&quot;: &quot;date-time&quot;,
+                    &quot;type&quot;: &quot;string&quot;
+                },
+                {
+                    &quot;type&quot;: &quot;null&quot;
+                }
+            ],
+            &quot;title&quot;: &quot;Date Of Dx&quot;
+        }
+    },
+    &quot;required&quot;: [
+        &quot;disease&quot;,
+        &quot;date_of_dx&quot;
+    ],
+    &quot;title&quot;: &quot;Diagnosis&quot;,
+    &quot;type&quot;: &quot;object&quot;
+}
+</pre></div>
+</div>
+</div>
+</div>
+<p>In Python, this JSON Schema could be used to validate data as follows:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">jsonschema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">jsonschema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Draft202012Validator</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">jsonschema</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;disease&quot;</span><span class="p">:</span> <span class="s2">&quot;http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C102872&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;date_of_dx&quot;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>
+        <span class="n">val</span><span class="o">.</span><span class="n">json_schema</span><span class="p">(</span><span class="s1">&#39;Diagnosis&#39;</span><span class="p">),</span>
+        <span class="n">format_checker</span><span class="o">=</span><span class="n">Draft202012Validator</span><span class="o">.</span><span class="n">FORMAT_CHECKER</span>
+    <span class="p">)</span>
+<span class="k">except</span> <span class="n">jsonschema</span><span class="o">.</span><span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.5 is not valid under any of the given schemas
+
+Failed validating &#39;anyOf&#39; in schema[&#39;properties&#39;][&#39;date_of_dx&#39;]:
+    {&#39;anyOf&#39;: [{&#39;format&#39;: &#39;date-time&#39;, &#39;type&#39;: &#39;string&#39;}, {&#39;type&#39;: &#39;null&#39;}],
+     &#39;title&#39;: &#39;Date Of Dx&#39;}
+
+On instance[&#39;date_of_dx&#39;]:
+    1.5
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="mdf.html" class="btn btn-neutral float-left" title="Model Description Files (MDF)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mdf_tools.html" class="btn btn-neutral float-right" title="Drivers and Tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-2025, FNLCR.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

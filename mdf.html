@@ -1,0 +1,608 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Model Description Files (MDF) &mdash; MDF Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Data Validation with MDF" href="data_val.html" />
+    <link rel="prev" title="Example Usage" href="example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            bento-mdf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example.html">Example Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example.html#make-changes-to-the-underlying-model">Make changes to the underlying model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Model Description Files (MDF)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-descriptors">Model Descriptors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nodes">Nodes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#relationships">Relationships</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#property-definitions">Property Definitions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#name-collisions-in-property-definitions">Name Collisions in Property Definitions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#property-data-types">Property Data Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#acceptable-value-lists">Acceptable Value Lists</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#terms">Terms</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#terms-for-entities">Terms for Entities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#universal-properties">Universal Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-input-yaml-files-and-overlays">Multiple input YAML files and “overlays”</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-elements">Adding elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#deleting-replacing-elements">Deleting/replacing elements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tagging-entities">Tagging Entities</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-description-format-mappings">Model Description Format - Mappings</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#source">Source</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#models">Models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#props">Props</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data_val.html">Data Validation with MDF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdf_tools.html">Drivers and Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conduct.html">Code of Conduct</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bento-mdf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Model Description Files (MDF)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/mdf.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="model-description-files-mdf">
+<h1>Model Description Files (MDF)<a class="headerlink" href="#model-description-files-mdf" title="Link to this heading"></a></h1>
+<p>The layout of nodes, relationships, node properties, and relationship
+properties are specified in data structures expressed in
+YAML-formatted <em>model description files</em>.</p>
+<p>The input format follows these general conventions, which are enforced
+by a <a class="reference external" href="https://json-schema.org/understanding-json-schema/">JSONSchema</a>
+<a class="reference download internal" download="" href="_downloads/fa84c7838f8ca6abf50465ada1614607/mdf-schema.yaml"><span class="xref download myst">schema</span></a>:</p>
+<ul class="simple">
+<li><p>Special key names are capitalized; these are essentially MDF directives;</p></li>
+<li><p>Custom names, such as names of nodes and properties, are all lower
+case, with underscores replacing any spaces (“snakecase”);</p></li>
+</ul>
+<p>A graph model can be expressed in a single YAML file, or multiple YAML
+files. <span class="xref myst">Compliant</span> drivers will merge the data structures,
+so that, for example, nodes and relationships can be described
+in one file, and property definitions can be provided in a separate
+file.</p>
+<section id="model-descriptors">
+<h2>Model Descriptors<a class="headerlink" href="#model-descriptors" title="Link to this heading"></a></h2>
+<p>Top level keys that describe the model itself include:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Handle: MyModel 
+URI: &quot;https://sts.ctos-data-team.org/model/MyModel&quot;
+  Version: v1.7.2
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Handle</span></code> value is intended to be a short, human-readable moniker
+for the model described in the document. It should be easy to compute
+with, e.g., contain no spaces and not start with a numeral.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">URI</span></code> value, if present, should be a resolving URL that can
+provide further detailed information about the model described in the
+MDF instance. Ideally, it should be the base URL for a terminology
+server (like the <a class="reference external" href="https://github.com/CBIIT/bento-sts">Simple Terminology Server</a>),
+that can be concatenated with path information in the MDF to return
+relevant details.</p>
+<p>In particular, an enumerated value set can be included “by reference”
+in the MDF, using a path.  Joining the URL value and the path value
+with a backslash should create a url that can return the actual list
+of enumerated values.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Version</span></code> value, if present, should be a human-readable version
+string (e.g., v1.7.2) for the model described in the MDF. Best
+practice is to keep it in sync with a git tag for which a GitHub
+release has been made.</p>
+</section>
+<section id="nodes">
+<h2>Nodes<a class="headerlink" href="#nodes" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Nodes</span></code> top-level key points to an object containing descriptions
+of each node type in the model. Node descriptions look like:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;nodename&gt; :
+    UniqueKeys:
+        - [ &#39;propnameA&#39;, &#39;propnameB&#39;, ... ]
+        - [ ... ]
+        - ...
+    Props:
+       - &lt;propname1&gt;
+       - &lt;propname2&gt;
+       - ...
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">UniqueKeys</span></code> key points to an array of arrays. Each bottom-level
+array is a list (which can be of length 1) of node property
+names. This specifies that nodes of this type that are created in the
+system must be unique with respect to the set of values for the
+properties indicated. For example, <code class="docutils literal notranslate"><span class="pre">['id']</span></code> here indicates that the
+value for the property <code class="docutils literal notranslate"><span class="pre">id</span></code> must be unique for all nodes of the
+type. <code class="docutils literal notranslate"><span class="pre">['project_id',</span> <span class="pre">'submitter_id']</span></code> indicates that the submitter id
+must be unique among all nodes having a given project_id value.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Props</span></code> key points to a simple array of property names given as
+strings. The detailed definition of each property (e.g., value type or
+enumeration, required status) are provided once, in a separate
+top-level section, <code class="docutils literal notranslate"><span class="pre">PropDefinitions</span></code> ([see below](#Property
+Definitions)).</p>
+</section>
+<section id="relationships">
+<h2>Relationships<a class="headerlink" href="#relationships" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Relationships</span></code> top-level key points to an object of descriptions
+of each relationship type. Relationship descriptions look like:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;relname&gt;:
+     Props:
+         - &lt;propname&gt;
+     Req: [ true | false ]
+     Mul: [ one_to_one | many_to_one | many_to_many | one_to_many ]
+     Ends:
+        - Src: &lt;nodename1&gt;
+          Dst: &lt;nodename2&gt;
+        - Src: &lt;nodename...&gt;
+           ...
+</pre></div>
+</div>
+<p>A named relationship can have properties defined, analogous to nodes.</p>
+<p>A named relationship can be specified as required with the <code class="docutils literal notranslate"><span class="pre">Req</span></code> key,
+and its multiplicity (from source node type to destination node type)
+with the <code class="docutils literal notranslate"><span class="pre">Mul</span></code> key.</p>
+<p>A given named relationship can be formed between different source and
+destination node type pairs. The <code class="docutils literal notranslate"><span class="pre">Ends</span></code> key points to an array of
+<code class="docutils literal notranslate"><span class="pre">{Src:&lt;nodename&gt;,</span> <span class="pre">Dst:&lt;nodename&gt;}</span></code> objects that describe the allowed
+pairs.</p>
+</section>
+<section id="property-definitions">
+<h2>Property Definitions<a class="headerlink" href="#property-definitions" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">PropDefinitions</span></code> top-level key points to an object of
+descriptions of each property. Property descriptions look like:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;propname1&gt;:
+    Desc: &quot;A description of the property&quot;
+    Type: &lt;string|number|...&gt;
+    # or the following:
+    # Enum:
+    #    - acceptable
+    #    - values
+    #    - for
+    #    - property
+    #    - go
+    #    - here
+    Nul: &lt;true|false&gt; # is property nullable?
+    Req: &lt;true|false&gt; # is property required?
+    Key: &lt;true|false&gt; # is property a unique identifier?
+    Strict: &lt;true|false&gt; # is property type/enum strict?
+    Deprecated: &lt;true|false&gt; # is property deprecated?
+</pre></div>
+</div>
+<p>Either the <code class="docutils literal notranslate"><span class="pre">Type</span></code> or the <code class="docutils literal notranslate"><span class="pre">Enum</span></code> key should be present. If Enum key is
+present, the <code class="docutils literal notranslate"><span class="pre">Type</span></code> key will be ignored.</p>
+<p>Where properties need to be applied to Nodes and Relationships, use a
+list of propnames from those defined in PropDefinitions.</p>
+<p>PropDefinitions are frequently kept in a separate file, like <code class="docutils literal notranslate"><span class="pre">&lt;model&gt;-model-props.yml</span></code>.</p>
+<section id="name-collisions-in-property-definitions">
+<h3>Name Collisions in Property Definitions<a class="headerlink" href="#name-collisions-in-property-definitions" title="Link to this heading"></a></h3>
+<p>The definitions of property values are separated from the list of
+properties provided in Node and Relationship specs. This is in order
+to make the model easier to read by humans. However, since there is
+nothing to prevent two different nodes from having properties with the
+same name or handle (nor should there be), the PropDefintions section
+needs to be able to disambiguate this situation.</p>
+<p>To refer to a property in a specific node in a PropDefinitions key,
+use a dotted notation for the key <code class="docutils literal notranslate"><span class="pre">&lt;node_name&gt;.&lt;property_name&gt;</span></code>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>PropDefinitions:
+diagnosis.best_response:
+  ...
+enrollment.best_response:
+  ...
+</pre></div>
+</div>
+</section>
+<section id="property-data-types">
+<h3>Property Data Types<a class="headerlink" href="#property-data-types" title="Link to this heading"></a></h3>
+<p>Properties are “slots” which can contain data. A property definition
+requires a Type specification for that data. MDF recognizes the following types:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Data Type</p></th>
+<th class="head"><p>value of Type: key</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Simple scalar</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">number</span></code>, <code class="docutils literal notranslate"><span class="pre">integer</span></code>, <code class="docutils literal notranslate"><span class="pre">string</span></code>, <code class="docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="docutils literal notranslate"><span class="pre">url</span></code>, <code class="docutils literal notranslate"><span class="pre">boolean</span></code>, <code class="docutils literal notranslate"><span class="pre">TBD</span></code></p></td>
+<td><p>Single value data. <code class="docutils literal notranslate"><span class="pre">TBD</span></code> is a placeholder</p></td>
+</tr>
+<tr class="row-odd"><td><p>Number with units</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;value_type&quot;:&lt;integer|number&gt;,</span> <span class="pre">&quot;units&quot;:</span> <span class="pre">[</span> <span class="pre">&lt;string&gt;,</span> <span class="pre">...</span> <span class="pre">]</span></code></p></td>
+<td><p>Units is an array of acceptable unit abbreviations (e.g. <code class="docutils literal notranslate"><span class="pre">[&quot;ul&quot;,&quot;nl&quot;]</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Pattern match</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;pattern&quot;:&lt;regexp&gt;</span> <span class="pre">}</span></code></p></td>
+<td><p>Acceptable data is a string matching the <code class="docutils literal notranslate"><span class="pre">pattern</span></code> regular expression</p></td>
+</tr>
+<tr class="row-odd"><td><p>Acceptable value list</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">&lt;string&gt;,</span> <span class="pre">...</span> <span class="pre">]</span></code></p></td>
+<td><p>List of acceptable string values (see below)</p></td>
+</tr>
+<tr class="row-even"><td><p>List</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">{</span> <span class="pre">&quot;value_type&quot;:&quot;list&quot;,</span> <span class="pre">&quot;item_type&quot;:&lt;typespec&gt;</span> <span class="pre">}</span></code></p></td>
+<td><p>Acceptable data is an array or list of items of specified type</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="acceptable-value-lists">
+<h3>Acceptable Value Lists<a class="headerlink" href="#acceptable-value-lists" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Enum</span></code> key in a property definition may be followed by a list of
+acceptable values, or a single list value containing a fully qualified
+URI, or a URI path that can be concatenated to the model URI. In
+either case, the resulting URI should resolve and should return a list
+of acceptable values for the property:</p>
+<p><propname2>:
+…
+Enum:
+- https://sts.ctos-data-team.org/model/MyModel/property/<propname2>/list</p>
+<p>A property with <code class="docutils literal notranslate"><span class="pre">value_type:</span> <span class="pre">list</span></code> can have an acceptable value list as its <code class="docutils literal notranslate"><span class="pre">item_type</span></code>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;propname3&gt;:
+    ...
+  Type:
+    value_type: list
+    item_type:
+      - acceptable
+      - values
+      - here
+</pre></div>
+</div>
+</section>
+</section>
+<section id="terms">
+<h2>Terms<a class="headerlink" href="#terms" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">Terms</span></code> top-level key, if present, should contain descriptions of
+terms used in the model. Terms relate string descriptors in the model
+(such as the handles of nodes and relationships, or values within
+enumerated acceptable value lists) to semantic concepts indexed in
+formal or informal terminologies. The keys in the Terms object refer
+to the term description, but they themselves need not be the string
+representation of the term in data. The primary “code”, or string
+representation, is the term’s “value” in the MDF. The term
+specification can include an origin or terminology authority, that
+authority’s code or identifier for the term or concept, and a
+definition that describes what the term signifies.</p>
+<p>It is probably most convenient to keep the Terms key/value in a
+separate file, like PropDefinitions, e.g. <code class="docutils literal notranslate"><span class="pre">&lt;model&gt;-model-terms.yml</span></code>.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Terms:
+...
+&lt;term_handle&gt;:
+  Value: &lt;term_instance_string|&quot;code&quot;&gt;
+  Origin: &lt;authority name|abbrev|identifier&gt;
+  Code: &lt;authority term id&gt;
+  Version: &lt;authority term version&gt;
+  Defintion: |
+    (authority&#39;s) text definition of term&#39;s concept 
+</pre></div>
+</div>
+<section id="terms-for-entities">
+<h3>Terms for Entities<a class="headerlink" href="#terms-for-entities" title="Link to this heading"></a></h3>
+<p>Nodes, Relationships, or Properties themselves may in some contexts
+have an external semantic representation in some framework. For
+example, a <code class="docutils literal notranslate"><span class="pre">participant</span></code> Node may need to be associated with a precise
+definition of “participant” as a person who is receiving medical care
+(e.g., NCIt Patient concept <a class="reference external" href="https://ncit.nci.nih.gov/ncitbrowser/ConceptReport.jsp?dictionary=NCI_Thesaurus&amp;amp;version=22.03d&amp;amp;ns=ncit&amp;amp;code=C16960&amp;amp;key=n93267819&amp;amp;b=1&amp;amp;n=null">C16960</a>).</p>
+<p>To record this, any Node, Relationship, or PropDefinition
+specification may also include a <code class="docutils literal notranslate"><span class="pre">Term</span></code> key, followed by <em>list</em> of
+key:value objects with keys <code class="docutils literal notranslate"><span class="pre">Value</span></code>, <code class="docutils literal notranslate"><span class="pre">Origin</span></code>, etc., as in the
+previous paragraph. Each object in the list describes a semantic
+element (term, concept, etc.) that should be identified with the
+containing Node, Relationship, or Property.</p>
+<p>In the example below, the property “inversion time” is associated with
+two relevant entities from other resources, caDSR and DICOM:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>PropDefintions:
+...
+  inversion_time:
+    Desc: |
+  A measurement of the time between the inversion and excitation pulses
+  in an inversion recovery pulse sequence.
+    Term:
+      - Origin: caDSR
+        Code: &#39;14644131&#39;
+        Value: Imaging Technique Inversion Time Float Number
+      - Origin: DICOM
+        Code: &#39;0018,0082&#39;
+        Value: inversion_time
+    Type: string
+</pre></div>
+</div>
+</section>
+</section>
+<section id="universal-properties">
+<h2>Universal Properties<a class="headerlink" href="#universal-properties" title="Link to this heading"></a></h2>
+<p>In some use cases, it is desirable for every node (or relationship) to
+possess a certain property or set of properties. For example, every
+node may be expected to have a unique ID, regardless of its type.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">UniversalNodeProperties</span></code> and
+<code class="docutils literal notranslate"><span class="pre">UniversalRelationshipProperties</span></code>
+top-level keys provide a means to specify these properties. The subkey
+<code class="docutils literal notranslate"><span class="pre">mustHave</span></code> should contain an array of property names for required
+universal properties. The subkey <code class="docutils literal notranslate"><span class="pre">mayHave</span></code> can contain an array of
+property names that are univerally allowable for all nodes or
+relationships.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>UniversalNodeProperties:
+  mustHave:
+    - id
+  mayHave:
+    - transaction_id
+</pre></div>
+</div>
+</section>
+<section id="multiple-input-yaml-files-and-overlays">
+<h2>Multiple input YAML files and “overlays”<a class="headerlink" href="#multiple-input-yaml-files-and-overlays" title="Link to this heading"></a></h2>
+<p>The <span class="xref myst">specification</span> allows graphs to be defined over multiple
+input YAML files. The structured information in the files are merged
+together to produce one input structure internally. This allows a user
+to, for example, keep Node definitions in one file, Relationships in
+another, and Property definitions in yet another. Each of these
+objects has a separate top-level key, and will be merged into the
+single internal object without any “collisions”.</p>
+<p><span class="xref myst">Compliant</span> drivers and tools enable merging YAML files into a
+single object according to specific rules. These allow the user to
+“overlay” desired changes onto a base model file, without having to
+resort to multiple versions of a base model. The first pair of files
+is merged, the next file is merged into that result, and so on to the
+end of the input files.  For example, using
+<a class="reference internal" href="#../../tools/make-model"><span class="xref myst">model-tool</span></a>:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>model-tool -g graph.svg icdc-model.yml temp-changes.yml
+</pre></div>
+</div>
+<p>would create a GraphViz graphic of nodes and edges defined in <code class="docutils literal notranslate"><span class="pre">icdc-model.yml</span></code>,
+as modified by changes specified in <code class="docutils literal notranslate"><span class="pre">temp-changes.yml</span></code>.</p>
+<section id="adding-elements">
+<h3>Adding elements<a class="headerlink" href="#adding-elements" title="Link to this heading"></a></h3>
+<p>As indicated above, if independent sets of keys at a given level of
+the YAML structure are present in the input files, the merged
+structure will possess all the keys and their contents:</p>
+<p>File 1:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Nodes:
+  original_node:
+    Props:
+    - old_prop
+</pre></div>
+</div>
+<p>File 2:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Nodes:
+  original_node:
+    Props:
+      - new_prop
+  addtional_node:
+    Props:
+      - new_prop
+</pre></div>
+</div>
+<p>yields</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Nodes:
+  original_node:
+    Props:
+      - old_prop
+      - new_prop
+  additional_node:
+    Props:
+      - new_prop
+</pre></div>
+</div>
+<p>Note that by default, the overlay keys and values are added; original
+array elements are not replaced. Array elements remain unique: if both
+files have an element named <code class="docutils literal notranslate"><span class="pre">foo</span></code>, only one <code class="docutils literal notranslate"><span class="pre">foo</span></code> element will be
+present in the merged array.</p>
+</section>
+<section id="deleting-replacing-elements">
+<h3>Deleting/replacing elements<a class="headerlink" href="#deleting-replacing-elements" title="Link to this heading"></a></h3>
+<p>To indicate that an overlay should remove a key and its contents, or
+an array element, that are present in an earlier file, prefix the
+key/element with a forward slash <code class="docutils literal notranslate"><span class="pre">/</span></code></p>
+<p>File 1:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Nodes:
+  original_node:
+    Props:
+      - unwanted_prop
+      - a_prop
+  unwanted_node:
+    Props:
+      - a_prop
+</pre></div>
+</div>
+<p>File 2:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Nodes:
+  original_node:
+    Props:
+      - /unwanted_prop
+      - new_prop
+  /unwanted_node:
+    Props:
+      - whatever_prop
+</pre></div>
+</div>
+<p>yields</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Nodes:
+  original_node:
+    Props:
+      - a_prop
+  - new_prop
+</pre></div>
+</div>
+</section>
+<section id="tagging-entities">
+<h3>Tagging Entities<a class="headerlink" href="#tagging-entities" title="Link to this heading"></a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">Tags</span></code> entry can be added to any object (i.e., thing that accepts
+key:value pairs), except a <code class="docutils literal notranslate"><span class="pre">Tags</span></code> entry, in the MDF. This is a way to
+associate metainformation with an entity that can be read later by a
+downstream custom processor. A <code class="docutils literal notranslate"><span class="pre">Tags</span></code> entry value is a json object
+(dictionary, hash) containing a set of keys with <em>scalar</em> values.</p>
+<p>For example, one may markup a set of nodes to be rendered in a certain
+color:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>dog:
+  Props:
+    - breed
+  Tags:
+    color: red
+cat:
+  Props:
+    - breed
+  Tags:
+    color: blue
+</pre></div>
+</div>
+</section>
+</section>
+<section id="model-description-format-mappings">
+<h2>Model Description Format - Mappings<a class="headerlink" href="#model-description-format-mappings" title="Link to this heading"></a></h2>
+<p>MDF-Map is an extension of MDF that allows a user to provide a simple,
+human-readable description of cross-model mappings between two or more
+models.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Source: MyModel 
+URI: &quot;https://sts.ctos-data-team.org/model/MyModel&quot;
+</pre></div>
+</div>
+<section id="source">
+<h3>Source<a class="headerlink" href="#source" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Source</span></code> value is intended to be a short, human-readable name that
+represents the entity performing or asserting the cross-model mappings
+such as the CRDC Data Standards Service (DSS) or Cancer Data
+Aggregator (CDA).</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Source: MappingSource
+</pre></div>
+</div>
+</section>
+<section id="models">
+<h3>Models<a class="headerlink" href="#models" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Models</span></code> top-level key points to an object containing descriptions
+of each target model that the source maps to such as Integrated Canine
+Data Commons (ICDC). Model descriptions look like:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;targetmodel1&gt; :
+    Version: &lt;string|number|...&gt;
+    VersionDate: &lt;date&gt;
+    URI: &lt;string&gt;
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Version</span></code> key refers to the version of the model being mapped to.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">VersionDate</span></code> key refers to the date of the model.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">URI</span></code> key refers to a resolving URL that can provide more
+information about the model being mapped. If the model is stored in
+MDF, this could reference a GitHub release or commit for the mapped
+version of the model.</p>
+<p>At least one of these keys should be present for each model.</p>
+</section>
+<section id="props">
+<h3>Props<a class="headerlink" href="#props" title="Link to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">Props</span></code> top-level key refers to mappings between source and target
+property names/handles given as strings. Property mappings look like:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&lt;sourcenode1&gt; :
+    &lt;sourceprop1&gt; :
+        &lt;targetmodel1&gt; :
+            - &lt;targetprop1&gt; :
+                Parents: &lt;string&gt;
+            - &lt;targetprop2&gt; :
+                Constant: &lt;true|false&gt;
+</pre></div>
+</div>
+<p>The mapping source properties are grouped by source
+node/endpoint/domain. Each property then has an object where the keys
+are target model handles (e.g. ICDC) and the values are arrays of the
+target model’s properties that map to that source property.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Parents</span></code> key refers to a node or series of nodes that the target
+property is a child of. Multiple nodes may be provided in a dot
+notation such as <code class="docutils literal notranslate"><span class="pre">parentnode1.parentnode2.childprop</span></code> to indicate a
+nested structure. If the target property is a root-level property,
+<code class="docutils literal notranslate"><span class="pre">Parents</span></code> is omitted.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">Constant</span></code> key is a boolean value that indicates the source
+property maps to a single constant value in the target model. For
+example, a property with the handle “File Format” might always map to
+the constant “DICOM” in the Imaging Data Commons. The default value is
+false.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="example.html" class="btn btn-neutral float-left" title="Example Usage" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data_val.html" class="btn btn-neutral float-right" title="Data Validation with MDF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-2025, FNLCR.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

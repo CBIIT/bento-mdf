@@ -1,0 +1,1184 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example Usage &mdash; MDF Documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Model Description Files (MDF)" href="mdf.html" />
+    <link rel="prev" title="Bento Graph Model Description Format" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            bento-mdf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Example Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loading-the-model-from-mdf-s">Loading the Model from MDF(s)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#loading-from-file-s">Loading from File(s)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#loading-from-url-s">Loading from URL(s)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#exploring-the-model">Exploring the Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nodes">Nodes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#relationships">Relationships</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#properties">Properties</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#properties-with-value-sets">Properties with Value Sets</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#properties-via-parent">Properties via Parent</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#terms">Terms</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#terms-via-valueset">Terms via ValueSet</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#term-annotations">Term Annotations</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tags">Tags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#model-diff">Model Diff</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#writing-mdf-from-the-model">Writing MDF from the Model</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#make-changes-to-the-underlying-model">Make changes to the underlying model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#validating-the-model">Validating the Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#schema-is-invalid">Schema is invalid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#yaml-structure-is-invalid">YAML structure is invalid</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mdf-yamls-are-invalid-against-the-mdf-schema">MDF YAMLs are invalid against the MDF schema</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mdf.html">Model Description Files (MDF)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_val.html">Data Validation with MDF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mdf_tools.html">Drivers and Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conduct.html">Code of Conduct</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">bento-mdf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Example Usage</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/example.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="example-usage">
+<h1>Example Usage<a class="headerlink" href="#example-usage" title="Link to this heading"></a></h1>
+<p>To use <code class="docutils literal notranslate"><span class="pre">bento-mdf</span></code> in a project, start by installing the latest version with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">bento-mdf</span></code> and importing it into your project.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">bento_mdf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span> <span class="c1"># for file paths</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">importlib.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">version</span> <span class="c1"># check package version</span>
+
+<span class="n">version</span><span class="p">(</span><span class="s2">&quot;bento_mdf&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;0.13.0&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<section id="loading-the-model-from-mdf-s">
+<h2>Loading the Model from MDF(s)<a class="headerlink" href="#loading-the-model-from-mdf-s" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">bento-mdf</span></code> package provides functionality for loading, validating, and manipulating MDF file content in Python.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">MDFReader</span></code> class parses and validates MDF files, creating a <a class="reference external" href="https://cbiit.github.io/bento-meta/the_object_model.html"><code class="docutils literal notranslate"><span class="pre">bento-meta</span></code> Model interface</a> with convenient features, demonstrated below. An <code class="docutils literal notranslate"><span class="pre">MDFReader</span></code> is initialized with the relevant MDF file(s), filepath(s), or URL pointing to these.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bento_mdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">MDFReader</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="loading-from-file-s">
+<h3>Loading from File(s)<a class="headerlink" href="#loading-from-file-s" title="Link to this heading"></a></h3>
+<p>First, we can specify the paths to the MDF files we want to load. Then, we provide these to the <code class="docutils literal notranslate"><span class="pre">MDFReader</span></code> class to initalize the model. This loads the content of these files into their corresponding <code class="docutils literal notranslate"><span class="pre">bento-meta</span></code> Python object representations, which we can access via the <code class="docutils literal notranslate"><span class="pre">Model</span></code> object found at <code class="docutils literal notranslate"><span class="pre">MDFReader.model</span></code>.</p>
+<p>(Note: if a top-level model <code class="docutils literal notranslate"><span class="pre">Handle</span></code> is not present in the MDFs, it needs to be provided to the MDFReader class’s <code class="docutils literal notranslate"><span class="pre">handle</span></code> argument.)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s1">&#39;mdf.log&#39;</span><span class="p">)</span>
+<span class="n">mdf_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;samples&quot;</span>
+<span class="n">ctdc_model</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;ctdc_model_file.yaml&quot;</span>
+<span class="n">ctdc_props</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;ctdc_model_properties_file.yaml&quot;</span>
+
+<span class="n">mdf_from_file</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="n">ctdc_model</span><span class="p">,</span> <span class="n">ctdc_props</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="s2">&quot;CTDC&quot;</span><span class="p">)</span>
+<span class="n">mdf_from_file</span><span class="o">.</span><span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.model.Model at 0x7f30ac350da0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="loading-from-url-s">
+<h3>Loading from URL(s)<a class="headerlink" href="#loading-from-url-s" title="Link to this heading"></a></h3>
+<p>Similarly, we can instantiate an MDF from URL(s) pointing to the model file(s):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_url</span> <span class="o">=</span> <span class="s2">&quot;https://cbiit.github.io/icdc-model-tool/model-desc/icdc-model.yml&quot;</span>
+<span class="n">props_url</span> <span class="o">=</span> <span class="s2">&quot;https://cbiit.github.io/icdc-model-tool/model-desc/icdc-model-props.yml&quot;</span>
+
+<span class="n">mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="n">model_url</span><span class="p">,</span> <span class="n">props_url</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="s2">&quot;ICDC&quot;</span><span class="p">)</span>
+<span class="n">mdf</span><span class="o">.</span><span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.model.Model at 0x7f309849dd90&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Setting the parameter <code class="docutils literal notranslate"><span class="pre">raise_error</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code> in the MDFReader call will raise a RuntimeError if any MDF issues are found. In any case, all issues found will appear in the log.</p>
+</section>
+</section>
+<section id="exploring-the-model">
+<h2>Exploring the Model<a class="headerlink" href="#exploring-the-model" title="Link to this heading"></a></h2>
+<p>Once we’ve loaded the model, we can start looking at the entities that make it up, including Nodes, Relationships, Properties, and Terms. These are conveniently stored in the <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Model</span></code> object.</p>
+<p>Note: This example will use the model created in the previous section from a URL.</p>
+<section id="nodes">
+<h3>Nodes<a class="headerlink" href="#nodes" title="Link to this heading"></a></h3>
+<p>Model nodes are stored as dictionaries in <code class="docutils literal notranslate"><span class="pre">Model.nodes</span></code>, where the keys are node handles and the values are <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Node</span></code> objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span>
+
+<span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>26
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;program&#39;, &#39;study&#39;, &#39;consent_group&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;bento_meta.objects.Node at 0x7f309849e2d0&gt;,
+ &lt;bento_meta.objects.Node at 0x7f308bfe05f0&gt;,
+ &lt;bento_meta.objects.Node at 0x7f308bfe0740&gt;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;study&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.objects.Node at 0x7f308bfe05f0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">get_attr_dict()</span></code> method is a convenient way to get a dictionary of a <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Entity's</span></code> set attributes. This will return string versions of the attributes. This can be useful for exploring the entity or for providing parameters to Neo4j Cypher queries.</p>
+<p>Note: this only includes simple attributes and not other bento-meta Entities or collections of Entities. All attributes can be accessed via methods matching their names.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;diagnosis&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;handle&#39;: &#39;diagnosis&#39;,
+ &#39;model&#39;: &#39;ICDC&#39;,
+ &#39;desc&#39;: &#39;The Diagnosis node contains numerous properties which fully characterize the type of cancer with which any given patient/subject/donor was diagnosed, inclusive of stage. This node also contains properties pertaining to comorbidities, and the availability of pathology reports, treatment data and follow-up data.&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="relationships">
+<h3>Relationships<a class="headerlink" href="#relationships" title="Link to this heading"></a></h3>
+<p>Simlarly, Model relationships are stored in <code class="docutils literal notranslate"><span class="pre">Model.edges</span></code>. This is a dictionary where the keys are (edge.handle, src.handle, dst.handle) tuples. The values are <code class="docutils literal notranslate"><span class="pre">Edge</span></code> objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">edges</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">edges</span>
+
+<span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>40
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">edges</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;member_of&#39;, &#39;case&#39;, &#39;cohort&#39;),
+ (&#39;member_of&#39;, &#39;cohort&#39;, &#39;study_arm&#39;),
+ (&#39;member_of&#39;, &#39;study_arm&#39;, &#39;study&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">edges</span><span class="o">.</span><span class="n">values</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;bento_meta.objects.Edge at 0x7f308bfd1e50&gt;,
+ &lt;bento_meta.objects.Edge at 0x7f308bfd3950&gt;,
+ &lt;bento_meta.objects.Edge at 0x7f308bfd3560&gt;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">edges</span><span class="p">[(</span><span class="s2">&quot;of_case&quot;</span><span class="p">,</span> <span class="s2">&quot;diagnosis&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;handle&#39;: &#39;of_case&#39;, &#39;model&#39;: &#39;ICDC&#39;, &#39;multiplicity&#39;: &#39;many_to_one&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">edge</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[(</span><span class="s2">&quot;of_case&quot;</span><span class="p">,</span> <span class="s2">&quot;diagnosis&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">)]</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">handle</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">handle</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">dst</span><span class="o">.</span><span class="n">handle</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="p">)</span>
+
+
+<span class="c1"># TIP: here&#39;s a convenient method to get the 3-tuple of an edge</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">triplet</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>of_case, diagnosis, case
+(&#39;of_case&#39;, &#39;diagnosis&#39;, &#39;case&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<p>An <code class="docutils literal notranslate"><span class="pre">Edge's</span></code> <code class="docutils literal notranslate"><span class="pre">src</span></code> and <code class="docutils literal notranslate"><span class="pre">dst</span></code> attributes are <code class="docutils literal notranslate"><span class="pre">Nodes</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">src</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">handle</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.objects.Node object at 0x7f308bf69d00&gt;
+diagnosis
+</pre></div>
+</div>
+</div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">Model</span></code> object also has some useful methods to work with relationships/edges including:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">edges_by_src(node)</span></code> - get all edges that have a given node as their src attribute</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">edges_by_dst(node)</span></code> - get all edges that have a given node as their dst attribute</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">edges_by_type(edge_handle)</span></code> - get all edges that have a given edge type (i.e., handle)</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">triplet</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">edges_by_dst</span><span class="p">(</span><span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;case&quot;</span><span class="p">])]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;of_case&#39;, &#39;enrollment&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;demographic&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;diagnosis&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;cycle&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;sample&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;file&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;visit&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;adverse_event&#39;, &#39;case&#39;),
+ (&#39;of_case&#39;, &#39;registration&#39;, &#39;case&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">triplet</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">edges_by_type</span><span class="p">(</span><span class="s2">&quot;of_study&quot;</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;of_study&#39;, &#39;human_relevance&#39;, &#39;study&#39;),
+ (&#39;of_study&#39;, &#39;study_site&#39;, &#39;study&#39;),
+ (&#39;of_study&#39;, &#39;principal_investigator&#39;, &#39;study&#39;),
+ (&#39;of_study&#39;, &#39;file&#39;, &#39;study&#39;),
+ (&#39;of_study&#39;, &#39;publication&#39;, &#39;study&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="properties">
+<h3>Properties<a class="headerlink" href="#properties" title="Link to this heading"></a></h3>
+<p>Model properties are stored in <code class="docutils literal notranslate"><span class="pre">Model.props</span></code>. This is a dictionary where the keys are ({edge|node}.handle, prop.handle) tuples. The values are <code class="docutils literal notranslate"><span class="pre">Property</span></code> objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">props</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">props</span>
+
+<span class="nb">len</span><span class="p">(</span><span class="n">props</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>229
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">props</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;program&#39;, &#39;program_name&#39;),
+ (&#39;program&#39;, &#39;program_acronym&#39;),
+ (&#39;program&#39;, &#39;program_short_description&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">props</span><span class="o">.</span><span class="n">values</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;bento_meta.objects.Property at 0x7f308bfc7890&gt;,
+ &lt;bento_meta.objects.Property at 0x7f308bfc7a10&gt;,
+ &lt;bento_meta.objects.Property at 0x7f308bfc7fb0&gt;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">primary_disease_site</span> <span class="o">=</span> <span class="n">props</span><span class="p">[(</span><span class="s2">&quot;diagnosis&quot;</span><span class="p">,</span> <span class="s2">&quot;primary_disease_site&quot;</span><span class="p">)]</span>
+<span class="n">primary_disease_site</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;handle&#39;: &#39;primary_disease_site&#39;,
+ &#39;model&#39;: &#39;ICDC&#39;,
+ &#39;value_domain&#39;: &#39;value_set&#39;,
+ &#39;is_required&#39;: &#39;Yes&#39;,
+ &#39;is_key&#39;: &#39;False&#39;,
+ &#39;is_nullable&#39;: &#39;False&#39;,
+ &#39;is_strict&#39;: &#39;True&#39;,
+ &#39;desc&#39;: &#39;The anatomical location at which the primary disease originated, recorded in relatively general terms at the subject level; the anatomical locations from which tumor samples subject to downstream analysis were acquired is recorded in more detailed terms at the sample level.&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+<section id="properties-with-value-sets">
+<h4>Properties with Value Sets<a class="headerlink" href="#properties-with-value-sets" title="Link to this heading"></a></h4>
+<p>Properties with the value_domain “value_set” have the <code class="docutils literal notranslate"><span class="pre">value_set</span></code> attribute (<code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">ValueSet</span></code>), which has a <code class="docutils literal notranslate"><span class="pre">terms</span></code> attribute (<code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Term</span></code> dictionary like <code class="docutils literal notranslate"><span class="pre">{term.value:</span> <span class="pre">Term}</span></code>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">value_set</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.objects.ValueSet at 0x7f308b98a1b0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">value_set</span><span class="o">.</span><span class="n">terms</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;Abdomen&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a540&gt;, &#39;Bladder&#39;: &lt;bento_meta.objects.Term object at 0x7f308b989b50&gt;, &#39;Bladder, Prostate&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98adb0&gt;, &#39;Bladder, Urethra&#39;: &lt;bento_meta.objects.Term object at 0x7f308b989fd0&gt;, &#39;Bladder, Urethra, Prostate&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a570&gt;, &#39;Bladder, Urethra, Vagina&#39;: &lt;bento_meta.objects.Term object at 0x7f308b989fa0&gt;, &#39;Bone&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98ad20&gt;, &#39;Bone (Appendicular)&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a780&gt;, &#39;Bone (Axial)&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a420&gt;, &#39;Bone Marrow&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a7e0&gt;, &#39;Brain&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b710&gt;, &#39;Carpus&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a960&gt;, &#39;Chest Wall&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98ade0&gt;, &#39;Cranial Sternum&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a930&gt;, &#39;Distal Urethra&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98acc0&gt;, &#39;Elbow Joint&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98abd0&gt;, &#39;Femur&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b3b0&gt;, &#39;Flank&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98afc0&gt;, &#39;Hip&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98aff0&gt;, &#39;Hock&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b290&gt;, &#39;Humerus&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98af60&gt;, &#39;Inguinal Region&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b1a0&gt;, &#39;Kidney&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b440&gt;, &#39;Knee Region&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b320&gt;, &#39;Lip&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b080&gt;, &#39;Lung&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b620&gt;, &#39;Lymph Node&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b740&gt;, &#39;Mammary Gland&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bb60&gt;, &#39;Mandible&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b8f0&gt;, &#39;Maxilla&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bf80&gt;, &#39;Mouth&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b950&gt;, &#39;Neck&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bcb0&gt;, &#39;Not Applicable&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b830&gt;, &#39;Pleural Cavity&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bb00&gt;, &#39;Rib Region&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bd40&gt;, &#39;Shoulder&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98baa0&gt;, &#39;Skin&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bad0&gt;, &#39;Spleen&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bd10&gt;, &#39;Subcutis&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98be00&gt;, &#39;Tarsus&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98be30&gt;, &#39;Thigh&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bfe0&gt;, &#39;Thorax&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb5be0&gt;, &#39;Thyroid Gland&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb7620&gt;, &#39;Unknown&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6cf0&gt;, &#39;Urethra&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6a50&gt;, &#39;Urethra, Prostate&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6570&gt;, &#39;Urinary Tract&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6ba0&gt;, &#39;Urogenital Tract&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6a80&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">Property</span></code> objects with value sets have some useful methods to get to those terms and their values including:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">.terms</span></code> returns a list of <code class="docutils literal notranslate"><span class="pre">Term</span></code> objects from the property’s value set</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.values</span></code> returns a list of the term values from the property’s value set</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">terms</span><span class="p">)</span>
+
+<span class="c1"># TIP: this is the same object found at the ValueSet&#39;s `terms` attribute</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">terms</span> <span class="ow">is</span> <span class="n">primary_disease_site</span><span class="o">.</span><span class="n">value_set</span><span class="o">.</span><span class="n">terms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;Abdomen&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a540&gt;, &#39;Bladder&#39;: &lt;bento_meta.objects.Term object at 0x7f308b989b50&gt;, &#39;Bladder, Prostate&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98adb0&gt;, &#39;Bladder, Urethra&#39;: &lt;bento_meta.objects.Term object at 0x7f308b989fd0&gt;, &#39;Bladder, Urethra, Prostate&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a570&gt;, &#39;Bladder, Urethra, Vagina&#39;: &lt;bento_meta.objects.Term object at 0x7f308b989fa0&gt;, &#39;Bone&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98ad20&gt;, &#39;Bone (Appendicular)&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a780&gt;, &#39;Bone (Axial)&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a420&gt;, &#39;Bone Marrow&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a7e0&gt;, &#39;Brain&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b710&gt;, &#39;Carpus&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a960&gt;, &#39;Chest Wall&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98ade0&gt;, &#39;Cranial Sternum&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98a930&gt;, &#39;Distal Urethra&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98acc0&gt;, &#39;Elbow Joint&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98abd0&gt;, &#39;Femur&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b3b0&gt;, &#39;Flank&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98afc0&gt;, &#39;Hip&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98aff0&gt;, &#39;Hock&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b290&gt;, &#39;Humerus&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98af60&gt;, &#39;Inguinal Region&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b1a0&gt;, &#39;Kidney&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b440&gt;, &#39;Knee Region&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b320&gt;, &#39;Lip&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b080&gt;, &#39;Lung&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b620&gt;, &#39;Lymph Node&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b740&gt;, &#39;Mammary Gland&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bb60&gt;, &#39;Mandible&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b8f0&gt;, &#39;Maxilla&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bf80&gt;, &#39;Mouth&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b950&gt;, &#39;Neck&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bcb0&gt;, &#39;Not Applicable&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98b830&gt;, &#39;Pleural Cavity&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bb00&gt;, &#39;Rib Region&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bd40&gt;, &#39;Shoulder&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98baa0&gt;, &#39;Skin&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bad0&gt;, &#39;Spleen&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bd10&gt;, &#39;Subcutis&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98be00&gt;, &#39;Tarsus&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98be30&gt;, &#39;Thigh&#39;: &lt;bento_meta.objects.Term object at 0x7f308b98bfe0&gt;, &#39;Thorax&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb5be0&gt;, &#39;Thyroid Gland&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb7620&gt;, &#39;Unknown&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6cf0&gt;, &#39;Urethra&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6a50&gt;, &#39;Urethra, Prostate&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6570&gt;, &#39;Urinary Tract&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6ba0&gt;, &#39;Urogenital Tract&#39;: &lt;bento_meta.objects.Term object at 0x7f308bfb6a80&gt;}
+True
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">20</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">values</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">terms</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Humerus
+48
+True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="properties-via-parent">
+<h4>Properties via Parent<a class="headerlink" href="#properties-via-parent" title="Link to this heading"></a></h4>
+<p>Model properties can also be accessed via their parent node|edge’s <code class="docutils literal notranslate"><span class="pre">props</span></code> attribute, which is a dictionary of properties.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diagnosis_props</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;diagnosis&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">props</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">diagnosis_props</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>15
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">diagnosis_props</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&#39;crdc_id&#39;, &#39;diagnosis_record_id&#39;, &#39;disease_term&#39;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">diagnosis_props</span><span class="o">.</span><span class="n">values</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;bento_meta.objects.Property at 0x7f308bfe8d10&gt;,
+ &lt;bento_meta.objects.Property at 0x7f308b988080&gt;,
+ &lt;bento_meta.objects.Property at 0x7f308b9885f0&gt;]
+</pre></div>
+</div>
+</div>
+</div>
+<p>Properties accesed via their parents are the same Property objects found in <code class="docutils literal notranslate"><span class="pre">Model.props</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diagnosis_props</span><span class="p">[</span><span class="s2">&quot;primary_disease_site&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="n">props</span><span class="p">[(</span><span class="s2">&quot;diagnosis&quot;</span><span class="p">,</span> <span class="s2">&quot;primary_disease_site&quot;</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="terms">
+<h3>Terms<a class="headerlink" href="#terms" title="Link to this heading"></a></h3>
+<p>Model terms are stored in <code class="docutils literal notranslate"><span class="pre">Model.terms</span></code> as a dictionary of <code class="docutils literal notranslate"><span class="pre">Term</span></code> objects. The keys are the term handles, and the values are the <code class="docutils literal notranslate"><span class="pre">Term</span></code> objects. Terms are used to relate string descriptors in the model, such as permissible values in a property’s value set, or semantic concepts from other frameworks that can describe an entity in the model via annotation (e.g. a caDSR Common Data Element/CDE annotating a model property).</p>
+<p>The keys in <code class="docutils literal notranslate"><span class="pre">Model.terms</span></code> are (term.handle, term.origin) tuples and the values are <code class="docutils literal notranslate"><span class="pre">bento-meta</span></code> <code class="docutils literal notranslate"><span class="pre">Term</span></code> objects.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">terms</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">terms</span>
+
+<span class="nb">len</span><span class="p">(</span><span class="n">terms</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>588
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">terms</span><span class="o">.</span><span class="n">keys</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[(&#39;program_name_text&#39;, &#39;caDSR&#39;, &#39;11444542&#39;, &#39;1.00&#39;),
+ (&#39;program_short_name_text&#39;, &#39;caDSR&#39;, &#39;11459801&#39;, &#39;1.0&#39;),
+ (&#39;clinical_study_identifier&#39;, &#39;caDSR&#39;, &#39;5054234&#39;, &#39;1&#39;)]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">list</span><span class="p">(</span><span class="n">terms</span><span class="o">.</span><span class="n">values</span><span class="p">())[:</span><span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>[&lt;bento_meta.objects.Term at 0x7f308bfc7a40&gt;,
+ &lt;bento_meta.objects.Term at 0x7f308bfc7b90&gt;,
+ &lt;bento_meta.objects.Term at 0x7f308bfe88f0&gt;]
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">shoulder</span> <span class="o">=</span> <span class="n">terms</span><span class="p">[(</span><span class="s2">&quot;Shoulder&quot;</span><span class="p">,</span> <span class="s2">&quot;ICDC&quot;</span><span class="p">)]</span>
+<span class="n">shoulder</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
+<span class="ne">KeyError</span><span class="g g-Whitespace">                                  </span>Traceback (most recent call last)
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">33</span><span class="p">],</span> <span class="n">line</span> <span class="mi">1</span>
+<span class="ne">----&gt; </span><span class="mi">1</span> <span class="n">shoulder</span> <span class="o">=</span> <span class="n">terms</span><span class="p">[(</span><span class="s2">&quot;Shoulder&quot;</span><span class="p">,</span> <span class="s2">&quot;ICDC&quot;</span><span class="p">)]</span>
+<span class="g g-Whitespace">      </span><span class="mi">2</span> <span class="n">shoulder</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">()</span>
+
+<span class="ne">KeyError</span>: (&#39;Shoulder&#39;, &#39;ICDC&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<section id="terms-via-valueset">
+<h4>Terms via ValueSet<a class="headerlink" href="#terms-via-valueset" title="Link to this heading"></a></h4>
+<p>Terms that are part of value set can be accessed via the owner of that value set as well. This is the same object found in <code class="docutils literal notranslate"><span class="pre">Model.terms</span></code></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">primary_disease_site</span><span class="o">.</span><span class="n">terms</span><span class="p">[</span><span class="s2">&quot;Shoulder&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="n">shoulder</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="term-annotations">
+<h4>Term Annotations<a class="headerlink" href="#term-annotations" title="Link to this heading"></a></h4>
+<p>Terms are also used to annotate model entities with semantic represenations from some other framework. For example, a Term from caDSR may be used to annotate a model property with a semantically equivalent CDE. In the <code class="docutils literal notranslate"><span class="pre">MDF</span></code>, these annotations are provided under the <code class="docutils literal notranslate"><span class="pre">Term</span></code> key for a given entity.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mdf_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="s2">&quot;samples&quot;</span>
+<span class="n">model_with_terms</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;test-model-with-terms-a.yml&quot;</span>
+<span class="c1"># Tip: model &#39;Handle&#39; key is in the yaml file so we don&#39;t need to provide one to MDF()</span>
+<span class="n">terms_mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="n">model_with_terms</span><span class="p">)</span>
+<span class="n">terms_mdf</span><span class="o">.</span><span class="n">model</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>100%|███████████████████████████████████████████████████████████| 2/2 [00:00&lt;00:00, 8665.92it/s]
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.model.Model at 0x105772c30&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<p>Terms can annotate nodes, relationships, and properties. The annotating term(s) are linked to the annotated entity via a <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Concept</span></code>, which stores them in a dictionary of the same format found at <code class="docutils literal notranslate"><span class="pre">Model.terms</span></code> (i.e. <code class="docutils literal notranslate"><span class="pre">{(term.value,</span> <span class="pre">term.origin_name):</span> <span class="pre">Term}</span></code>).</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">case_concept</span> <span class="o">=</span> <span class="n">terms_mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s2">&quot;case&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">concept</span>
+<span class="n">case_concept</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_meta.objects.Concept at 0x106153140&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">case_concept</span><span class="o">.</span><span class="n">terms</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{(&#39;case_term&#39;, &#39;CTDC&#39;): &lt;bento_meta.objects.Term object at 0x106153020&gt;, (&#39;subject&#39;, &#39;caDSR&#39;): &lt;bento_meta.objects.Term object at 0x1061507d0&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># TIP: to find an annotating CDE, we can look for entries where the origin is &#39;caDSR&#39;</span>
+<span class="k">for</span> <span class="n">term_key</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">case_concept</span><span class="o">.</span><span class="n">terms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">if</span> <span class="n">term_key</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;caDSR&quot;</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">term</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;handle&#39;: &#39;subject&#39;, &#39;value&#39;: &#39;subject&#39;, &#39;origin_name&#39;: &#39;caDSR&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">terms_mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">edges</span><span class="p">[(</span><span class="s2">&quot;of_case&quot;</span><span class="p">,</span> <span class="s2">&quot;sample&quot;</span><span class="p">,</span> <span class="s2">&quot;case&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">concept</span><span class="o">.</span><span class="n">terms</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{(&#39;of_case_term&#39;, &#39;CTDC&#39;): &lt;bento_meta.objects.Term object at 0x106153c20&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">terms_mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">props</span><span class="p">[(</span><span class="s2">&quot;case&quot;</span><span class="p">,</span> <span class="s2">&quot;case_id&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">concept</span><span class="o">.</span><span class="n">terms</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{(&#39;case_id&#39;, &#39;CTDC&#39;): &lt;bento_meta.objects.Term object at 0x106178fe0&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># TIP: terms found in Model.terms are the same objects as those in an entity&#39;s concept</span>
+<span class="n">case_id_anno</span> <span class="o">=</span> <span class="n">terms_mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">props</span><span class="p">[(</span><span class="s2">&quot;case&quot;</span><span class="p">,</span> <span class="s2">&quot;case_id&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">concept</span><span class="o">.</span><span class="n">terms</span><span class="p">[(</span><span class="s2">&quot;case_id&quot;</span><span class="p">,</span> <span class="s2">&quot;CTDC&quot;</span><span class="p">)]</span>
+<span class="n">terms_mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">terms</span><span class="p">[(</span><span class="s2">&quot;case_id&quot;</span><span class="p">,</span> <span class="s2">&quot;CTDC&quot;</span><span class="p">)]</span> <span class="ow">is</span> <span class="n">case_id_anno</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>True
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="tags">
+<h3>Tags<a class="headerlink" href="#tags" title="Link to this heading"></a></h3>
+<p>A tags entry can be added to any object in the model. They are used to associated metainformation with an entity for downstream custom processing. Any <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Entity</span></code> except the <code class="docutils literal notranslate"><span class="pre">Tag</span></code> can be tagged with one of these key-value pairs. They are accessible via the <code class="docutils literal notranslate"><span class="pre">tags</span></code> attribute of the entity, where they are stored in a dictionary where the key is the tag’s ‘key’ and the value is a <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Tag</span></code> object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">icdc_breed_tags</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">props</span><span class="p">[(</span><span class="s2">&quot;demographic&quot;</span><span class="p">,</span> <span class="s2">&quot;breed&quot;</span><span class="p">)]</span><span class="o">.</span><span class="n">tags</span>
+<span class="n">icdc_breed_tags</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;Labeled&#39;: &lt;bento_meta.objects.Tag object at 0x106075490&gt;}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">icdc_breed_tags</span><span class="p">[</span><span class="s2">&quot;Labeled&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_attr_dict</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;key&#39;: &#39;Labeled&#39;, &#39;value&#39;: &#39;Breed&#39;}
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="model-diff">
+<h2>Model Diff<a class="headerlink" href="#model-diff" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">bento-mdf</span></code> also provides the <code class="docutils literal notranslate"><span class="pre">diff_models</span></code> function, which can be used to compare two models and report on the differences between them. This is useful for comparing models that have been updated or modified over time.</p>
+<p><code class="docutils literal notranslate"><span class="pre">diff_models()</span></code> has two required arguments, both of which are <code class="docutils literal notranslate"><span class="pre">bento_meta.Model</span></code> objects:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">mdl_a</span></code>: The first model to compare.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mdl_b</span></code>: The second model to compare.</p></li>
+</ul>
+<p>The function returns a <code class="docutils literal notranslate"><span class="pre">dict</span></code> with keys for nodes, edges, props, and terms, each with a dictionary with keys:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;added&quot;</span></code>: found in <code class="docutils literal notranslate"><span class="pre">mdl_a</span></code> but not in <code class="docutils literal notranslate"><span class="pre">mdl_b</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;removed&quot;</span></code>: found in <code class="docutils literal notranslate"><span class="pre">mdl_b</span></code> but not in <code class="docutils literal notranslate"><span class="pre">mdl_a</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&quot;changed&quot;</span></code>: found in both models but with altered attributes</p></li>
+</ul>
+</section>
+<section id="writing-mdf-from-the-model">
+<h2>Writing MDF from the Model<a class="headerlink" href="#writing-mdf-from-the-model" title="Link to this heading"></a></h2>
+<p>Schema-valid MDF may produced from a <code class="docutils literal notranslate"><span class="pre">bento-meta</span></code> Model, using the <code class="docutils literal notranslate"><span class="pre">MDFWriter</span></code> class. This can be useful if you wish to make changes to the Model within Python using the <a class="reference external" href="https://cbiit.github.io/bento-meta/the_object_model.html#model-as-an-interface">update methods of that interface</a>, and then write out the updated model in MDF format for sharing.</p>
+<p>Consider a simple data model in MDF format:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># sample-model.yml                                                                              </span>
+<span class="nt">Handle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="nt">Version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="nt">Nodes</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sample</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Props</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample_type</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">amount</span>
+<span class="nt">Relationships</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">is_subsample_of</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Mul</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">many_to_one</span>
+<span class="w">    </span><span class="nt">Ends</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Src</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample</span>
+<span class="w">        </span><span class="nt">Dst</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sample</span>
+<span class="w">        </span><span class="nt">Props</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span>
+<span class="nt">PropDefinitions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">sample_type</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Enum</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">normal</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tumor</span>
+<span class="w">  </span><span class="nt">amount</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">units</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mg</span>
+<span class="w">      </span><span class="nt">value_type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">number</span>
+</pre></div>
+</div>
+<p>Suppose we want to add a property from the ICDC model to this simple model, and write out a new MDF. We add the property to the model, then we can create an MDFWriter instance from the MDFReader instance. Then the <code class="docutils literal notranslate"><span class="pre">mdf</span></code> attribute of the writer will contain a dict that can be written as YAML.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bento_mdf</span><span class="w"> </span><span class="kn">import</span> <span class="n">MDFReader</span><span class="p">,</span> <span class="n">MDFWriter</span>
+
+<span class="n">smodel</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="s2">&quot;./sample-model.yml&quot;</span><span class="p">)</span>
+<span class="n">new_prop</span> <span class="o">=</span> <span class="n">mdf</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">props</span><span class="p">[(</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="s1">&#39;tumor_sample_origin&#39;</span><span class="p">)]</span>
+<span class="n">smodel</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">add_prop</span><span class="p">(</span> <span class="n">smodel</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">],</span> <span class="n">new_prop</span> <span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">MDFWriter</span><span class="p">(</span><span class="n">smodel</span><span class="p">)</span><span class="o">.</span><span class="n">mdf</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Handle: test
+Nodes:
+    sample:
+        Props:
+        - amount
+        - sample_type
+        - tumor_sample_origin
+PropDefinitions:
+    amount:
+        Key: false
+        Nul: false
+        Req: false
+        Strict: true
+        Type:
+            units:
+            - mg
+            value_type: number
+    sample_type:
+        Enum:
+        - normal
+        - tumor
+        Key: false
+        Nul: false
+        Req: false
+        Strict: true
+    tumor_sample_origin:
+        Desc: An indication as to whether a tumor sample was derived from a primary
+            versus a metastatic tumor.
+        Enum:
+        - Primary
+        - Metastatic
+        - Not Applicable
+        - Unknown
+        Key: false
+        Nul: false
+        Req: &#39;Yes&#39;
+        Strict: true
+        Tags:
+            Labeled: Tumor Sample Origin
+Relationships:
+    is_subsample_of:
+        Ends:
+        -   Dst: sample
+            Props: null
+            Src: sample
+        Mul: many_to_one
+        Props: null
+Terms:
+    normal:
+        Origin: test
+        Value: normal
+    tumor:
+        Origin: test
+        Value: tumor
+URI: null
+Version: 0.01
+</pre></div>
+</div>
+</div>
+</div>
+<p>Note that the new property <code class="docutils literal notranslate"><span class="pre">tumor_sample_origin</span></code> appears in the new MDF.</p>
+</section>
+</section>
+<section id="make-changes-to-the-underlying-model">
+<h1>Make changes to the underlying model<a class="headerlink" href="#make-changes-to-the-underlying-model" title="Link to this heading"></a></h1>
+<section id="validating-the-model">
+<h2>Validating the Model<a class="headerlink" href="#validating-the-model" title="Link to this heading"></a></h2>
+<p>As the <code class="docutils literal notranslate"><span class="pre">MDFReader</span></code> class loads the model, it automatically validates it against the MDF schema and will raise an exception if the model is invalid. This will use the <a class="reference external" href="https://github.com/CBIIT/bento-mdf/blob/main/schema/mdf-schema.yaml">default schema</a> unless one is provided via the <code class="docutils literal notranslate"><span class="pre">MDFReader</span></code> class’s <code class="docutils literal notranslate"><span class="pre">mdf_schema</span></code> argument.</p>
+<p><code class="docutils literal notranslate"><span class="pre">bento-mdf</span></code> also provides the <code class="docutils literal notranslate"><span class="pre">MDFValidator</span></code> class, which can be used to validate a model against the MDF schema directly.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bento_mdf.validator</span><span class="w"> </span><span class="kn">import</span> <span class="n">MDFValidator</span>
+
+<span class="n">validator</span> <span class="o">=</span> <span class="n">MDFValidator</span><span class="p">(</span>
+    <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">[</span><span class="n">ctdc_model</span><span class="p">,</span> <span class="n">ctdc_props</span><span class="p">],</span>
+    <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">validator</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;bento_mdf.validator.MDFValidator at 0x106186bd0&gt;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">validator</span><span class="o">.</span><span class="n">load_and_validate_schema</span><span class="p">();</span> <span class="c1"># load and check that JSON schema is valid</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">validator</span><span class="o">.</span><span class="n">load_and_validate_yaml</span><span class="p">()</span><span class="o">.</span><span class="n">as_dict</span><span class="p">();</span> <span class="c1"># load and check YAML is valid</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">validator</span><span class="o">.</span><span class="n">validate_instance_with_schema</span><span class="p">();</span> <span class="c1"># check YAML against the schema</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>If the schema or yaml instances (from MDF files) are invalid, the validation will fail.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">jsonschema</span><span class="w"> </span><span class="kn">import</span> <span class="n">SchemaError</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">yaml.parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">clear_output</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="schema-is-invalid">
+<h3>Schema is invalid<a class="headerlink" href="#schema-is-invalid" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bad_schema</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;mdf-bad-schema.yaml&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">MDFValidator</span><span class="p">(</span><span class="n">bad_schema</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load_and_validate_schema</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">SchemaError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">clear_output</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;crobject&#39; is not valid under any of the given schemas
+
+Failed validating &#39;anyOf&#39; in metaschema[&#39;properties&#39;][&#39;properties&#39;][&#39;additionalProperties&#39;][&#39;properties&#39;][&#39;type&#39;]:
+    {&#39;anyOf&#39;: [{&#39;$ref&#39;: &#39;#/definitions/simpleTypes&#39;},
+               {&#39;type&#39;: &#39;array&#39;,
+                &#39;items&#39;: {&#39;$ref&#39;: &#39;#/definitions/simpleTypes&#39;},
+                &#39;minItems&#39;: 1,
+                &#39;uniqueItems&#39;: True}]}
+
+On schema[&#39;properties&#39;][&#39;UniversalNodeProperties&#39;][&#39;type&#39;]:
+    &#39;crobject&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="yaml-structure-is-invalid">
+<h3>YAML structure is invalid<a class="headerlink" href="#yaml-structure-is-invalid" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">bad_yaml</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;ctdc_model_bad.yaml&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">MDFValidator</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">bad_yaml</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">load_and_validate_yaml</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">ParserError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">clear_output</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>while parsing a block mapping
+  in &quot;/Users/jensenma/Code/bento-mdf/python/tests/samples/ctdc_model_bad.yaml&quot;, line 1, column 1
+expected &lt;block end&gt;, but found &#39;&lt;block mapping start&gt;&#39;
+  in &quot;/Users/jensenma/Code/bento-mdf/python/tests/samples/ctdc_model_bad.yaml&quot;, line 3, column 3
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="mdf-yamls-are-invalid-against-the-mdf-schema">
+<h3>MDF YAMLs are invalid against the MDF schema<a class="headerlink" href="#mdf-yamls-are-invalid-against-the-mdf-schema" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">test_schema</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;mdf-schema.yaml&quot;</span>
+<span class="n">ctdc_bad</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;ctdc_model_file_invalid.yaml&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">MDFValidator</span><span class="p">(</span>
+        <span class="n">test_schema</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">[</span><span class="n">ctdc_bad</span><span class="p">,</span> <span class="n">ctdc_props</span><span class="p">],</span>
+        <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">v</span><span class="o">.</span><span class="n">load_and_validate_schema</span><span class="p">()</span>
+    <span class="n">v</span><span class="o">.</span><span class="n">load_and_validate_yaml</span><span class="p">()</span>
+    <span class="n">v</span><span class="o">.</span><span class="n">validate_instance_with_schema</span><span class="p">()</span>
+<span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">clear_output</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;case.show_node&#39; does not match &#39;^[A-Za-z_][A-Za-z0-9_]*$&#39;
+
+Failed validating &#39;pattern&#39; in schema[&#39;properties&#39;][&#39;PropDefinitions&#39;][&#39;propertyNames&#39;]:
+    {&#39;$id&#39;: &#39;#snake_case_id&#39;,
+     &#39;type&#39;: &#39;string&#39;,
+     &#39;pattern&#39;: &#39;^[A-Za-z_][A-Za-z0-9_]*$&#39;}
+
+On instance[&#39;PropDefinitions&#39;]:
+    &#39;case.show_node&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">bento_mdf.diff</span><span class="w"> </span><span class="kn">import</span> <span class="n">diff_models</span>
+
+<span class="n">old_model</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;test-model-d.yml&quot;</span>
+<span class="n">new_model</span> <span class="o">=</span> <span class="n">mdf_dir</span> <span class="o">/</span> <span class="s2">&quot;test-model-e.yml&quot;</span>
+
+<span class="n">old_mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="n">old_model</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="s2">&quot;TEST&quot;</span><span class="p">)</span>
+<span class="n">new_mdf</span> <span class="o">=</span> <span class="n">MDFReader</span><span class="p">(</span><span class="n">new_model</span><span class="p">,</span> <span class="n">handle</span><span class="o">=</span><span class="s2">&quot;TEST&quot;</span><span class="p">)</span>
+
+<span class="n">diff_models</span><span class="p">(</span><span class="n">mdl_a</span><span class="o">=</span><span class="n">old_mdf</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">mdl_b</span><span class="o">=</span><span class="n">new_mdf</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;nodes&#39;: {&#39;changed&#39;: {&#39;diagnosis&#39;: {&#39;props&#39;: {&#39;removed&#39;: {&#39;fatal&#39;: &lt;bento_meta.objects.Property at 0x1061d73b0&gt;},
+     &#39;added&#39;: None}}},
+  &#39;removed&#39;: None,
+  &#39;added&#39;: {&#39;outcome&#39;: &lt;bento_meta.objects.Node at 0x10619cad0&gt;}},
+ &#39;edges&#39;: {&#39;removed&#39;: None,
+  &#39;added&#39;: {(&#39;end_result&#39;,
+    &#39;diagnosis&#39;,
+    &#39;outcome&#39;): &lt;bento_meta.objects.Edge at 0x10619ffe0&gt;}},
+ &#39;props&#39;: {&#39;removed&#39;: {(&#39;diagnosis&#39;,
+    &#39;fatal&#39;): &lt;bento_meta.objects.Property at 0x1061d73b0&gt;},
+  &#39;added&#39;: {(&#39;outcome&#39;,
+    &#39;fatal&#39;): &lt;bento_meta.objects.Property at 0x1061e0c80&gt;}}}
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">diff_models</span></code> has two optional arguments:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">objects_as_dicts</span></code>: if True, the output will convert <code class="docutils literal notranslate"><span class="pre">bento-meta</span> <span class="pre">Entity</span></code> objects like <code class="docutils literal notranslate"><span class="pre">Node</span></code> or <code class="docutils literal notranslate"><span class="pre">Edge</span></code> to dictionaries with <code class="docutils literal notranslate"><span class="pre">get_attr_dict()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">include_summary</span></code>: if True, the output will include a formatted string summary of the differences between the two models. This can be useful for GitHub changelogs when a model is updated, for example.</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diff</span> <span class="o">=</span> <span class="n">diff_models</span><span class="p">(</span>
+    <span class="n">old_mdf</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">new_mdf</span><span class="o">.</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">objects_as_dicts</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">include_summary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">diff</span><span class="p">[</span><span class="s2">&quot;nodes&quot;</span><span class="p">][</span><span class="s2">&quot;changed&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>{&#39;diagnosis&#39;: {&#39;props&#39;: {&#39;removed&#39;: {&#39;fatal&#39;: {&#39;handle&#39;: &#39;fatal&#39;,
+     &#39;model&#39;: &#39;TEST&#39;,
+     &#39;value_domain&#39;: &#39;value_set&#39;,
+     &#39;is_required&#39;: &#39;False&#39;,
+     &#39;is_key&#39;: &#39;False&#39;,
+     &#39;is_nullable&#39;: &#39;False&#39;,
+     &#39;is_strict&#39;: &#39;True&#39;}},
+   &#39;added&#39;: None}}}
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">diff</span><span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">],</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1 node(s) added; 1 edge(s) added; 1 prop(s) removed; 1 prop(s) added; 1 attribute(s) changed for 1 node(s)
+- Added node: &#39;outcome&#39;
+- Added edge: &#39;end_result&#39; with src: &#39;diagnosis&#39; and dst: &#39;outcome&#39;
+- Removed prop: &#39;fatal&#39; with parent: &#39;diagnosis&#39;
+- Added prop: &#39;fatal&#39; with parent: &#39;outcome&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Bento Graph Model Description Format" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="mdf.html" class="btn btn-neutral float-right" title="Model Description Files (MDF)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-2025, FNLCR.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
