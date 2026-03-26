@@ -14,6 +14,7 @@ from pydantic import BaseModel, TypeAdapter, ValidationError, AnyUrl
 from pydantic.json_schema import GenerateJsonSchema
 from pdb import set_trace
 import keyword
+import hashlib
 
 jenv = Environment(
     loader=PackageLoader("bento_mdf", package_path="mdf/templates"),
@@ -71,7 +72,9 @@ def to_snakecase(
     # Handle empty str
     if name == "":
         name = empty_fallback
-    return name
+    # add short hash to avoid two terms that might turn into the same name after lower() and operator normalization
+    h = hashlib.md5(val.encode()).hexdigest()[:6]
+    return f"{name}_{h}"
 
 
 def to_unit_types(unitstr: str, typ: type(int) | type(float)) -> List[str]:
