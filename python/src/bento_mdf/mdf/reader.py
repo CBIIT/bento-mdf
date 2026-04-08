@@ -280,6 +280,8 @@ class MDFReader:
                 # to the Edge, _rather than_ tags set in the "edge key" or spec
                 # level
                 spec["Tags"] = ends.get("Tags") or spec.get("Tags")
+                # if Req is set in the Ends entry, it overrides the spec level
+                spec["Req"] = ends.get("Req") if ends.get("Req") is not None else spec.get("Req")
                 edge = self.model.add_edge(
                     spec_to_entity(
                         e,
