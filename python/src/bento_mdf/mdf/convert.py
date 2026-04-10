@@ -295,8 +295,8 @@ def entity_to_spec(ent: Entity, spec: dict = None) -> dict:
                     break
     elif isinstance(ent, Edge):
         # note that edge mdf specs must be merged correctly in the caller
-        if ent.is_required:
-            spec["Req"] = True
+        if ent.is_required is not None:
+            spec["Req"] = ent.is_required
         if ent.multiplicity:
             spec["Mul"] = ent.multiplicity
         spec["Src"] = ent.src.handle

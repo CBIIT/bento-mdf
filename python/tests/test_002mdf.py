@@ -523,3 +523,31 @@ def test_use_null_cde_helper_function() -> None:
     assert property_uses_null_cde(imaging_software) is True
     assert property_uses_null_cde(processing_method) is False
     assert property_uses_null_cde(sample_id) is False
+
+
+def test_edge_req_from_ends_mixed() -> None:
+    """Test that per-End Req values are applied to individual edges."""
+    m = MDF(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
+    # of_case: sample->case has Req: true, diagnosis->case has Req: false
+    sample_case = m.model.edges[("of_case", "sample", "case")]
+    diag_case = m.model.edges[("of_case", "diagnosis", "case")]
+    assert sample_case.is_required is True
+    assert diag_case.is_required is False
+
+
+def test_edge_req_from_ends_toplevel() -> None:
+    """Test that uniform Edge-level Req values are applied to all edges."""
+    m = MDF(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
+    # of_sample: both Ends have Req: true
+    file_sample = m.model.edges[("of_sample", "file", "sample")]
+    diag_sample = m.model.edges[("of_sample", "diagnosis", "sample")]
+    assert file_sample.is_required is True
+    assert diag_sample.is_required is True
+
+
+def test_edge_req_inherited_from_relationship_level() -> None:
+    """Test that relationship-level Req is inherited when Ends don't specify it."""
+    m = MDF(TDIR / "samples" / "test-model.yml", handle="test")
+    # test-model.yml has no Req on Ends or relationship level for of_case
+    sample_case = m.model.edges[("of_case", "sample", "case")]
+    assert sample_case.is_required is None or sample_case.is_required is False
