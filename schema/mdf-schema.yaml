@@ -296,6 +296,18 @@ defs:
           Human-readable description of the relationship.
         type: string
       Mul:
+        description: |
+          The multiplicity of the relationship:
+            one_to_one - any source node instance may have this relationship with one
+              and only one destination node instance
+            many_to_many - any source node instance may have this relationship with one
+              or more destination node instances, and vice versa
+            one_to_many - any source node instance my have this relationship with one
+              or more destination node instances, but any destination node instance may
+              have this relationship with one and only one source node instance
+            many_to_one - any destination node instance my have this relationship with one
+              or more source node instances, but any source node instance may
+              have this relationship with one and only one destination node instance
         # here, the "default" multiplicity for all Src->Dst pairs
         type: string
         enum:
@@ -303,6 +315,11 @@ defs:
           - one_to_many
           - many_to_one
           - many_to_many
+      Req:
+        description: |
+          Boolean indicating whether the relationship is required. If a relationship is
+          required, it means that if the database contains an instance of either end node,
+          it must also possess a relationship with an instance of the other end node.
       Props:
         oneOf:
           -

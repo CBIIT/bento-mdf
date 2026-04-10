@@ -26,13 +26,12 @@ Relationships:
   of_sample:
     Props: ~
     Mul: many_to_one
+    Req: true
     Ends:
       - Src: file
         Dst: sample
-        Req: true
       - Src: diagnosis
         Dst: sample
-        Req: true
 PropDefinitions:
   case_id:
     Type: string

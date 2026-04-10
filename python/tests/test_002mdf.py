@@ -535,8 +535,8 @@ def test_edge_req_from_ends_mixed() -> None:
     assert diag_case.is_required is False
 
 
-def test_edge_req_from_ends_uniform() -> None:
-    """Test that uniform per-End Req values are applied to all edges."""
+def test_edge_req_from_ends_toplevel() -> None:
+    """Test that uniform Edge-level Req values are applied to all edges."""
     m = MDF(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
     # of_sample: both Ends have Req: true
     file_sample = m.model.edges[("of_sample", "file", "sample")]
