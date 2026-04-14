@@ -4,6 +4,9 @@ on: [push, pull_request]
 
 jobs:
   test-build:
+    permissions:
+      content: read
+      packages: read
     uses: CBIIT/bento-workflows/.github/workflows/test-build.yml@v3.0.26
     with:
       workdir: ./python
