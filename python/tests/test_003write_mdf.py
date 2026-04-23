@@ -284,3 +284,35 @@ def test_write_use_null_cde_only_on_cadsr_terms():
 
     assert "useNullCDE" in cadsr_terms[0]
     assert "useNullCDE" not in ncit_terms[0]
+
+
+def test_write_req_on_ends_mixed():
+    """Test that mixed Req values stay on individual Ends, not hoisted to relationship."""
+    m = MDFReader(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
+    wr_m = MDFWriter(model=m.model)
+    mdf = wr_m.write_mdf()
+
+    # of_case has mixed Req (true on sample->case, false on diagnosis->case)
+    of_case = mdf["Relationships"]["of_case"]
+    # Req should NOT be at the relationship level since values differ
+    assert "Req" not in of_case
+
+    ends = {(e["Src"], e["Dst"]): e for e in of_case["Ends"]}
+    assert ends[("sample", "case")].get("Req") is True
+    assert ends[("diagnosis", "case")].get("Req") is False
+
+
+def test_write_req_on_ends_uniform():
+    """Test that uniform Req values are hoisted to relationship level."""
+    m = MDFReader(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
+    wr_m = MDFWriter(model=m.model)
+    mdf = wr_m.write_mdf()
+
+    # of_sample has uniform Req: true on both Ends
+    of_sample = mdf["Relationships"]["of_sample"]
+    # Req should be hoisted to relationship level
+    assert of_sample.get("Req") is True
+
+    # Individual Ends should NOT have Req (stripped as redundant)
+    for end in of_sample["Ends"]:
+        assert "Req" not in end

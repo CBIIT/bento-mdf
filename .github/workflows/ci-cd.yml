@@ -1,9 +1,13 @@
 name: ci-cd
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   test-build:
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
     uses: CBIIT/bento-workflows/.github/workflows/test-build.yml@v3.1.2
     with:
       workdir: ./python

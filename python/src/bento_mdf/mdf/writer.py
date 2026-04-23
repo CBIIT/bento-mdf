@@ -79,6 +79,10 @@ class MDFWriter:
                 top["Desc"] = dfDesc
             if not top["Desc"]:
                 del top["Desc"]
+            # raise common Req (if all Ends share the same value, hoist it)
+            req_values = [x.get("Req") for x in edge_specs[hdl]]
+            if all(v is not None for v in req_values) and len(set(req_values)) == 1:
+                top["Req"] = req_values[0]
             # merge props - this logic raises all Props specified in
             # Ends members to the Relationship[<handle>] level
             # (MDF schema does not currently allow Props to be specified
@@ -98,6 +102,8 @@ class MDFWriter:
                         del spec["Desc"]
                 if spec.get("Props"):
                     del spec["Props"]
+                if "Req" in spec and spec.get("Req") == top.get("Req"):
+                    del spec["Req"]
                 top["Ends"].append(spec)
             self._mdf["Relationships"][hdl] = top
 

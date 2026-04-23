@@ -1,0 +1,43 @@
+Handle: test_req_ends
+Nodes:
+  case:
+    Props:
+      - case_id
+  sample:
+    Props:
+      - sample_type
+  diagnosis:
+    Props:
+      - disease
+  file:
+    Props:
+      - file_name
+Relationships:
+  of_case:
+    Props: ~
+    Mul: many_to_one
+    Ends:
+      - Src: sample
+        Dst: case
+        Req: true
+      - Src: diagnosis
+        Dst: case
+        Req: false
+  of_sample:
+    Props: ~
+    Mul: many_to_one
+    Req: true
+    Ends:
+      - Src: file
+        Dst: sample
+      - Src: diagnosis
+        Dst: sample
+PropDefinitions:
+  case_id:
+    Type: string
+  sample_type:
+    Type: string
+  disease:
+    Type: string
+  file_name:
+    Type: string
