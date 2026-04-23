@@ -1,6 +1,7 @@
 """Tests for bento_mdf.mdf.validator.MDFDataValidator."""
 
 from pathlib import Path
+import re
 import pytest
 from bento_mdf import MDFReader
 from bento_mdf.mdf.validator import MDFDataValidator
@@ -418,11 +419,16 @@ class TestMDFDataValidatorHelperFunctions:
     def test_to_snakecase(self):
         """Test to_snakecase helper function."""
         from bento_mdf.mdf.validator import to_snakecase
-        assert to_snakecase("TestNode") == "testnode"
-        assert to_snakecase("My Sample Type") == "my_sample_type"
-        assert to_snakecase("Test-Node") == "test_minus_node"
-        assert to_snakecase("123test") == "digit_123test"
-        assert to_snakecase("") == "unspecified"
+
+        assert re.fullmatch(r"testnode_[0-9a-f]{6}", to_snakecase("TestNode"))
+        assert re.fullmatch(
+            r"my_sample_type_[0-9a-f]{6}", to_snakecase("My Sample Type")
+        )
+        assert re.fullmatch(
+            r"test_minus_node_[0-9a-f]{6}", to_snakecase("Test-Node")
+        )
+        assert re.fullmatch(r"digit_123test_[0-9a-f]{6}", to_snakecase("123test"))
+        assert re.fullmatch(r"unspecified_[0-9a-f]{6}", to_snakecase(""))
 
     def test_normalize_operators(self):
         """Test normalize_operators helper function."""
