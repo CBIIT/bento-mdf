@@ -171,6 +171,9 @@ defs:
         -
           $ref:
             "#/defs/path"
+        -
+          $ref:
+            "#/defs/termRefSpec"
     uniqueItems: true
   numberWithUnits:
     $id: "#numberWithUnits"
@@ -526,6 +529,38 @@ defs:
     required:
       - Value
       - Origin
+  termRefSpec:
+    $id: "#termRefSpec"
+    type: object
+    description: |
+      Same properties as a termSpec, but either Origin/Code/Version or NanoID are required
+      to be present. This entity is meant to be used as a reference to a unique Term that
+      can be looked up in the database.
+    Properties:
+      Handle:
+        type: string
+      Desc:
+        type: string
+      Value:
+        type: string
+      Origin:
+        type: string
+      Code:
+        type: string
+      Version:
+        type: string
+      Definition:
+        type: tring
+      NanoID:
+        $ref: "#/defs/nanoid"
+    oneOf:
+      - required:
+          - Origin
+          - Code
+          - Version
+      - required:
+          - NanoID
+        
   paramSpec:
     $id: "#paramSpec"
     description: |

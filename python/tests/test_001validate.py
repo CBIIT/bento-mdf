@@ -40,7 +40,7 @@ test_model_file = tdir / "samples" / "test-model.yml"
 test_model_file_bad_type_value = tdir / "samples" / "test-model-bad-type-value-1.yml"
 test_model_file_bad_list_type = tdir / "samples" / "test-model-bad-list-type.yml"
 test_model_null_cde = tdir / "samples" / "test-model-null-cde.yml"
-
+test_model_edp_enum = tdir / "samples" / "test-model-edp-enum.yml"
 
 def test_with_all_file_args():
     sch = test_schema_file.open()
@@ -185,3 +185,14 @@ def test_use_null_cde_validates():
     assert v.load_and_validate_schema()
     assert v.load_and_validate_yaml()
     assert v.validate_instance_with_schema()
+
+def test_enum_by_term_validates():
+    """
+    Test that Enum via reference to a Term (CDE/EDP) validates
+    """
+    v = MDFValidator(test_latest_schema, test_model_edp_enum)
+    assert v
+    assert v.load_and_validate_schema()
+    assert v.load_and_validate_yaml()
+    assert v.validate_instance_with_schema()
+    
