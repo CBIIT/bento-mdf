@@ -390,6 +390,16 @@ class MDFReader:
                 )
                 self.model.add_prop(ent, prop)
                 ent.props[prop.handle] = prop
+
+        # remaining props in defns_for do not have a parent Node or
+        # Edge. Check for EDPs in this group.
+        for pname in list(defns_for):
+            spec = propdefs[pname]
+            if spec.get("Ext"):
+                prop = self.create_or_merge_prop_from_mdf(
+                    spec, pname, force_create=True)
+                
+
         if defns_for:
             self.logger.error(
                 "No properties in model corresponding to the following "
@@ -408,14 +418,20 @@ class MDFReader:
         if not force_create and (self.handle, p_hdl) in self._props:
             pass
         else:
+            # kludge for EDP definition
+            model = self.model.handle
+            if spec.get("Ext"):
+                model = "_EDP"
             prop = spec_to_entity(
                 p_hdl,
                 spec,
-                {"handle": p_hdl, "model": self.handle, "_commit": self._commit},
+                {"handle": p_hdl, "model": model, "_commit": self._commit},
                 Property,
             )
             if prop.value_set and (
-                prop.value_set.path is not None or prop.value_set.url is not None
+                prop.value_set.path is not None or
+                prop.value_set.url is not None or
+                prop.value_set.edp_term is not None
             ):  # enum as reference
                 if self.ignore_enum_by_reference:
                     self.logger.info(
@@ -448,33 +464,43 @@ class MDFReader:
 
     def load_enum_reference(
         self,
-        enum_ref: str,
+        enum_ref: str | dict
     ) -> dict[str, dict[str, list[str] | dict[str, str]]]:
         """Load enum from a reference (path or url, yaml file or list of strings)."""
-        if re.match("^/", enum_ref):  # looks like a path
-            enum_path = (Path.cwd() / Path(enum_ref.lstrip("/"))).resolve()
-            if not enum_path.exists():
-                self.logger.error("Enum reference path '%s' does not exist", enum_path)
-                self.create_model_success = False
-                return {}
-            with Path(enum_path).open() as f:
-                v = MDFValidator(None, f)
+        if isinstance(enum_ref, str):
+            if re.match("^/", enum_ref):  # looks like a path
+                enum_path = (Path.cwd() / Path(enum_ref.lstrip("/"))).resolve()
+                if not enum_path.exists():
+                    self.logger.error("Enum reference path '%s' does not exist", enum_path)
+                    self.create_model_success = False
+                    return {}
+                with Path(enum_path).open() as f:
+                    v = MDFValidator(None, f)
+                    enum_mdf = v.load_and_validate_yaml()
+                    if not enum_mdf:
+                        self.logger.error("Error loading enum from path '%s'", enum_path)
+                        self.create_model_success = False
+                        return {}
+                    return enum_mdf.as_dict()  # type: ignore reportReturnType
+            if re.match("(?:file|https?)://", enum_ref):  # looks like a url
+                vargs = []
+                self.load_yaml_vargs_from_url(vargs, enum_ref, raise_error=False)
+                v = MDFValidator(None, *vargs)
                 enum_mdf = v.load_and_validate_yaml()
                 if not enum_mdf:
-                    self.logger.error("Error loading enum from path '%s'", enum_path)
+                    self.logger.error("Error loading enum from url '%s'", enum_ref)
                     self.create_model_success = False
                     return {}
                 return enum_mdf.as_dict()  # type: ignore reportReturnType
-        if re.match("(?:file|https?)://", enum_ref):  # looks like a url
-            vargs = []
-            self.load_yaml_vargs_from_url(vargs, enum_ref, raise_error=False)
-            v = MDFValidator(None, *vargs)
-            enum_mdf = v.load_and_validate_yaml()
-            if not enum_mdf:
-                self.logger.error("Error loading enum from url '%s'", enum_ref)
-                self.create_model_success = False
-                return {}
-            return enum_mdf.as_dict()  # type: ignore reportReturnType
+        elif isinstance(enum_ref, dict):
+            # edp term
+            # resolve term to value set here with MDB #
+            pass
+        else:
+            self.logger.error("Error - can't interpret enum reference '%s'", enum_ref)
+            self.create_model_success = False
+            return {}
+        
         return {}
 
     def merge_enum_reference(self, prop: Property) -> None:
@@ -483,10 +509,14 @@ class MDFReader:
 
         Adds terms to the property value set.
         """
-        if not prop.value_set or not (prop.value_set.path or prop.value_set.url):
+        if not prop.value_set or not (prop.value_set.path or prop.value_set.url or prop.value_set.edp_term):
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
-        enum = self.load_enum_reference(prop.value_set.path or prop.value_set.url)
+        enum = self.load_enum_reference(
+            prop.value_set.path or
+            prop.value_set.url or
+            prop.value_set.edp_term
+        )
         enum_prop_defs = enum.get("PropDefinitions", {})
         if not enum_prop_defs:
             self.logger.error(

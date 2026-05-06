@@ -14,6 +14,8 @@ from urllib.parse import unquote
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from bento_meta.tf_objects import Transform, TfStep
 
+from pdb import set_trace
+
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
 
@@ -161,6 +163,15 @@ def process_prop(init: dict, spec: dict, prop: Property) -> None:
             prop.value_set = ValueSet(
                 {"path": domain_spec["path"], "_commit": prop._commit},
             )
+        elif domain_spec.get("edp_term"):
+            prop.value_set = ValueSet(
+                {"edp_term": spec_to_entity(
+                    None,
+                    domain_spec["edp_term"],
+                    {},
+                    Term),
+                 "_commit":prop._commit},
+            )
         elif domain_spec.get("value_set"):
             # create 'dummy' ValueSet to hold Enum terms,
             # but merge them with any Terms section terms in mdf.py
@@ -174,6 +185,7 @@ def process_prop(init: dict, spec: dict, prop: Property) -> None:
             raise RuntimeError(msg)
     # set default values for unprovided attrs
     prop_attrs_with_defaults = {
+        "is_extended": False,
         "is_strict": True,
         "is_key": False,
         "is_nullable": False,
@@ -211,7 +223,7 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
             list_spec = spec.get("item_type") or spec.get("Enum")
             item_domain_spec = typespec_to_domain_spec(list_spec)
             domain_spec["item_domain"] = item_domain_spec["value_domain"]
-            for key in ("units", "value_set", "url", "path"):
+            for key in ("units", "value_set", "url", "path", "edp_term"):
                 if key not in item_domain_spec:
                     continue
                 domain_spec[key] = item_domain_spec[key]
@@ -232,16 +244,20 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
             return domain_spec
     # enum type
     if isinstance(spec, list):
-        # do not implement union type for now
-        # assume a value_set, as a list of term handles or a single url/path
+        # assume a value_set, as (1) list of term handles/values, (2) a single
+        # url/path, or (2) a "term dict" indicating an edp term
         # don't merge terms here, but in process_prop
-        # list of term initializers returned
+        # list of term initializers returned, where:
         #   term values == term handles
-        if len(spec) == 1 and isinstance(spec[0], str):
-            if re.match("^[a-z][a-z]*://", spec[0]):
-                return {"value_domain": "value_set", "url": spec[0]}
-            if re.match("^/.*", spec[0]):
-                return {"value_domain": "value_set", "path": spec[0]}
+        if len(spec) == 1:
+            if isinstance(spec[0], str):
+                if re.match("^[a-z][a-z]*://", spec[0]):
+                    return {"value_domain": "value_set", "url": spec[0]}
+                if re.match("^/.*", spec[0]):
+                    return {"value_domain": "value_set", "path": spec[0]}
+            elif isinstance(spec[0], dict):
+                # edp term
+                return {"value_domain": "value_set", "edp_term": spec[0]}
         vs = []
         for tm in spec:
             if isinstance(tm, bool):

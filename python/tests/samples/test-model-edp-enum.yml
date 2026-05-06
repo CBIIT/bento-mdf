@@ -34,6 +34,7 @@ PropDefinitions:
         Version: "2.0"
     Enum:
       - Origin: caDSR
+        Value: Person Sex at Birth Category
         Code: '7572817'
         Version: "2.0"
     Req: true

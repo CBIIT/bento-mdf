@@ -417,6 +417,16 @@ defs:
               - "Yes"
               - "No"
               - "Preferred"
+      Ext:
+        description: |
+          True if the property defined is an "extended definition property",
+          which is a property that (1) is not necessarily part of a model,
+          (2) has an associated Term that specifies its Origin, Code, Version
+          and Definitions (this is the "extension"), and (3) has an explicitly
+          enumerated list of acceptable values (i.e., has an Enum: type, with
+          an explicit list of strings). Default value (when key Ext: is not
+          present) = false.
+        type: boolean
       Deprecated:
         description: |
           True if this property is being retained for backward compatibility,

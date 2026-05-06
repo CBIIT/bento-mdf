@@ -10,6 +10,8 @@ from bento_meta.objects import ValueSet
 
 from tests.samples.test_urls import TEST_CONVERT_URLS
 
+from pdb import set_trace
+
 TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 CTDC_MODEL_FILE = TDIR / "samples" / "ctdc_model_file.yaml"
 CTDC_MODEL_PROPS_FILE = TDIR / "samples" / "ctdc_model_properties_file.yaml"
@@ -551,3 +553,14 @@ def test_edge_req_inherited_from_relationship_level() -> None:
     # test-model.yml has no Req on Ends or relationship level for of_case
     sample_case = m.model.edges[("of_case", "sample", "case")]
     assert sample_case.is_required is None or sample_case.is_required is False
+
+def test_object_creation_for_edp() -> None:
+    """
+    Test that property, value_set, terms created correctly for CDE/EDP
+    (both enum - term specification, reading an EDP definition)
+    """
+    m = MDF(Path("/Users/jensenma/Code/bento-mdf/python/tests") / "samples" / "test-model-edp-enum.yml", handle="test")
+    pr = m.model.nodes['participant'].props['sex_at_birth']
+    assert pr.value_domain == "value_set"
+    assert pr.value_set.edp_term.origin_id == "7572817"
+    
