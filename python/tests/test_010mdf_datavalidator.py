@@ -406,6 +406,101 @@ class TestMDFDataValidatorEnumValidation:
             assert isinstance(simple_validator.last_validation_warnings, dict)
 
 
+class TestMaybeOptional:
+    """Tests for maybe_optional behavior with all is_required values."""
+
+    def test_required_true_field_is_required(self, simple_validator):
+        """Test that a field with is_required=True fails when missing."""
+        # participant_id has Req: true — omitting it should fail
+        data = {
+            "race": ["White"],
+            "sex_at_birth": "Female",
+        }
+        result = simple_validator.validate("participant", data)
+        assert result is False
+
+    def test_required_false_field_is_optional(self, simple_validator):
+        """Test that a field with is_required=False passes when omitted."""
+        # occupation has Req: false — omitting it should still pass
+        data = {
+            "participant_id": "PART_001",
+            "race": ["White"],
+            "sex_at_birth": "Female",
+            # occupation intentionally omitted
+        }
+        result = simple_validator.validate("participant", data)
+        assert result is True
+
+    def test_required_preferred_field_is_optional(self, simple_validator):
+        """Test that a field with is_required='Preferred' passes when omitted."""
+        # preferred_contact_method has Req: "Preferred" — omitting it should pass
+        data = {
+            "participant_id": "PART_001",
+            "race": ["White"],
+            "sex_at_birth": "Female",
+            # preferred_contact_method intentionally omitted
+        }
+        result = simple_validator.validate("participant", data)
+        assert result is True
+
+    def test_required_preferred_field_accepts_valid_value(self, simple_validator):
+        """Test that a field with is_required='Preferred' accepts a valid value when provided."""
+        data = {
+            "participant_id": "PART_001",
+            "race": ["White"],
+            "sex_at_birth": "Female",
+            "preferred_contact_method": "Email",
+        }
+        result = simple_validator.validate("participant", data)
+        assert result is True
+
+    def test_maybe_optional_direct_true(self):
+        """Test maybe_optional returns val unchanged when is_required is True."""
+        from bento_mdf.mdf.validator import maybe_optional
+        from unittest.mock import MagicMock
+
+        prop = MagicMock()
+        prop.is_required = True
+        result = maybe_optional("str", prop)
+        assert result == "str"
+
+    def test_maybe_optional_direct_false(self):
+        """Test maybe_optional wraps type in Optional when is_required is False."""
+        from bento_mdf.mdf.validator import maybe_optional
+        from unittest.mock import MagicMock
+
+        prop = MagicMock()
+        prop.is_required = False
+        result = maybe_optional("str", prop)
+        assert result == "Optional[str] = None"
+
+    def test_maybe_optional_direct_preferred(self):
+        """Test maybe_optional wraps type in Optional when is_required is 'Preferred'."""
+        from bento_mdf.mdf.validator import maybe_optional
+        from unittest.mock import MagicMock
+
+        prop = MagicMock()
+        prop.is_required = "Preferred"
+        result = maybe_optional("str", prop)
+        assert result == "Optional[str] = None"
+
+    def test_maybe_optional_only_true_is_required(self):
+        """Test that only is_required=True keeps the field required; others are optional."""
+        from bento_mdf.mdf.validator import maybe_optional
+        from unittest.mock import MagicMock
+
+        def make_prop(val):
+            p = MagicMock()
+            p.is_required = val
+            return p
+
+        # Only True should return the raw type string
+        assert maybe_optional("int", make_prop(True)) == "int"
+        # Both False and "Preferred" should produce Optional
+        assert maybe_optional("int", make_prop(False)) == "Optional[int] = None"
+        assert maybe_optional("int", make_prop("Preferred")) == "Optional[int] = None"
+
+
 class TestMDFDataValidatorHelperFunctions:
     """Tests for helper functions used in validator."""
 
