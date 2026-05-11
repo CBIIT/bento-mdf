@@ -82,7 +82,7 @@ def to_unit_types(unitstr: str, typ: type(int) | type(float)) -> List[str]:
 
 
 def maybe_optional(val: str, prop: Property):
-    if prop.is_required:
+    if prop.is_required is True:
         return val
     else:
         # the field is still required in pydantic unless we set a default None value

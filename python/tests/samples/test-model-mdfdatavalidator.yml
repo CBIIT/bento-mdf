@@ -8,6 +8,7 @@ Nodes:
       - race
       - sex_at_birth
       - occupation
+      - preferred_contact_method
 Relationships: {}
 PropDefinitions:
   participant_id:
@@ -76,6 +77,15 @@ PropDefinitions:
       - "Nurse Practitioner"
       - "Registered Nurse"
     Req: false
+    Strict: false
+    Private: false
+  preferred_contact_method:
+    Desc: "The preferred method of contact for the participant."
+    Enum:
+      - "Email"
+      - "Phone"
+      - "Mail"
+    Req: "Preferred"
     Strict: false
     Private: false
   guid:
