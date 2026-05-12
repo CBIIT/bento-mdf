@@ -12,6 +12,7 @@ from collections import ChainMap
 from pathlib import Path
 from tempfile import TemporaryFile
 from urllib.parse import urlparse
+from typing import TextIO
 
 import requests
 from bento_meta.entity import ArgError, Entity
@@ -47,6 +48,8 @@ class MDFReader:
         mdf_schema: str | Path | None = None,
         sts_url: str = settings.sts_url,
         raise_error: bool = False,
+        verify: bool = False,
+        timeout: int = 10,
         ignore_enum_by_reference: bool = False,
         logger: logging.Logger | None = None,
     ) -> None:
@@ -102,7 +105,8 @@ class MDFReader:
         vargs = []
         for f in self.files:
             if isinstance(f, str) and re.match("(?:file|https?)://", f):
-                self.load_yaml_vargs_from_url(vargs, f, verify=verify, raise_error=True)
+                fh = self.load_yaml_from_url(f)
+                vargs.append(fh)
             elif isinstance(f, str) and Path(f).exists():
                 fh = Path(f).open(encoding="utf-8")
                 vargs.append(fh)
@@ -124,23 +128,29 @@ class MDFReader:
             if hasattr(fh, "close") and callable(fh.close):
                 fh.close()
 
-    def load_yaml_vargs_from_url(
-        self,
-        vargs: list,
-        url: str,
-        *,
-        verify: bool = True,
-        raise_error: bool = False,
-    ) -> None:
+    def load_yaml_from_url(self, url: str) -> TemporaryFile:
         """Load YAML from a URL. Converts GitHub repo URLs to raw URLs."""
+
+        def convert_github_url(url: str) -> str:
+            """Convert a GitHub blob URL to a raw URL."""
+            parsed_url = urlparse(url)
+            parts = parsed_url.path.strip("/").split("/")
+            if parsed_url.netloc != "github.com" or len(parts) < 4 or parts[2] != "blob":
+                return url  # not a GitHub blob URL
+            user, repo, _, branch = parts[:4]
+            file_path = "/".join(parts[4:])
+            return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"
         raw_url = convert_github_url(url)
+
         try:
-            response = requests.get(raw_url, verify=verify, timeout=10)
+            response = requests.get(raw_url,
+                                    verify=self.verify,
+                                    timeout=self.timeout)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             msg = f"Fetching url {raw_url} raised exception {e}"
             self.logger.error(msg)
-            if raise_error:
+            if self.raise_error:
                 raise ArgError(msg) from e
             return
         response.encoding = "utf8"
@@ -148,38 +158,8 @@ class MDFReader:
         for chunk in response.iter_content(chunk_size=128):
             fh.write(chunk)
         fh.seek(0)
-        vargs.append(fh)
+        return fh
 
-    def load_enum_by_term_from_sts(
-        self,
-        term: Term,
-        *,
-        verify: bool = True,
-        raise_error: bool = True,
-    ) -> list[str]:
-        if (term.origin_name is None or
-            term.origin_id is None or
-            term.origin_version is None):
-            msg = f"Cannot load enum from STS: term argument '{term.value}' must have non-null origin_name, origin_id, and origin_version";
-            self.logger.error(msg)
-            if raise_error:
-                raise ArgError(msg)
-        endpt = settings.sts_url + f"/edp/{term.origin_name}/{term.origin_id}/{term.origin_version}" + "/terms"
-        try:
-            response = requests.get(endpt,
-                                    verify=verify, timeout=10)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            msg = f"STS API call to {endpt} raised exception {e}"
-            self.logger.error(msg)
-            if raise_error:
-                raise ArgError(msg) from e
-            return
-        response.encoding = "utf8"
-        ### TBContinued
-        set_trace()
-        pass
-    
         
     def create_model(self, *, raise_error: bool = False) -> Model:
         """
@@ -495,48 +475,6 @@ class MDFReader:
             self._props[(prop.model, prop.handle)] = prop
         return self._props[(self.handle, p_hdl)]
 
-    def load_enum_reference(
-        self,
-        enum_ref: str | Term
-    ) -> dict[str, dict[str, list[str] | dict[str, str]]]:
-        """Load enum from a reference (path or url, yaml file or list of strings)."""
-        if isinstance(enum_ref, str):
-            if re.match("^/", enum_ref):  # looks like a path
-                enum_path = (Path.cwd() / Path(enum_ref.lstrip("/"))).resolve()
-                if not enum_path.exists():
-                    self.logger.error("Enum reference path '%s' does not exist", enum_path)
-                    self.create_model_success = False
-                    return {}
-                with Path(enum_path).open() as f:
-                    v = MDFValidator(None, f)
-                    enum_mdf = v.load_and_validate_yaml()
-                    if not enum_mdf:
-                        self.logger.error("Error loading enum from path '%s'", enum_path)
-                        self.create_model_success = False
-                        return {}
-                    return enum_mdf.as_dict()  # type: ignore reportReturnType
-            if re.match("(?:file|https?)://", enum_ref):  # looks like a url
-                vargs = []
-                self.load_yaml_vargs_from_url(vargs, enum_ref, raise_error=False)
-                v = MDFValidator(None, *vargs)
-                enum_mdf = v.load_and_validate_yaml()
-                if not enum_mdf:
-                    self.logger.error("Error loading enum from url '%s'", enum_ref)
-                    self.create_model_success = False
-                    return {}
-                return enum_mdf.as_dict()  # type: ignore reportReturnType
-        elif isinstance(enum_ref, Term):
-            # edp term
-            # resolve term to value set here with MDB #
-            self.load_enum_by_term_from_sts(enum_ref)
-            pass
-        else:
-            self.logger.error("Error - can't interpret enum reference '%s'", enum_ref)
-            self.create_model_success = False
-            return {}
-        
-        return {}
-
     def merge_enum_reference(self, prop: Property) -> None:
         """
         Merge enum from a reference (path or url to yaml file,
@@ -547,53 +485,116 @@ class MDFReader:
         if not prop.value_set or not (prop.value_set.path or prop.value_set.url or prop.value_set.edp_term):
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
-        enum = self.load_enum_reference(
-            prop.value_set.path or
-            prop.value_set.url or
-            prop.value_set.edp_term
-        )
-        enum_prop_defs = enum.get("PropDefinitions", {})
-        if not enum_prop_defs:
-            self.logger.error(
-                "No PropDefinitions found in enum reference '%s'",
-                prop.value_set.path or prop.value_set.url,
-            )
-            self.create_model_success = False
-            return
-        enum_prop_handle = next(iter(enum_prop_defs.keys()))
-        if enum_prop_handle == prop.handle:
-            enum_values = enum_prop_defs.get(prop.handle, [])
-        else:
-            self.logger.warning(
-                "Property handle '%s' does not match enum key '%s' in reference '%s'. "
-                "Loading enum values at reference anyway.",
-                prop.handle,
-                enum_prop_handle,
-                prop.value_set.path or prop.value_set.url,
+        terms = self.load_enum_reference(prop)
+        self.add_terms_to_model_prop(prop, terms)
+
+    def load_enum_reference(
+        self,
+        prop: Property,
+    ) -> list[Term]:
+        """
+        Load enum from a reference (path or url, yaml file or list of strings).
+        Return a list of Term objects.
+        """
+
+        def process_yaml_for_enum(fh: TextIO, prop: Property) -> list[Term]:
+            v = MDFValidator(None, fh)
+            enum_mdf = v.load_and_validate_yaml()            
+            enum_prop_defs = enum_mdf.get("PropDefinitions", {})
+            if not enum_prop_defs:
+                self.logger.error(
+                    "No PropDefinitions found in enum reference '%s'",
+                    prop.value_set.path or prop.value_set.url,
+                )
+                self.create_model_success = False
+                return
+            enum_prop_handle = next(iter(enum_prop_defs.keys()))
+            if enum_prop_handle == prop.handle:
+                enum_values = enum_prop_defs.get(prop.handle, [])
+            else:
+                self.logger.warning(
+                    "Property handle '%s' does not match enum key '%s' in reference '%s'. "
+                    "Loading enum values at reference anyway.",
+                    prop.handle,
+                    enum_prop_handle,
+                    prop.value_set.path or prop.value_set.url,
             )
             enum_values = enum_prop_defs.get(enum_prop_handle, [])
-        enum_terms = enum.get("Terms", {})
-        if not enum_values:
-            self.logger.error(
-                "No enum at reference '%s'",
-                prop.value_set.path or prop.value_set.url,
-            )
+            enum_terms = enum_mdf.get("Terms", {})
+            if not enum_values:
+                self.logger.error(
+                    "No enum at reference '%s'",
+                    prop.value_set.path or prop.value_set.url,
+                )
+                self.create_model_success = False
+                return
+            specs = {val: {"Value": val} for val in enum_values}
+            if enum_terms:  # merge term definitions with enum values
+                specs.update(
+                    {val: enum_terms.get(val, {"Value": val}) for val in enum_values},
+                )
+            for spec in specs.values():
+                if "Origin" in spec:
+                    continue
+                spec["Origin"] = prop.model
+            return [
+                spec_to_entity(None, spec, {"_commit": "dummy"}, Term)
+                for spec in specs.values()
+            ]
+
+        def load_enum_by_term_from_sts(term: Term) -> list[Term]:
+            if (term.origin_name is None or
+                term.origin_id is None or
+                term.origin_version is None):
+                msg = f"Cannot load enum from STS: term argument '{term.value}' must have non-null origin_name, origin_id, and origin_version";
+                self.logger.error(msg)
+                if self.raise_error:
+                    raise ArgError(msg)
+            endpt = settings.sts_url + f"/edp/{term.origin_name}/{term.origin_id}/{term.origin_version}" + "/terms"
+            try:
+                response = requests.get(endpt,
+                                        verify=self.verify,
+                                        timeout=self.timeout)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                msg = f"STS API call to {endpt} raised exception {e}"
+                self.logger.error(msg)
+                if self.raise_error:
+                    raise ArgError(msg) from e
+                return
+            response.encoding = "utf8"
+            return [Term(x) for x in response.json()]
+
+        enum_ref = prop.value_set.path or prop.value_set.url or prop.value_set.edp_term
+        if enum_ref is None:
+            self.logger.error(f"No enum reference in property '{prop.handle}'")
             self.create_model_success = False
-            return
-        specs = {val: {"Value": val} for val in enum_values}
-        if enum_terms:  # merge term definitions with enum values
-            specs.update(
-                {val: enum_terms.get(val, {"Value": val}) for val in enum_values},
-            )
-        for spec in specs.values():
-            if "Origin" in spec:
-                continue
-            spec["Origin"] = prop.model
-        terms = [
-            spec_to_entity(None, spec, {"_commit": "dummy"}, Term)
-            for spec in specs.values()
-        ]
-        self.add_terms_to_model_prop(prop, terms)
+            return []
+
+        if isinstance(enum_ref, str):
+            # process MDF yaml
+            fh = None
+            if re.match("^/", enum_ref):  # looks like a path
+                enum_path = (Path.cwd() / Path(enum_ref.lstrip("/"))).resolve()
+                if not enum_path.exists():
+                    self.logger.error("Enum reference path '%s' does not exist", enum_path)
+                    self.create_model_success = False
+                    return {}
+                fh = Path(enum_path).open()
+                return process_yaml_for_enum(fh, prop)
+
+            if re.match("(?:file|https?)://", enum_ref):  # looks like a url
+                fh = self.load_yaml_from_url(enum_ref)
+                return process_yaml_for_enum(fh, prop)
+        elif isinstance(enum_ref, Term):
+            # edp term
+            # resolve term to value set here with MDB #
+            return load_enum_by_term_from_sts(enum_ref)
+
+        else:
+            self.logger.error("Error - can't interpret enum reference '%s'", enum_ref)
+            self.create_model_success = False
+            return []
 
     def add_terms_to_model_prop(self, prop: Property, terms: list[Term]) -> None:
         """Add terms to a model property & handles list type props with value sets."""
@@ -724,18 +725,3 @@ class MDFReader:
                             ),
                         )
                 nd.composite_key_props = key_props
-
-
-def convert_github_url(url: str) -> str:
-    """Convert a GitHub blob URL to a raw URL."""
-    parsed_url = urlparse(url)
-    parts = parsed_url.path.strip("/").split("/")
-    if parsed_url.netloc != "github.com" or len(parts) < 4 or parts[2] != "blob":
-        return url  # not a GitHub blob URL
-    user, repo, _, branch = parts[:4]
-    file_path = "/".join(parts[4:])
-    return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"
-
-
-def set_property_null_cde(prop: Property, term: Term) -> None:
-    """Set the useNullCDE tag for a property based on the term."""
