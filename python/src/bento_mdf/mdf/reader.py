@@ -22,6 +22,7 @@ from tqdm import tqdm
 
 from bento_mdf.mdf.convert import spec_to_entity
 from bento_mdf.validator import MDFValidator
+from bento_mdf.config import settings
 
 Node.pvt_attr.append("composite_key_props")
 
@@ -44,6 +45,7 @@ class MDFReader:
         model: Model | None = None,
         _commit: str | None = None,
         mdf_schema: str | Path | None = None,
+        sts_url: str = settings.sts_url,
         raise_error: bool = False,
         ignore_enum_by_reference: bool = False,
         logger: logging.Logger | None = None,
@@ -148,6 +150,37 @@ class MDFReader:
         fh.seek(0)
         vargs.append(fh)
 
+    def load_enum_by_term_from_sts(
+        self,
+        term: Term,
+        *,
+        verify: bool = True,
+        raise_error: bool = True,
+    ) -> list[str]:
+        if (term.origin_name is None or
+            term.origin_id is None or
+            term.origin_version is None):
+            msg = f"Cannot load enum from STS: term argument '{term.value}' must have non-null origin_name, origin_id, and origin_version";
+            self.logger.error(msg)
+            if raise_error:
+                raise ArgError(msg)
+        endpt = settings.sts_url + f"/edp/{term.origin_name}/{term.origin_id}/{term.origin_version}" + "/terms"
+        try:
+            response = requests.get(endpt,
+                                    verify=verify, timeout=10)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            msg = f"STS API call to {endpt} raised exception {e}"
+            self.logger.error(msg)
+            if raise_error:
+                raise ArgError(msg) from e
+            return
+        response.encoding = "utf8"
+        ### TBContinued
+        set_trace()
+        pass
+    
+        
     def create_model(self, *, raise_error: bool = False) -> Model:
         """
         Create :class:`Model` instance from loaded YAML.
@@ -464,7 +497,7 @@ class MDFReader:
 
     def load_enum_reference(
         self,
-        enum_ref: str | dict
+        enum_ref: str | Term
     ) -> dict[str, dict[str, list[str] | dict[str, str]]]:
         """Load enum from a reference (path or url, yaml file or list of strings)."""
         if isinstance(enum_ref, str):
@@ -492,9 +525,10 @@ class MDFReader:
                     self.create_model_success = False
                     return {}
                 return enum_mdf.as_dict()  # type: ignore reportReturnType
-        elif isinstance(enum_ref, dict):
+        elif isinstance(enum_ref, Term):
             # edp term
             # resolve term to value set here with MDB #
+            self.load_enum_by_term_from_sts(enum_ref)
             pass
         else:
             self.logger.error("Error - can't interpret enum reference '%s'", enum_ref)
@@ -505,7 +539,8 @@ class MDFReader:
 
     def merge_enum_reference(self, prop: Property) -> None:
         """
-        Merge enum from a reference (path or url to yaml file or list of strings).
+        Merge enum from a reference (path or url to yaml file,
+        or list of strings, or EDP term).
 
         Adds terms to the property value set.
         """
