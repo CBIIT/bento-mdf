@@ -57,7 +57,7 @@ def test_load_yaml_url() -> None:
 
 
 def test_create_model() -> None:
-    m = MDF(handle="test")
+    m = MDF(handle="test",ignore_enum_by_reference=True)
     m.files = [CTDC_MODEL_FILE, CTDC_MODEL_PROPS_FILE]
     m.load_yaml()
     m.create_model()

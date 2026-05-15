@@ -25,6 +25,7 @@ from bento_mdf.mdf.convert import spec_to_entity
 from bento_mdf.validator import MDFValidator
 from bento_mdf.config import settings
 
+from pdb import set_trace
 Node.pvt_attr.append("composite_key_props")
 
 
@@ -79,6 +80,10 @@ class MDFReader:
         self._props = {}
         self.version = None
         self.uri = None
+        self.verify = verify
+        self.raise_error = raise_error
+        self.timeout = timeout
+        self.sts_url = sts_url
         self.logger = logger or logging.getLogger(__name__)
         self.create_model_success = False
         if model:
@@ -131,15 +136,6 @@ class MDFReader:
     def load_yaml_from_url(self, url: str) -> TemporaryFile:
         """Load YAML from a URL. Converts GitHub repo URLs to raw URLs."""
 
-        def convert_github_url(url: str) -> str:
-            """Convert a GitHub blob URL to a raw URL."""
-            parsed_url = urlparse(url)
-            parts = parsed_url.path.strip("/").split("/")
-            if parsed_url.netloc != "github.com" or len(parts) < 4 or parts[2] != "blob":
-                return url  # not a GitHub blob URL
-            user, repo, _, branch = parts[:4]
-            file_path = "/".join(parts[4:])
-            return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"
         raw_url = convert_github_url(url)
 
         try:
@@ -486,6 +482,9 @@ class MDFReader:
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
         terms = self.load_enum_reference(prop)
+        if not terms:
+            self.logger.error(f"Unable to resolve enum reference in property '{prop.handle}'")
+            return
         self.add_terms_to_model_prop(prop, terms)
 
     def load_enum_reference(
@@ -725,3 +724,13 @@ class MDFReader:
                             ),
                         )
                 nd.composite_key_props = key_props
+
+def convert_github_url(url: str) -> str:
+    """Convert a GitHub blob URL to a raw URL."""
+    parsed_url = urlparse(url)
+    parts = parsed_url.path.strip("/").split("/")
+    if parsed_url.netloc != "github.com" or len(parts) < 4 or parts[2] != "blob":
+        return url  # not a GitHub blob URL
+    user, repo, _, branch = parts[:4]
+    file_path = "/".join(parts[4:])
+    return f"https://raw.githubusercontent.com/{user}/{repo}/{branch}/{file_path}"

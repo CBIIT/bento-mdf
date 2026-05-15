@@ -60,7 +60,8 @@ def test_write_mdf():
 
 
 def test_read_write_gold_std_roundtrip():
-    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml", handle="test")
+    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml", handle="test",
+                  ignore_enum_by_reference=True)
     wr_m = MDFWriter(model=m.model)
     assert isinstance(wr_m.model, Model)
     with NamedTemporaryFile(mode="w+", suffix=".yaml", delete=False) as mdf_w:
