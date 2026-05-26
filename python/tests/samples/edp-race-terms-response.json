@@ -1,0 +1,7 @@
+[
+  {"type": "Term", "value": "American Indian or Alaska Native", "origin_name": "caDSR", "handle": "american_indian_or_alaska_native", "origin_id": "2192199", "origin_version": "1.00"},
+  {"type": "Term", "value": "Asian", "origin_name": "caDSR", "handle": "asian", "origin_id": "2192199", "origin_version": "1.00"},
+  {"type": "Term", "value": "Black or African American", "origin_name": "caDSR", "handle": "black_or_african_american", "origin_id": "2192199", "origin_version": "1.00"},
+  {"type": "Term", "value": "Native Hawaiian or Other Pacific Islander", "origin_name": "caDSR", "handle": "native_hawaiian_or_other_pacific_islander", "origin_id": "2192199", "origin_version": "1.00"},
+  {"type": "Term", "value": "White", "origin_name": "caDSR", "handle": "white", "origin_id": "2192199", "origin_version": "1.00"}
+]

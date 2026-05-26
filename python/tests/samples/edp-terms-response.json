@@ -1,0 +1,6 @@
+[
+  {"type": "Term", "value": "Female", "origin_name": "caDSR", "handle": "female", "origin_id": "7572817", "origin_version": "2.0"},
+  {"type": "Term", "value": "Male", "origin_name": "caDSR", "handle": "male", "origin_id": "7572817", "origin_version": "2.0"},
+  {"type": "Term", "value": "Intersex", "origin_name": "caDSR", "handle": "intersex", "origin_id": "7572817", "origin_version": "2.0"},
+  {"type": "Term", "value": "None of these describe me", "origin_name": "caDSR", "handle": "none_of_these_describe_me", "origin_id": "7572817", "origin_version": "2.0"}
+]

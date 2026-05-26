@@ -37,6 +37,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "responses>=0.25.0,<1.0.0",
     "pytest>=7.2.1,<8.0.0",
     "jupyter>=1.0.0,<2.0.0",
     "jupyterlab>=4.4.9,<5.0.0",
