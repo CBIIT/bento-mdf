@@ -569,8 +569,10 @@ def test_object_creation_for_edp() -> None:
     Test that property, value_set, terms created correctly for CDE/EDP
     (both enum - term specification, reading an EDP definition)
     """
-    m = MDF(Path("/Users/jensenma/Code/bento-mdf/python/tests") / "samples" / "test-model-edp-enum.yml", handle="test")
+    m = MDF(Path("/Users/jensenma/Code/bento-mdf/python/tests") / "samples" / "test-model-edp-enum.yml", handle="test", raise_error=True)
     pr = m.model.nodes['participant'].props['sex_at_birth']
     assert pr.value_domain == "value_set"
     assert pr.value_set.edp_term.origin_id == "7572817"
+    assert set([x.value for x in pr.terms.values()]) == set()
+
     

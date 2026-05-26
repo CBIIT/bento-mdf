@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.13.1"
+version = "0.13.2-rc"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
   { name = "Mark A. Jensen", email = "mark.jensen@nih.gov" },
@@ -13,7 +13,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    "bento-meta>=0.3.1",
+    "bento-meta",
     "jsonschema>=4.17.3,<5.0.0",
     "Jinja2==3.1.6",
     "PyYAML>=6.0.1",
@@ -28,6 +28,7 @@ dependencies = [
     "tornado>=6.5.1,<7.0.0",
     "urllib3>=2.5.0,<3.0.0",
     "hatchling>=1.28.0",
+    "pydantic-settings>=2.14.1",
 ]
 
 [project.urls]
@@ -56,6 +57,9 @@ test_mdf_cdes = "bento_mdf.bin.val_mdf_cdes:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.uv.sources]
+bento-meta = { git = "https://github.com/CBIIT/bento-meta.git", branch = "DATATEAM-547-549/edp-features", subdirectory = "python" }
 
 [tool.hatch.build]
 include = ["src","templates/pymodel.py.jinja2"]
