@@ -49,7 +49,7 @@ class MDFReader:
         mdf_schema: str | Path | None = None,
         sts_url: str = settings.sts_url,
         raise_error: bool = False,
-        verify: bool = False,
+        verify: bool = True,
         timeout: int = 10,
         ignore_enum_by_reference: bool = False,
         logger: logging.Logger | None = None,
