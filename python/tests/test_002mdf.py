@@ -588,7 +588,6 @@ def test_object_creation_for_edp() -> None:
             sex_at_birth_terms = json.load(f)
         with open(TDIR / "samples" / "edp-race-terms-response.json") as f:
             race_terms = json.load(f)
-
         with responses.RequestsMock() as rsps:
             rsps.add_passthru("https://")
             rsps.add(
@@ -603,12 +602,12 @@ def test_object_creation_for_edp() -> None:
                 json=race_terms,
                 status=200,
             )
-            m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", raise_error=True)
+
+            m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test",
+                    raise_error=True)
 
     pr = m.model.nodes['participant'].props['sex_at_birth']
     assert pr.value_domain == "value_set"
-    assert pr.value_set.edp_term.origin_id == "7572817"
+    assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
     term_values = set(x.value for x in pr.terms.values())
     assert {"Female", "Male", "Intersex", "None of these describe me"} <= term_values
-
-    

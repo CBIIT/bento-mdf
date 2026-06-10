@@ -186,7 +186,7 @@ def test_use_null_cde_validates():
     assert v.load_and_validate_yaml()
     assert v.validate_instance_with_schema()
 
-def test_enum_by_term_validates():
+def test_enum_by_edp_term_validates():
     """
     Test that Enum via reference to a Term (CDE/EDP) validates
     """

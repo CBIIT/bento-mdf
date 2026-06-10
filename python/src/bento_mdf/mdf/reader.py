@@ -12,9 +12,10 @@ from collections import ChainMap
 from pathlib import Path
 from tempfile import TemporaryFile
 from urllib.parse import urlparse
-from typing import TextIO
+from typing import TextIO, Any
 
 import requests
+
 from bento_meta.entity import ArgError, Entity
 from bento_meta.model import Model
 from bento_meta.objects import Edge, Node, Property, Tag, Term
@@ -440,7 +441,7 @@ class MDFReader:
             if prop.value_set and (
                 prop.value_set.path is not None or
                 prop.value_set.url is not None or
-                prop.value_set.edp_term is not None
+                len(prop.value_set.edp_terms) > 0
             ):  # enum as reference
                 if self.ignore_enum_by_reference:
                     self.logger.info(
@@ -478,7 +479,9 @@ class MDFReader:
 
         Adds terms to the property value set.
         """
-        if not prop.value_set or not (prop.value_set.path or prop.value_set.url or prop.value_set.edp_term):
+        if not prop.value_set or not (prop.value_set.path or
+                                      prop.value_set.url or
+                                      len(prop.value_set.edp_terms) > 0):
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
         terms = self.load_enum_reference(prop)
@@ -494,7 +497,7 @@ class MDFReader:
         """
         Load enum from a reference (path or url, yaml file or list of strings).
         Return a list of Term objects.
-        """
+         """
 
         def process_yaml_for_enum(fh: TextIO, prop: Property) -> list[Term]:
             v = MDFValidator(None, fh)
@@ -564,7 +567,9 @@ class MDFReader:
             response.encoding = "utf8"
             return [Term(x) for x in response.json()]
 
-        enum_ref = prop.value_set.path or prop.value_set.url or prop.value_set.edp_term
+        enum_ref = (prop.value_set.path or
+                    prop.value_set.url or
+                    list(prop.value_set.edp_terms.values())[0])
         if enum_ref is None:
             self.logger.error(f"No enum reference in property '{prop.handle}'")
             self.create_model_success = False

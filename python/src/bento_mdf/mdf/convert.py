@@ -164,14 +164,15 @@ def process_prop(init: dict, spec: dict, prop: Property) -> None:
                 {"path": domain_spec["path"], "_commit": prop._commit},
             )
         elif domain_spec.get("edp_term"):
-            prop.value_set = ValueSet(
-                {"edp_term": spec_to_entity(
+            tm = spec_to_entity(
                     None,
                     domain_spec["edp_term"],
                     {},
-                    Term),
-                 "_commit":prop._commit},
+                    Term)
+            prop.value_set = ValueSet(
+                {"_commit":prop._commit}
             )
+            prop.value_set.edp_terms[tm.handle] = tm
         elif domain_spec.get("value_set"):
             # create 'dummy' ValueSet to hold Enum terms,
             # but merge them with any Terms section terms in mdf.py
