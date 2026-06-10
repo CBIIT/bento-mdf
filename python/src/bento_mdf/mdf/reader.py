@@ -552,7 +552,7 @@ class MDFReader:
                 self.logger.error(msg)
                 if self.raise_error:
                     raise ArgError(msg)
-            endpt = settings.sts_url + f"/edp/{term.origin_name}/{term.origin_id}/{term.origin_version}" + "/terms"
+            endpt = self.sts_url + f"/edp/{term.origin_name}/{term.origin_id}/{term.origin_version}" + "/terms"
             try:
                 response = requests.get(endpt,
                                         verify=self.verify,
