@@ -552,6 +552,7 @@ class MDFReader:
                 self.logger.error(msg)
                 if self.raise_error:
                     raise ArgError(msg)
+                return []
             endpt = self.sts_url + f"/edp/{term.origin_name}/{term.origin_id}/{term.origin_version}" + "/terms"
             try:
                 response = requests.get(endpt,
@@ -565,7 +566,14 @@ class MDFReader:
                     raise ArgError(msg) from e
                 return
             response.encoding = "utf8"
-            return [Term(x) for x in response.json()]
+            try:
+                return [Term(x) for x in response.json()]
+            except Exception as e:
+                msg = f"Invalid payload returned from sts"
+                self.logger.error(msg)
+                if self.raise_error:
+                    raise(e)
+                return []
 
         enum_ref = (prop.value_set.path or
                     prop.value_set.url or

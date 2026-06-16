@@ -560,7 +560,7 @@ defs:
       Version:
         type: string
       Definition:
-        type: tring
+        type: string
       NanoID:
         $ref: "#/defs/nanoid"
     oneOf:
