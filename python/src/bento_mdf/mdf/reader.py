@@ -203,6 +203,7 @@ class MDFReader:
         self.create_edges()
         self.create_props()
         self.resolve_composite_key_props()
+        self.add_edp_definitions_accessor()
 
         if raise_error and not self.create_model_success:
             msg = "MDF errors found; see log output."
@@ -403,11 +404,21 @@ class MDFReader:
 
         # remaining props in defns_for do not have a parent Node or
         # Edge. Check for EDPs in this group.
+
         for pname in list(defns_for):
             spec = propdefs[pname]
             if spec.get("Ext"):
+                defns_for.discard(pname)
+                # create or retrieve special node for edps (kludge for now)
+                edp_node = self.model.nodes.get("_edp") or self.model.add_node(
+                    Node({"model": self.handle,
+                          "version": self.version,
+                          "handle": "_edp",
+                          "_commit": self._commit}))
                 prop = self.create_or_merge_prop_from_mdf(
                     spec, pname, force_create=True)
+                self.model.add_prop(edp_node, prop)
+                edp_node.props[prop.handle] = prop
                 
 
         if defns_for:
@@ -738,6 +749,10 @@ class MDFReader:
                         )
                 nd.composite_key_props = key_props
 
+    def add_edp_definitions_accessor(self):
+        if self.model.nodes.get("_edp"):
+            self.model.edp_definitions = self.model.nodes["_edp"].props
+        
 def convert_github_url(url: str) -> str:
     """Convert a GitHub blob URL to a raw URL."""
     parsed_url = urlparse(url)
