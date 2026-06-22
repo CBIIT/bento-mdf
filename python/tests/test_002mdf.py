@@ -1,14 +1,18 @@
 """Tests for bento_mdf.mdf."""
 
+import json
 from pathlib import Path
 
 import pytest
+import responses
 from bento_mdf.mdf import MDF, convert_github_url
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
 from bento_meta.objects import ValueSet
 
 from tests.samples.test_urls import TEST_CONVERT_URLS
+
+from pdb import set_trace
 
 TDIR = Path("tests/").resolve() if Path("tests").exists() else Path().resolve()
 CTDC_MODEL_FILE = TDIR / "samples" / "ctdc_model_file.yaml"
@@ -40,14 +44,14 @@ def test_class() -> None:
 
 
 def test_load_yaml() -> None:
-    m = MDF(handle="test")
+    m = MDF(handle="test", ignore_enum_by_reference=True)
     m.files = [CTDC_MODEL_FILE, CTDC_MODEL_PROPS_FILE]
     m.load_yaml(verify=False)
     assert m.mdf["Nodes"]
 
 
 def test_load_yaml_url() -> None:
-    m = MDF(handle="ICDC")
+    m = MDF(handle="ICDC", ignore_enum_by_reference=True)
     m.files = [ICDC_MODEL_URL, ICDC_PROPS_URL]
     m.load_yaml()
     m.create_model()
@@ -55,7 +59,7 @@ def test_load_yaml_url() -> None:
 
 
 def test_create_model() -> None:
-    m = MDF(handle="test")
+    m = MDF(handle="test", ignore_enum_by_reference=True)
     m.files = [CTDC_MODEL_FILE, CTDC_MODEL_PROPS_FILE]
     m.load_yaml()
     m.create_model()
@@ -63,7 +67,7 @@ def test_create_model() -> None:
 
 
 def test_created_model() -> None:
-    m = MDF(TEST_MODEL_FILE, handle="test")
+    m = MDF(TEST_MODEL_FILE, handle="test", ignore_enum_by_reference=True)
     assert isinstance(m.model, Model)
     assert set([x.handle for x in m.model.nodes.values()]) == {
         "case",
@@ -156,7 +160,7 @@ def test_created_model() -> None:
 
 
 def test_create_model_qual_props() -> None:
-    m = MDF(handle="test")
+    m = MDF(handle="test", ignore_enum_by_reference=True)
     m.files = [TEST_MODEL_QUAL_PROPS_FILE]
     m.load_yaml()
     m.create_model()
@@ -169,7 +173,7 @@ def test_create_model_qual_props() -> None:
 
 
 def test_create_model_with_terms_section() -> None:
-    m = MDF(handle="test")
+    m = MDF(handle="test", ignore_enum_by_reference=True)
     m.files = [TEST_MODEL_TERMS_A]
     m.load_yaml()
     m.create_model()
@@ -281,7 +285,7 @@ def test_convert_github_url(input_url: str, expected_url: str) -> None:
 
 def test_load_repo_url() -> None:
     """Test loading model from a GitHub blob URL converted to raw URL."""
-    m = MDF(handle="CCDI")
+    m = MDF(handle="CCDI", ignore_enum_by_reference=True)
     m.files = [CCDI_MODEL_URL, CCDI_PROPS_URL]
     m.load_yaml()
     m.create_model()
@@ -358,7 +362,8 @@ def test_multiple_properties_shared_enum_ref() -> None:
 def test_term_collision_bug_fix() -> None:
     """Test fix for term collision when Value and Origin are same but Codes differ."""
     m = MDF(
-        TDIR / "samples" / "test-model-term-collision-bug.yml", handle="test_collision"
+        TDIR / "samples" / "test-model-term-collision-bug.yml", handle="test_collision",
+        ignore_enum_by_reference=True
     )
 
     design_desc_prop = m.model.props[("sample", "design_description")]
@@ -409,7 +414,8 @@ def test_terms_with_different_versions_are_distinct() -> None:
 
     Per MDB conventions, terms are unique by (origin_name, origin_id, origin_version).
     """
-    m = MDF(TDIR / "samples" / "test-model-term-versions.yml", handle="test_versions")
+    m = MDF(TDIR / "samples" / "test-model-term-versions.yml",
+            handle="test_versions", ignore_enum_by_reference=True)
 
     status_v1_prop = m.model.props[("sample", "status_v1")]
     status_v2_prop = m.model.props[("sample", "status_v2")]
@@ -432,7 +438,8 @@ def test_terms_with_different_versions_are_distinct() -> None:
 
 def test_lookup_term_by_handle() -> None:
     """Test the lookup_term_by_handle helper method."""
-    m = MDF(TDIR / "samples" / "test-model-with-terms-a.yml", handle="test")
+    m = MDF(TDIR / "samples" / "test-model-with-terms-a.yml",
+            handle="test", ignore_enum_by_reference=True)
 
     normal_term = m.lookup_term_by_handle("normal")
     assert normal_term is not None
@@ -449,7 +456,8 @@ def test_terms_with_no_code_use_none_in_key() -> None:
 
     This ensures backward compatibility with MDF files that only provide Value and Origin.
     """
-    m = MDF(TDIR / "samples" / "test-model.yml", handle="test")
+    m = MDF(TDIR / "samples" / "test-model.yml", handle="test",
+            ignore_enum_by_reference=True)
 
     case_node = m.model.nodes["case"]
 
@@ -471,7 +479,8 @@ def test_use_null_cde_converted_to_property_tag() -> None:
 
     MDF has useNullCDE as Term attribute. Reader converts it to Property tag.
     """
-    m = MDF(TDIR / "samples" / "test-model-null-cde.yml", handle="test_null_cde")
+    m = MDF(TDIR / "samples" / "test-model-null-cde.yml",
+            handle="test_null_cde", ignore_enum_by_reference=True)
 
     # Get properties with useNullCDE in their Term definitions
     imaging_software_prop = m.model.props[("sample", "imaging_software")]
@@ -493,7 +502,8 @@ def test_use_null_cde_converted_to_property_tag() -> None:
 def test_use_null_cde_backward_compatibility() -> None:
     """Test that models without useNullCDE work normally (backward compatibility)."""
     # Test with new model that has no useNullCDE
-    m = MDF(TDIR / "samples" / "test-model-null-cde.yml", handle="test_null_cde")
+    m = MDF(TDIR / "samples" / "test-model-null-cde.yml",
+            handle="test_null_cde", ignore_enum_by_reference=True)
     sample_id_prop = m.model.props[("sample", "sample_id")]
     assert "useNullCDE" not in sample_id_prop.tags
 
@@ -514,7 +524,8 @@ def test_use_null_cde_helper_function() -> None:
             True,
         ]
 
-    m = MDF(TDIR / "samples" / "test-model-null-cde.yml", handle="test_null_cde")
+    m = MDF(TDIR / "samples" / "test-model-null-cde.yml",
+            handle="test_null_cde", ignore_enum_by_reference=True)
 
     imaging_software = m.model.props[("sample", "imaging_software")]
     processing_method = m.model.props[("sample", "processing_method")]
@@ -527,7 +538,8 @@ def test_use_null_cde_helper_function() -> None:
 
 def test_edge_req_from_ends_mixed() -> None:
     """Test that per-End Req values are applied to individual edges."""
-    m = MDF(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
+    m = MDF(TDIR / "samples" / "test-model-req-ends.yml",
+            handle="test_req_ends", ignore_enum_by_reference=True)
     # of_case: sample->case has Req: true, diagnosis->case has Req: false
     sample_case = m.model.edges[("of_case", "sample", "case")]
     diag_case = m.model.edges[("of_case", "diagnosis", "case")]
@@ -537,7 +549,8 @@ def test_edge_req_from_ends_mixed() -> None:
 
 def test_edge_req_from_ends_toplevel() -> None:
     """Test that uniform Edge-level Req values are applied to all edges."""
-    m = MDF(TDIR / "samples" / "test-model-req-ends.yml", handle="test_req_ends")
+    m = MDF(TDIR / "samples" / "test-model-req-ends.yml",
+            handle="test_req_ends", ignore_enum_by_reference=True)
     # of_sample: both Ends have Req: true
     file_sample = m.model.edges[("of_sample", "file", "sample")]
     diag_sample = m.model.edges[("of_sample", "diagnosis", "sample")]
@@ -547,7 +560,54 @@ def test_edge_req_from_ends_toplevel() -> None:
 
 def test_edge_req_inherited_from_relationship_level() -> None:
     """Test that relationship-level Req is inherited when Ends don't specify it."""
-    m = MDF(TDIR / "samples" / "test-model.yml", handle="test")
+    m = MDF(TDIR / "samples" / "test-model.yml", handle="test",
+            ignore_enum_by_reference=True)
     # test-model.yml has no Req on Ends or relationship level for of_case
     sample_case = m.model.edges[("of_case", "sample", "case")]
     assert sample_case.is_required is None or sample_case.is_required is False
+
+def _sts_is_up() -> bool:
+    """Check if the local STS server is reachable."""
+    try:
+        import requests as req
+        resp = req.get("http://localhost:8000/v2/", timeout=2)
+        return resp.status_code < 500
+    except Exception:
+        return False
+
+
+def test_object_creation_for_edp() -> None:
+    """
+    Test that property, value_set, terms created correctly for CDE/EDP
+    (both enum - term specification, reading an EDP definition)
+    """
+    if _sts_is_up():
+        m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", raise_error=True)
+    else:
+        with open(TDIR / "samples" / "edp-terms-response.json") as f:
+            sex_at_birth_terms = json.load(f)
+        with open(TDIR / "samples" / "edp-race-terms-response.json") as f:
+            race_terms = json.load(f)
+        with responses.RequestsMock() as rsps:
+            rsps.add_passthru("https://")
+            rsps.add(
+                responses.GET,
+                "http://localhost:8000/v2/edp/caDSR/7572817/2.0/terms",
+                json=sex_at_birth_terms,
+                status=200,
+            )
+            rsps.add(
+                responses.GET,
+                "http://localhost:8000/v2/edp/caDSR/2192199/1.00/terms",
+                json=race_terms,
+                status=200,
+            )
+
+            m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test",
+                    raise_error=True)
+
+    pr = m.model.nodes['participant'].props['sex_at_birth']
+    assert pr.value_domain == "value_set"
+    assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
+    term_values = set(x.value for x in pr.terms.values())
+    assert {"Female", "Male", "Intersex", "None of these describe me"} <= term_values

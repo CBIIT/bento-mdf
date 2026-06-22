@@ -1,6 +1,6 @@
 [project]
 name = "bento-mdf"
-version = "0.13.1"
+version = "0.13.2"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
   { name = "Mark A. Jensen", email = "mark.jensen@nih.gov" },
@@ -13,7 +13,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    "bento-meta>=0.3.1",
+    "bento-meta>=0.3.2",
     "jsonschema>=4.17.3,<5.0.0",
     "Jinja2==3.1.6",
     "PyYAML>=6.0.1",
@@ -24,10 +24,11 @@ dependencies = [
     "annotated-types>=0.7.0,<1.0.0",
     "certifi>=2025.4.26",
     "setuptools>=80.9.0,<81.0.0",
-    "cryptography>=45.0.3,<46.0.0",
+    "cryptography>=46.0.5",
     "tornado>=6.5.1,<7.0.0",
     "urllib3>=2.5.0,<3.0.0",
     "hatchling>=1.28.0",
+    "pydantic-settings>=2.14.1",
 ]
 
 [project.urls]
@@ -36,6 +37,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "responses>=0.25.0,<1.0.0",
     "pytest>=7.2.1,<8.0.0",
     "jupyter>=1.0.0,<2.0.0",
     "jupyterlab>=4.4.9,<5.0.0",

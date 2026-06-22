@@ -139,13 +139,13 @@ def test_jsonschema():
 
 def test_validator_for_gold_mdf():
 
-    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml")
+    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml", ignore_enum_by_reference=True)
     v = MDFDataValidator(m)
     assert v
 
 
 def test_list_type_validation():
-    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml")
+    m = MDFReader(TDIR / "samples" / "crdc_datahub_mdf.yml", ignore_enum_by_reference=True)
     v = MDFDataValidator(m)
     data = {
         "transaction_id": None,
