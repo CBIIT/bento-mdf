@@ -14,8 +14,6 @@ from urllib.parse import unquote
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from bento_meta.tf_objects import Transform, TfStep
 
-from pdb import set_trace
-
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
 
