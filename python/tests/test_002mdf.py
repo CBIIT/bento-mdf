@@ -621,7 +621,7 @@ def test_edge_req_inherited_from_relationship_level() -> None:
     sample_case = m.model.edges[("of_case", "sample", "case")]
     assert sample_case.is_required is None or sample_case.is_required is False
 
-def _sts_is_up() -> bool:
+def _sts_is_up(self) -> bool:
     """Check if the local STS server is reachable."""
     try:
         import requests as req
