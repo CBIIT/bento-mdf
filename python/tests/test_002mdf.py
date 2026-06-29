@@ -238,7 +238,7 @@ class TestDataHubModel:
 
     def test_property_is_required(self) -> None:
         """Test "is_required" attribute set on Property from "Req" object in MDF."""
-        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == "Preferred"
+        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == True
         assert self.m.model.props[("diagnosis", "id")].is_required is True
         assert self.m.model.props[("diagnosis", "date")].is_required is True
         assert self.m.model.props[("diagnosis", "transaction_id")].is_required is False
@@ -289,7 +289,7 @@ class TestEDPFeatures:
     TEST_EDP_PROPS_FILE = TDIR / "samples" / "test-edp-props.yml"
     TEST_EDP_TERMS_FILE = TDIR / "samples" / "test-obib-terms.yml"
     
-    def _sts_is_up() -> bool:
+    def _sts_is_up(self) -> bool:
         """Check if the local STS server is reachable."""
         try:
             import requests as req
