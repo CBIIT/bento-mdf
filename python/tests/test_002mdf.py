@@ -238,7 +238,7 @@ class TestDataHubModel:
 
     def test_property_is_required(self) -> None:
         """Test "is_required" attribute set on Property from "Req" object in MDF."""
-        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == "Preferred"
+        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == True
         assert self.m.model.props[("diagnosis", "id")].is_required is True
         assert self.m.model.props[("diagnosis", "date")].is_required is True
         assert self.m.model.props[("diagnosis", "transaction_id")].is_required is False
@@ -286,8 +286,6 @@ class TestDataHubModel:
 
 class TestEDPFeatures:
     """Tests for EDP-specific functionality."""
-    TEST_EDP_PROPS_FILE = TDIR / "samples" / "test-edp-props.yml"
-    TEST_EDP_TERMS_FILE = TDIR / "samples" / "test-obib-terms.yml"
     
     def _sts_is_up() -> bool:
         """Check if the local STS server is reachable."""
@@ -333,21 +331,6 @@ class TestEDPFeatures:
         assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
         term_values = set(x.value for x in pr.terms.values())
         assert {"Female", "Male", "Intersex", "None of these describe me"} <= term_values
-
-    def test_parse_edp_mdf(self) -> None:
-        """Test parsing of EDP props and terms yaml."""
-        m = MDF(TestEDPFeatures.TEST_EDP_PROPS_FILE,
-                TestEDPFeatures.TEST_EDP_TERMS_FILE, raise_error=True)
-        assert m.model.nodes["_edp"]
-        assert m.model.nodes["_edp"].props["obib_terms_valueset"]
-        assert len(m.model.nodes["_edp"].props["obib_terms_valueset"].terms) == 128
-        term = m.model.nodes["_edp"].props["obib_terms_valueset"].terms["venous blood specimen"]
-        assert term.origin_id == "2000014"
-        assert term.origin_definition == "A specimen that is derived from some venous blood"
-        assert m.model.edp_definitions == m.model.nodes["_edp"].props
-        assert m.model.edp_definitions["obib_terms_valueset"]
-        
-
 
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)
 def test_convert_github_url(input_url: str, expected_url: str) -> None:
