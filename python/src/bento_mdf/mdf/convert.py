@@ -98,6 +98,13 @@ def spec_to_entity(
     if hdl and "handle" not in init:
         init["handle"] = hdl
     # init now contains (translated) spec keys and its original keys
+    # flatten is_required
+    if init.get("is_required"):
+        if isinstance(init["is_required"], str):
+            if init["is_required"].lower() in ("yes", "true", "1", "preferred"):
+                init["is_required"] = True
+            else:
+                init["is_required"] = False
     ent = ent_cls(init)
     info = process[ent_cls](init, spec, ent)
     if spec.get("Tags"):

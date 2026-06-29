@@ -276,6 +276,14 @@ class TestDataHubModel:
         assert finding.props["finding_id"].is_key
         assert visit.props["visit_id"].is_key
 
+    def test_flatten_is_required(self) -> None:
+        spec = self.m.mdf["PropDefinitions"]["diagnosis"]
+        pr = self.m.model.props[("diagnosis", "diagnosis")]
+        assert spec["Req"] == "Preferred"
+        assert isinstance(pr.is_required, bool)
+        assert pr.is_required
+        
+
 class TestEDPFeatures:
     """Tests for EDP-specific functionality."""
     TEST_EDP_PROPS_FILE = TDIR / "samples" / "test-edp-props.yml"

@@ -184,7 +184,7 @@ wheels = [
 
 [[package]]
 name = "bento-mdf"
-version = "0.13.2rc0"
+version = "0.13.2"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },
@@ -223,7 +223,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "annotated-types", specifier = ">=0.7.0,<1.0.0" },
-    { name = "bento-meta", git = "https://github.com/CBIIT/bento-meta.git?subdirectory=python&branch=DATATEAM-547-549%2Fedp-features" },
+    { name = "bento-meta", specifier = ">=0.3.2" },
     { name = "certifi", specifier = ">=2025.4.26" },
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "delfick-project", specifier = "==0.7.9" },
@@ -253,8 +253,8 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "bento-meta"
-version = "0.3.2rc0"
-source = { git = "https://github.com/CBIIT/bento-meta.git?subdirectory=python&branch=DATATEAM-547-549%2Fedp-features#e8db3626c0bb43ab8af5dabdd85ad0ce8f2e147c" }
+version = "0.3.2"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "cryptography" },
@@ -271,6 +271,10 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
     { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/96/e4/bf751ee813d7b8b948165ada1687e120ab647371fa4a153899580ca8d267/bento_meta-0.3.2.tar.gz", hash = "sha256:dda93f461e11c0f6761d761f846a93c5b7ccca03e24967367b348bf7b6086b61", size = 45374, upload-time = "2026-06-16T21:03:45.462Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/99/a4/3f68cb8634be8935ef0e829ecb512d8dd6fd7703e972dfe971f565dee673/bento_meta-0.3.2-py3-none-any.whl", hash = "sha256:053a70d534bf07e0517877995470deab22d9fdc3e5f1850f9391e7fb83d74eb2", size = 52315, upload-time = "2026-06-16T21:03:44.393Z" },
 ]
 
 [[package]]
@@ -782,7 +786,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
