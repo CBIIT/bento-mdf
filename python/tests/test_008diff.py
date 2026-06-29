@@ -903,3 +903,114 @@ class TestValueSets:
         actual = self.diff.valuesets_are_different(p_1.value_set, p_2.value_set)
         expected = False
         assert actual == expected
+
+
+class TestDiffSummaryChangedTerms:
+    """Tests for DiffSummary paths handling changed terms (lines 70-71, 123-125, 133, 165-170)."""
+
+    def _make_diff_with_changed_terms(self, *, with_annotation=False):
+        """Helper to construct a Diff object with a 'changed' term."""
+        from bento_mdf.diff import Diff
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = Diff()
+        term_key = ("my_term", "NCIt", "C12345", "1.0")
+        diff.result = {
+            "terms": {
+                "changed": {
+                    term_key: {
+                        "origin_definition": {
+                            "removed": "old definition",
+                            "added": "new definition",
+                        },
+                    },
+                },
+                "removed": None,
+                "added": None,
+            },
+        }
+        if with_annotation:
+            diff.annotations = {
+                "nodes": {},
+                "edges": {},
+                "props": {
+                    ("sample", "sample_type"): {
+                        "added": {term_key: True},
+                    },
+                },
+                "terms": {},
+            }
+        else:
+            diff.annotations = {"nodes": {}, "edges": {}, "props": {}, "terms": {}}
+        return diff
+
+    def test_changed_terms_in_detailed_summary(self):
+        """Test that changed terms appear in detailed summary (lines 70-71)."""
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = self._make_diff_with_changed_terms()
+        summary = DiffSummary(diff)
+        detailed = summary.create_detailed_summary()
+        assert "Changed term:" in detailed
+        assert "'my_term'" in detailed
+        assert "'NCIt'" in detailed
+
+    def test_format_changed_detail(self):
+        """Test format_changed_detail method directly (lines 165-170)."""
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = self._make_diff_with_changed_terms()
+        summary = DiffSummary(diff)
+        term_key = ("my_term", "NCIt", "C12345", "1.0")
+        changes = {"origin_definition": {"removed": "old", "added": "new"}}
+        item = (term_key, changes)
+        result = summary.format_changed_detail("terms", item)
+        assert "- Changed term:" in result
+        assert "'my_term'" in result
+        assert "'NCIt'" in result
+
+    def test_format_changed_detail_non_terms_returns_empty(self):
+        """Test that format_changed_detail returns empty for non-terms (line 165-166)."""
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = self._make_diff_with_changed_terms()
+        summary = DiffSummary(diff)
+        result = summary.format_changed_detail("nodes", (("case",), {}))
+        assert result == ""
+
+    def test_changed_term_with_annotation(self):
+        """Test changed term annotation formatting (lines 123-125, 133)."""
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = self._make_diff_with_changed_terms(with_annotation=True)
+        summary = DiffSummary(diff)
+        term_key = ("my_term", "NCIt", "C12345", "1.0")
+        changes = {"origin_definition": {"removed": "old def", "added": "new def"}}
+        item = (term_key, changes)
+        result = summary.format_entity_annotation("changed", item)
+        assert "which annotates" in result
+        assert "Attribute: 'origin_definition'" in result
+        assert "'old def'" in result
+        assert "'new def'" in result
+
+    def test_changed_term_without_annotation(self):
+        """Test changed term with no matching annotation returns empty."""
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = self._make_diff_with_changed_terms(with_annotation=False)
+        summary = DiffSummary(diff)
+        term_key = ("my_term", "NCIt", "C12345", "1.0")
+        changes = {"origin_definition": {"removed": "old", "added": "new"}}
+        item = (term_key, changes)
+        result = summary.format_entity_annotation("changed", item)
+        assert result == ""
+
+    def test_overall_summary_includes_changed_terms(self):
+        """Test that overall summary counts changed term attributes."""
+        from bento_mdf.diff_summary import DiffSummary
+
+        diff = self._make_diff_with_changed_terms()
+        summary = DiffSummary(diff)
+        overall = summary.create_overall_summary()
+        assert "attribute(s) changed" in overall
+        assert "term(s)" in overall
