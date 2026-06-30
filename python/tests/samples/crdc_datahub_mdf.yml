@@ -146,7 +146,7 @@ PropDefinitions:
     Req: true
   date:
     Type: datetime
-    Req: Yes
+    Req: "Yes"
   visit_date:
     Type: datetime
     Req: Yes
