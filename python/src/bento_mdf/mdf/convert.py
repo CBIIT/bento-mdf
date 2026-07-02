@@ -101,7 +101,7 @@ def spec_to_entity(
     # flatten is_required
     if init.get("is_required"):
         if isinstance(init["is_required"], str):
-            if init["is_required"].lower() in ("yes", "true", "1", "preferred"):
+            if init["is_required"].lower() in ("yes", "true", "1"):
                 init["is_required"] = True
             else:
                 init["is_required"] = False

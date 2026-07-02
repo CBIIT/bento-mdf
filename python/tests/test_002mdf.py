@@ -238,7 +238,7 @@ class TestDataHubModel:
 
     def test_property_is_required(self) -> None:
         """Test "is_required" attribute set on Property from "Req" object in MDF."""
-        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == True
+        assert self.m.model.props[("diagnosis", "diagnosis")].is_required == False
         assert self.m.model.props[("diagnosis", "id")].is_required is True
         assert self.m.model.props[("diagnosis", "date")].is_required is True
         assert self.m.model.props[("diagnosis", "transaction_id")].is_required is False
@@ -280,6 +280,11 @@ class TestDataHubModel:
         spec = self.m.mdf["PropDefinitions"]["diagnosis"]
         pr = self.m.model.props[("diagnosis", "diagnosis")]
         assert spec["Req"] == "Preferred"
+        assert isinstance(pr.is_required, bool)
+        assert not pr.is_required
+        spec = self.m.mdf["PropDefinitions"]["date"]
+        pr = self.m.model.props[("diagnosis", "date")]
+        assert spec["Req"] == "Yes"
         assert isinstance(pr.is_required, bool)
         assert pr.is_required
         
@@ -637,6 +642,3 @@ def test_edge_req_inherited_from_relationship_level() -> None:
     # test-model.yml has no Req on Ends or relationship level for of_case
     sample_case = m.model.edges[("of_case", "sample", "case")]
     assert sample_case.is_required is None or sample_case.is_required is False
-
-
-
