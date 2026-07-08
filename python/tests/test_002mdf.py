@@ -346,6 +346,7 @@ class TestEDPFeatures:
         assert m.model.nodes["_edp"]
         pr = m.model.nodes["_edp"].props["obib_terms_valueset"]
         assert pr.is_extended
+        assert list(pr.value_set.edp_terms.values())[0].origin_id == "CRDC0002"
         assert len(m.model.nodes["_edp"].props["obib_terms_valueset"].terms) == 128
         term = m.model.nodes["_edp"].props["obib_terms_valueset"].terms["venous blood specimen"]
         assert term.origin_id == "2000014"

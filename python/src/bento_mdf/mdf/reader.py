@@ -417,6 +417,18 @@ class MDFReader:
                           "_commit": self._commit}))
                 prop = self.create_or_merge_prop_from_mdf(
                     spec, pname, force_create=True)
+                if not prop.annotations:
+                    msg = f"Property '{prop.handle}' is an EDP, but has no Term: annotation"
+                    self.logger.error(msg)
+                    if self.raise_error:
+                        raise RuntimeError(msg)
+                if not prop.value_set:
+                    msg = f"Property '{prop.handle}' is an EDP, but has no value set (enum list) defined"
+                    self.logger.error(msg)
+                    if self.raise_error:
+                        raise RuntimeError(msg)
+                k, v = list(prop.annotations.items())[0]
+                prop.value_set.edp_terms[k] = v
                 self.model.add_prop(edp_node, prop)
                 edp_node.props[prop.handle] = prop
                 
