@@ -344,7 +344,8 @@ class TestEDPFeatures:
         m = MDF(TestEDPFeatures.TEST_EDP_PROPS_FILE,
                 TestEDPFeatures.TEST_EDP_TERMS_FILE, raise_error=True)
         assert m.model.nodes["_edp"]
-        assert m.model.nodes["_edp"].props["obib_terms_valueset"]
+        pr = m.model.nodes["_edp"].props["obib_terms_valueset"]
+        assert pr.is_extended
         assert len(m.model.nodes["_edp"].props["obib_terms_valueset"].terms) == 128
         term = m.model.nodes["_edp"].props["obib_terms_valueset"].terms["venous blood specimen"]
         assert term.origin_id == "2000014"

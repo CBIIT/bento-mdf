@@ -36,6 +36,7 @@ mdf_to_meta = {
     "Desc": "desc",
     "Dst": "dst",
     "Enum": "Enum",
+    "Ext": "is_extended",
     "Handle": "handle",
     "Identities": None,
     "Inputs": None,
