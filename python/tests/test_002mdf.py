@@ -119,6 +119,8 @@ def test_created_model() -> None:
     assert m.model.nodes["file"].props["md5sum"].value_domain == "regexp"
     assert m.model.nodes["file"].props["md5sum"].pattern
     amount = m.model.props[("sample", "amount")]
+    assert not amount.is_extended
+    assert not amount.edp_term
     assert amount
     assert amount.value_domain == "number"
     assert amount.units == "mg"
@@ -348,6 +350,7 @@ class TestEDPFeatures:
         assert pr.is_extended
         assert list(pr.concept.terms.values())[0].origin_id == "CRDC0002"
         assert list(pr.value_set.edp_terms.values())[0].origin_id == "CRDC0002"
+        assert pr.edp_term.origin_id == "CRDC0002"
         assert len(m.model.nodes["_edp"].props["obib_terms_valueset"].terms) == 128
         term = m.model.nodes["_edp"].props["obib_terms_valueset"].terms["venous blood specimen"]
         assert term.origin_id == "2000014"

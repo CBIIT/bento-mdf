@@ -28,7 +28,7 @@ from bento_mdf.config import settings
 
 from pdb import set_trace
 Node.pvt_attr.append("composite_key_props")
-
+Property.pvt_attr.append("edp_term")
 
 def make_nano() -> str:
     """Generate a 6-character alphanumeric string."""
@@ -764,6 +764,8 @@ class MDFReader:
     def add_edp_definitions_accessor(self):
         if self.model.nodes.get("_edp"):
             self.model.edp_definitions = self.model.nodes["_edp"].props
+            for pr in self.model.edp_definitions.values():
+                pr.edp_term = list(pr.concept.terms.values())[0]
         
 def convert_github_url(url: str) -> str:
     """Convert a GitHub blob URL to a raw URL."""
