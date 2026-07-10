@@ -184,7 +184,7 @@ wheels = [
 
 [[package]]
 name = "bento-mdf"
-version = "0.13.2"
+version = "0.13.3b1"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },
