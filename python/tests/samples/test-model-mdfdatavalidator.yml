@@ -8,6 +8,12 @@ Nodes:
       - race
       - sex_at_birth
       - occupation
+  sample:
+    Props:
+      - sample_id
+      - sample_list_prop
+      - sample_bool_prop
+      - sample_tbd_prop
 Relationships: {}
 PropDefinitions:
   participant_id:
@@ -88,4 +94,26 @@ PropDefinitions:
     Type: string
     Req: false
     Key: false
+    Private: false
+  sample_id:
+    Desc: sample identifier
+    Type: string
+    Req: true
+    Private: false
+  sample_list_prop:
+    Desc: A list of string values for testing list-type properties.
+    Type:
+      value_type: list
+      item_type: string
+    Req: false
+    Private: false
+  sample_bool_prop:
+    Desc: A boolean property for testing boolean-type properties.
+    Type: boolean
+    Req: false
+    Private: false
+  sample_tbd_prop:
+    Desc: A TBD property for testing TBD-type properties.
+    Type: TBD
+    Req: false
     Private: false
