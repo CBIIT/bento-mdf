@@ -5,7 +5,7 @@
 #
 
 import re
-from typing import Optional, Annotated, List
+from typing import Optional, Annotated, List, Any
 from annotated_types import Predicate, Unit
 from enum import Enum
 from datetime import datetime
@@ -61,7 +61,7 @@ class {{node.handle | toCamelCase }}(MDFBaseModel):
 {% elif pr.value_domain == 'regexp' or pr.item_domain == 'regexp'%}
     {{pr.handle}}: {{ "MatchedStrType(r'{}')".format(pr.pattern) | maybe_list(pr) | maybe_optional(pr) }}
 {% elif pr.value_domain == 'url' or pr.item_domain == 'url' %}
-    {{pr.handle}}: {{ "AnyUrl" | maybe_list(pr) | maybe_optional(pr) }}
+    {{pr.handle}}: {{ typemap[pr.item_domain if pr.item_domain else pr.value_domain].__name__ | maybe_list(pr) | maybe_optional(pr) }}
 {% elif pr.value_domain == 'number' or pr.value_domain == 'integer' or
         pr.item_domain == 'number' or pr.item_domain == 'integer' %}
 {% if pr.units %}
@@ -81,10 +81,15 @@ class {{node.handle | toCamelCase }}(MDFBaseModel):
     {{pr.handle}}: {{ "str"| maybe_optional(pr) }}
 {% elif pr.value_domain == 'datetime' or pr.item_domain == 'datetime' %}
     {{pr.handle}}: {{ "datetime" | maybe_list(pr) |maybe_optional(pr) }}
+{% elif pr.item_domain is not none %}
+    {{pr.handle}}: {{ typemap[pr.item_domain].__name__ | maybe_list(pr) | maybe_optional(pr) }}
+{% elif pr.value_domain == 'boolean' %}
+    {{pr.handle}}: {{ typemap[pr.value_domain].__name__ | maybe_optional(pr) }}
+{% elif pr.value_domain == 'TBD' %}
+    {{pr.handle}}: {{ typemap[pr.value_domain].__name__ | maybe_optional(pr) }}
 {% else %}
 {% endif %}
 {% endfor %}
-
 {% endfor %}
 
 class {{"{}Data".format(model.handle.replace("-","").replace("_","").capitalize())}}(BaseModel):
