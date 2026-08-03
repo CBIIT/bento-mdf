@@ -1,0 +1,769 @@
+Terms:
+  adipose tissue specimen:
+    Origin: OBIB
+    Code: "0002530"
+    Version: "1"
+    Value: adipose tissue specimen
+    Definition: "A specimen that is derived from adipose tissue."
+  adrenal gland specimen:
+    Origin: OBIB
+    Code: "0002522"
+    Version: "1"
+    Value: adrenal gland specimen
+    Definition: "A specimen that is derived from adrenal gland."
+  agar stab specimen:
+    Origin: OBIB
+    Code: "0000981"
+    Version: "1"
+    Value: agar stab specimen
+    Definition: "a specimen that is output of a process that cell culture inoculated into agar for long term storage."
+  amniotic fluid specimen:
+    Origin: OBIB
+    Code: "0002500"
+    Version: "1"
+    Value: amniotic fluid specimen
+    Definition: "A specimen that is derived from amniotic fluid."
+  analyte assay:
+    Origin: OBIB
+    Code: "0000443"
+    Version: "1"
+    Value: analyte assay
+    Definition: "An assay with the objective to capture information about the presence, concentration, or amount of an analyte in an evaluant."
+  analyte role:
+    Origin: OBIB
+    Code: "0000275"
+    Version: "1"
+    Value: analyte role
+    Definition: "A measurand role borne by a molecular entity or an atom and realized in an analyte assay which achieves the objective to measure the magnitude/concentration/amount of the analyte in the entity bearing evaluant role."
+  aorta specimen:
+    Origin: OBIB
+    Code: "0002542"
+    Version: "1"
+    Value: aorta specimen
+    Definition: "A specimen that is derived from aorta."
+  areolar swab specimen:
+    Origin: OBIB
+    Code: "0002603"
+    Version: "1"
+    Value: areolar swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of an areola of a breast."
+  arterial blood specimen:
+    Origin: OBIB
+    Code: "2000013"
+    Version: "1"
+    Value: arterial blood specimen
+    Definition: "A specimen that is derived from some arterial blood"
+  atrial appendage specimen:
+    Origin: OBIB
+    Code: "0002543"
+    Version: "1"
+    Value: atrial appendage specimen
+    Definition: "A specimen that is derived from the atrium auricular region."
+  bile specimen:
+    Origin: OBIB
+    Code: "0002501"
+    Version: "1"
+    Value: bile specimen
+    Definition: "A specimen that is derived from bile."
+  blood plasma specimen:
+    Origin: OBIB
+    Code: "0100016"
+    Version: "1"
+    Value: blood plasma specimen
+    Definition: "a material entity which corresponds to the liquid component of blood, in which the blood cells are suspended."
+  blood serum specimen:
+    Origin: OBIB
+    Code: "0100017"
+    Version: "1"
+    Value: blood serum specimen
+    Definition: "A material entity which derives from blood and corresponds to blood plasma without fibrinogen or the other clotting factors."
+  blood specimen:
+    Origin: OBIB
+    Code: "0000655"
+    Version: "1"
+    Value: blood specimen
+    Definition: "a material entity derived from a portion of blood collected from an organism"
+  blood specimen on blood spot card:
+    Origin: OBIB
+    Code: "0000039"
+    Version: "1"
+    Value: blood specimen on blood spot card
+    Definition: "A blood specimen that is located on a blood spot card."
+  bodily fluid specimen:
+    Origin: OBIB
+    Code: "2000009"
+    Version: "1"
+    Value: bodily fluid specimen
+    Definition: "A specimen that is derived from some bodily fluid"
+  bone marrow specimen:
+    Origin: OBIB
+    Code: "0002512"
+    Version: "1"
+    Value: bone marrow specimen
+    Definition: "A specimen that is derived from bone marrow."
+  brain specimen:
+    Origin: OBIB
+    Code: "0002516"
+    Version: "1"
+    Value: brain specimen
+    Definition: "A specimen that is derived from brain."
+  breast specimen:
+    Origin: OBIB
+    Code: "0002523"
+    Version: "1"
+    Value: breast specimen
+    Definition: "A specimen that is derived from breast."
+  breast swab specimen:
+    Origin: OBIB
+    Code: "0002604"
+    Version: "1"
+    Value: breast swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a breast."
+  bronchial alveolar lavage:
+    Origin: OBIB
+    Code: "0100067"
+    Version: "1"
+    Value: bronchial alveolar lavage
+    Definition: "Group of biomaterials present in the bronchial aveolar space of an organism which are collected through lavage including the reagents used to for the lavage process, organisms, cells, and cellular secretions present in the bronchial aveolar space."
+  buffy coat specimen:
+    Origin: OBIB
+    Code: "0000036"
+    Version: "1"
+    Value: buffy coat specimen
+    Definition: "A processed specimen which is the output of a density gradient centrifugation of an anticoagulated blood specimen that contains most of the white blood cells and platelets."
+  capillary blood specimen:
+    Origin: OBIB
+    Code: "2000015"
+    Version: "1"
+    Value: capillary blood specimen
+    Definition: "A specimen that is derived from some capillary blood"
+  cell:
+    Origin: OBIB
+    Code: "0000000"
+    Version: "1"
+    Value: cell
+    Definition: "A material entity of anatomical origin (part of or deriving from an organism) that has as its parts a maximally connected cell compartment surrounded by a plasma membrane."
+  cerebellum specimen:
+    Origin: OBIB
+    Code: "0002538"
+    Version: "1"
+    Value: cerebellum specimen
+    Definition: "A specimen that is derived from cerebellum."
+  cerebral cortex specimen:
+    Origin: OBIB
+    Code: "0002536"
+    Version: "1"
+    Value: cerebral cortex specimen
+    Definition: "A specimen that is derived from cerebral cortex."
+  cerebrospinal fluid specimen:
+    Origin: OBIB
+    Code: "0002502"
+    Version: "1"
+    Value: cerebrospinal fluid specimen
+    Definition: "A specimen that is derived from cerbrospinal fluid."
+  cervical mucus specimen:
+    Origin: OBIB
+    Code: "2000002"
+    Version: "1"
+    Value: cervical mucus specimen
+    Definition: "A specimen that is derived from some cervical mucus"
+  cheek swab specimen:
+    Origin: OBIB
+    Code: "0002605"
+    Version: "1"
+    Value: cheek swab specimen
+    Definition: "A specimen that is collected with a swab from the cheek portion of the inside surface of a mouth."
+  chorionic villus specimen:
+    Origin: OBIB
+    Code: "2000010"
+    Version: "1"
+    Value: chorionic villus specimen
+    Definition: "A specimen that is derived from some chorionic villus"
+  colon specimen:
+    Origin: OBIB
+    Code: "0002533"
+    Version: "1"
+    Value: colon specimen
+    Definition: "A specimen that is derived from colon."
+  coronary artery specimen:
+    Origin: OBIB
+    Code: "0002540"
+    Version: "1"
+    Value: coronary artery specimen
+    Definition: "A specimen that is derived from coronary artery."
+  cortex of kidney specimen:
+    Origin: OBIB
+    Code: "0002531"
+    Version: "1"
+    Value: cortex of kidney specimen
+    Definition: "A specimen that is derived from cortex of kidney."
+  digestive system fluid or secretion specimen:
+    Origin: OBIB
+    Code: "0002504"
+    Version: "1"
+    Value: digestive system fluid or secretion specimen
+    Definition: "A specimen that is derived from digestive system fluid or secretion."
+  DNA extract:
+    Origin: OBIB
+    Code: "0001051"
+    Version: "1"
+    Value: DNA extract
+    Definition: "The output of an extraction process in which DNA molecules are purified in order to exclude DNA from organellas."
+  environmental swab specimen:
+    Origin: OBIB
+    Code: "0002613"
+    Version: "1"
+    Value: environmental swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of an environmenal material."
+  erythrocyte specimen:
+    Origin: OBIB
+    Code: "2000016"
+    Version: "1"
+    Value: erythrocyte specimen
+    Definition: "A specimen that is derived from some erythrocytes"
+  esophagogastric junction specimen:
+    Origin: OBIB
+    Code: "0002544"
+    Version: "1"
+    Value: esophagogastric junction specimen
+    Definition: "A specimen that is derived from the esophagogastric junction."
+  esophagus mucosa specimen:
+    Origin: OBIB
+    Code: "0002532"
+    Version: "1"
+    Value: esophagus mucosa specimen
+    Definition: "A specimen that is derived from esophagus mucosa."
+  esophagus muscularis mucosa specimen:
+    Origin: OBIB
+    Code: "0002535"
+    Version: "1"
+    Value: esophagus muscularis mucosa specimen
+    Definition: "A specimen that is derived from esophagus muscularis mucosa."
+  eye specimen:
+    Origin: OBIB
+    Code: "2000004"
+    Version: "1"
+    Value: eye specimen
+    Definition: "A specimen that is derived from some eye"
+  fecal swab specimen:
+    Origin: OBIB
+    Code: "0002612"
+    Version: "1"
+    Value: fecal swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a feces."
+  feces specimen:
+    Origin: OBIB
+    Code: "0002503"
+    Version: "1"
+    Value: feces specimen
+    Definition: "A specimen that is derived from feces."
+  FFPE specimen:
+    Origin: OBIB
+    Code: "1200000"
+    Version: "1"
+    Value: FFPE specimen
+    Definition: "A specimen that has been fixed in formalin and embedded in paraffin."
+  fixed tissue block specimen:
+    Origin: OBIB
+    Code: "0000660"
+    Version: "1"
+    Value: fixed tissue block specimen
+    Definition: "A fixed tissue specimen that is in block form."
+  fixed tissue slide specimen:
+    Origin: OBIB
+    Code: "0000661"
+    Version: "1"
+    Value: fixed tissue slide specimen
+    Definition: "A fixed tissue specimen that is placed in a slide."
+  fixed tissue specimen:
+    Origin: OBIB
+    Code: "0000659"
+    Version: "1"
+    Value: fixed tissue specimen
+    Definition: "A processed specimen that is the output of a fixation process."
+  flash frozen specimen:
+    Origin: OBIB
+    Code: "0000662"
+    Version: "1"
+    Value: flash frozen specimen
+    Definition: "A frozen specimen that has been instantly/quickly frozen by subjecting the specimen to cryogenic temperatures, or in direct contact with liquid nitrogen at -320.8F or -196C."
+  fresh specimen:
+    Origin: OBIB
+    Code: "0000971"
+    Version: "1"
+    Value: fresh specimen
+    Definition: "a specimen that is output of a specimen creation process used for an investigation without storage."
+  fresh tissue specimen:
+    Origin: OBIB
+    Code: "0000663"
+    Version: "1"
+    Value: fresh tissue specimen
+    Definition: "A fresh specimen that is in a tissue form."
+  frozen specimen:
+    Origin: OBIB
+    Code: "0000922"
+    Version: "1"
+    Value: frozen specimen
+    Definition: "A specimen that has been frozen in order to store it."
+  frozen tissue block specimen:
+    Origin: OBIB
+    Code: "0000664"
+    Version: "1"
+    Value: frozen tissue block specimen
+    Definition: "A frozen specimen is a tissue sample preserved in a block."
+  frozen tissue slide specimen:
+    Origin: OBIB
+    Code: "0000665"
+    Version: "1"
+    Value: frozen tissue slide specimen
+    Definition: "A frozen specimen that has been sliced from a tissue block into thin layers that are placed on a glass to be examined under a microscope."
+  hair specimen:
+    Origin: OBIB
+    Code: "0002517"
+    Version: "1"
+    Value: hair specimen
+    Definition: "A specimen that is derived from hair."
+  heart specimen:
+    Origin: OBIB
+    Code: "0002520"
+    Version: "1"
+    Value: heart specimen
+    Definition: "A specimen that is derived from heart."
+  ileum specimen:
+    Origin: OBIB
+    Code: "0002545"
+    Version: "1"
+    Value: ileum specimen
+    Definition: "A specimen that is derived from ileum."
+  induced sputum specimen:
+    Origin: OBIB
+    Code: "0002746"
+    Version: "1"
+    Value: induced sputum specimen
+    Definition: "A sputum specimen that is collected from an organism following its inhalation of a nebulized salt solution."
+  leukocyte specimen:
+    Origin: OBIB
+    Code: "2000018"
+    Version: "1"
+    Value: leukocyte specimen
+    Definition: "A specimen that is derived from some leukocytes"
+  liver specimen:
+    Origin: OBIB
+    Code: "0002546"
+    Version: "1"
+    Value: liver specimen
+    Definition: "A specimen that is derived from liver."
+  lung specimen:
+    Origin: OBIB
+    Code: "0002534"
+    Version: "1"
+    Value: lung specimen
+    Definition: "A specimen that is derived from lung."
+  lyophilized specimen:
+    Origin: OBIB
+    Code: "0000965"
+    Version: "1"
+    Value: lyophilized specimen
+    Definition: "a specimen that is output of a lyophilization storage process in which specimen is lyophilized for storage."
+  material sample:
+    Origin: OBIB
+    Code: "0000747"
+    Version: "1"
+    Value: material sample
+    Definition: "A material entity that has the material sample role"
+  meconium specimen:
+    Origin: OBIB
+    Code: "2000011"
+    Version: "1"
+    Value: meconium specimen
+    Definition: "A specimen that is derived from some meconium"
+  microdissected specimen:
+    Origin: OBIB
+    Code: "0000666"
+    Version: "1"
+    Value: microdissected specimen
+    Definition: "A specimen that has been procured from a histology slide under direct microscopic visualization."
+  milk specimen:
+    Origin: OBIB
+    Code: "0002505"
+    Version: "1"
+    Value: milk specimen
+    Definition: "A specimen that is derived from milk."
+  minor salivary gland specimen:
+    Origin: OBIB
+    Code: "0002547"
+    Version: "1"
+    Value: minor salivary gland specimen
+    Definition: "A specimen that is derived from minor salivary gland."
+  nasal swab specimen:
+    Origin: OBIB
+    Code: "0000917"
+    Version: "1"
+    Value: nasal swab specimen
+    Definition: "A specimen obtained using a cotton swab on a stick, passed up the nostril to obtain a sample of exudate and epithelial debris for microbiological or cellular examination."
+  nasopharyngeal swab specimen:
+    Origin: OBIB
+    Code: "0002606"
+    Version: "1"
+    Value: nasopharyngeal swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a nasopharynx."
+  nasopharynx specimen:
+    Origin: OBIB
+    Code: "2000007"
+    Version: "1"
+    Value: nasopharynx specimen
+    Definition: "A specimen that is derived from some nasopharynx"
+  normal specimen:
+    Origin: OBIB
+    Code: "0000726"
+    Version: "1"
+    Value: normal specimen
+    Definition: "A specimen that is normal."
+  nucleic acid extract:
+    Origin: OBIB
+    Code: "0001010"
+    Version: "1"
+    Value: nucleic acid extract
+    Definition: "An extract that is the output of an extraction process in which nucleic acid molecules are isolated from a specimen."
+  omentum specimen:
+    Origin: OBIB
+    Code: "0002548"
+    Version: "1"
+    Value: omentum specimen
+    Definition: "A specimen that is derived from omentum."
+  oral swab specimen:
+    Origin: OBIB
+    Code: "0002607"
+    Version: "1"
+    Value: oral swab specimen
+    Definition: "A specimen that is collected with a swab from the inside surface of a mouth."
+  oropharyngeal swab specimen:
+    Origin: OBIB
+    Code: "0002608"
+    Version: "1"
+    Value: oropharyngeal swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a oropharynx."
+  ovary specimen:
+    Origin: OBIB
+    Code: "0002549"
+    Version: "1"
+    Value: ovary specimen
+    Definition: "A specimen that is derived from female gonad."
+  pancreas specimen:
+    Origin: OBIB
+    Code: "0002527"
+    Version: "1"
+    Value: pancreas specimen
+    Definition: "A specimen that is derived from pancreas."
+  paraffin specimen:
+    Origin: OBIB
+    Code: "0000950"
+    Version: "1"
+    Value: paraffin specimen
+    Definition: "a specimen that is output of a paraffin storage process in which specimen is embedded in paraffin"
+  pericardial fluid specimen:
+    Origin: OBIB
+    Code: "0002506"
+    Version: "1"
+    Value: pericardial fluid specimen
+    Definition: "A specimen that is derived from pericardial fluid."
+  peritoneal fluid specimen:
+    Origin: OBIB
+    Code: "0002514"
+    Version: "1"
+    Value: peritoneal fluid specimen
+    Definition: "A specimen that is derived from peritoneal fluid."
+  pituitary gland specimen:
+    Origin: OBIB
+    Code: "0002529"
+    Version: "1"
+    Value: pituitary gland specimen
+    Definition: "A specimen that is derived from pituitary gland."
+  placenta specimen:
+    Origin: OBIB
+    Code: "0002513"
+    Version: "1"
+    Value: placenta specimen
+    Definition: "A specimen that is derived from placenta."
+  platelet-poor plasma specimen:
+    Origin: OBIB
+    Code: "0002774"
+    Version: "1"
+    Value: platelet-poor plasma specimen
+    Definition: "A blood plasma specimen that is the output of some platelet-poor plasma preparation and is the portion of plasma that contains fewer than 10,000 platelets per microliter."
+  pleural fluid specimen:
+    Origin: OBIB
+    Code: "0002515"
+    Version: "1"
+    Value: pleural fluid specimen
+    Definition: "A specimen that is derived from pleural fluid."
+  pool of specimens:
+    Origin: OBIB
+    Code: "0302716"
+    Version: "1"
+    Value: pool of specimens
+    Definition: "A pool of specimens is a mixture of a population of samples which have been gathered from one or more sample populations, obtained by the physical process of mixing individual specimens."
+  pre-mortem specimen:
+    Origin: OBIB
+    Code: "0000873"
+    Version: "1"
+    Value: pre-mortem specimen
+    Definition: "a specimen that was taken from a live organism"
+  processed specimen:
+    Origin: OBIB
+    Code: "0000953"
+    Version: "1"
+    Value: processed specimen
+    Definition: "A specimen that has been intentionally physically modified."
+  prostate gland specimen:
+    Origin: OBIB
+    Code: "0002518"
+    Version: "1"
+    Value: prostate gland specimen
+    Definition: "A specimen that is derived from prostate gland."
+  rectal swab specimen:
+    Origin: OBIB
+    Code: "0002609"
+    Version: "1"
+    Value: rectal swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a rectum."
+  renal medulla specimen:
+    Origin: OBIB
+    Code: "0002521"
+    Version: "1"
+    Value: renal medulla specimen
+    Definition: "A specimen that is derived from renal medulla."
+  respiratory system specimen:
+    Origin: OBIB
+    Code: "2000005"
+    Version: "1"
+    Value: respiratory system specimen
+    Definition: "A specimen that is derived from some respiratory system"
+  reticulocyte specimen:
+    Origin: OBIB
+    Code: "2000017"
+    Version: "1"
+    Value: reticulocyte specimen
+    Definition: "A specimen that is derived from some reticulocytes"
+  RNA extract:
+    Origin: OBIB
+    Code: "0000880"
+    Version: "1"
+    Value: RNA extract
+    Definition: "an extract which is the output of an extraction process in which RNA molecules are isolated from a specimen."
+  saliva specimen:
+    Origin: OBIB
+    Code: "0002507"
+    Version: "1"
+    Value: saliva specimen
+    Definition: "A specimen that is derived from saliva."
+  sample from organism:
+    Origin: OBIB
+    Code: "0000671"
+    Version: "1"
+    Value: sample from organism
+    Definition: "a material obtained from an organism in order to be a representative of the whole"
+  semen specimen:
+    Origin: OBIB
+    Code: "2000008"
+    Version: "1"
+    Value: semen specimen
+    Definition: "A specimen that is derived from some semen"
+  sigmoid colon specimen:
+    Origin: OBIB
+    Code: "0002550"
+    Version: "1"
+    Value: sigmoid colon specimen
+    Definition: "A specimen that is derived from sigmoid colon."
+  skeletal muscle tissue specimen:
+    Origin: OBIB
+    Code: "0002519"
+    Version: "1"
+    Value: skeletal muscle tissue specimen
+    Definition: "A specimen that is derived from skeletal muscle."
+  skin of body specimen:
+    Origin: OBIB
+    Code: "0002526"
+    Version: "1"
+    Value: skin of body specimen
+    Definition: "A specimen that is derived from skin."
+  specimen:
+    Origin: OBIB
+    Code: "0100051"
+    Version: "1"
+    Value: specimen
+    Definition: "A material entity that has the specimen role."
+  specimen collected with specific collection packet:
+    Origin: OBIB
+    Code: "0000086"
+    Version: "1"
+    Value: specimen collected with specific collection packet
+    Definition: "A specimen from organism that is collected with a collection packet that is designed to collect specimens of a particular type for a particular purpose."
+  specimen from organism:
+    Origin: OBIB
+    Code: "0001479"
+    Version: "1"
+    Value: specimen from organism
+    Definition: "A specimen that derives from an anatomical part or substance arising from an organism."
+  specimen meeting specification:
+    Origin: OBIB
+    Code: "0000715"
+    Version: "1"
+    Value: specimen meeting specification
+    Definition: "All specimens that meet the set parameters to be procured on."
+  specimen with known storage state:
+    Origin: OBIB
+    Code: "0001472"
+    Version: "1"
+    Value: specimen with known storage state
+    Definition: "A specimen for which it is known whether it has been subjected to storage of a specified type."
+  specimen with pre- or post-mortem status:
+    Origin: OBIB
+    Code: "0001506"
+    Version: "1"
+    Value: specimen with pre- or post-mortem status
+    Definition: "A specimen that has been established to be taken from a live (pre-mortem) or dead (post-mortem) organism."
+  spleen specimen:
+    Origin: OBIB
+    Code: "0002541"
+    Version: "1"
+    Value: spleen specimen
+    Definition: "A specimen that is derived from spleen."
+  sputum specimen:
+    Origin: OBIB
+    Code: "0002508"
+    Version: "1"
+    Value: sputum specimen
+    Definition: "A specimen that is derived from sputum."
+  stomach specimen:
+    Origin: OBIB
+    Code: "0002528"
+    Version: "1"
+    Value: stomach specimen
+    Definition: "A specimen that is derived from stomach."
+  suprapubic skin specimen:
+    Origin: OBIB
+    Code: "0002551"
+    Version: "1"
+    Value: suprapubic skin specimen
+    Definition: "A specimen that is derived from suprapubic skin."
+  swab specimen:
+    Origin: OBIB
+    Code: "0002599"
+    Version: "1"
+    Value: swab specimen
+    Definition: "A specimen that is stored on a swab as the output of a collecting specimen with swab process."
+  sweat specimen:
+    Origin: OBIB
+    Code: "0002509"
+    Version: "1"
+    Value: sweat specimen
+    Definition: "A specimen that is derived from sweat."
+  synovial fluid specimen:
+    Origin: OBIB
+    Code: "0002510"
+    Version: "1"
+    Value: synovial fluid specimen
+    Definition: "A specimen that is derived from synovial fluid."
+  testis specimen:
+    Origin: OBIB
+    Code: "0002552"
+    Version: "1"
+    Value: testis specimen
+    Definition: "A specimen that is derived from testis."
+  throat specimen:
+    Origin: OBIB
+    Code: "2000003"
+    Version: "1"
+    Value: throat specimen
+    Definition: "A specimen that is derived from some throat"
+  thyroid gland specimen:
+    Origin: OBIB
+    Code: "0002537"
+    Version: "1"
+    Value: thyroid gland specimen
+    Definition: "A specimen that is derived from thyroid gland."
+  tibial artery specimen:
+    Origin: OBIB
+    Code: "0002525"
+    Version: "1"
+    Value: tibial artery specimen
+    Definition: "A specimen that is derived from tibial artery."
+  tibial nerve specimen:
+    Origin: OBIB
+    Code: "0002539"
+    Version: "1"
+    Value: tibial nerve specimen
+    Definition: "A specimen that is derived from tibial nerve."
+  tongue swab specimen:
+    Origin: OBIB
+    Code: "0002610"
+    Version: "1"
+    Value: tongue swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a tongue."
+  umbilical cord blood specimen:
+    Origin: OBIB
+    Code: "2000012"
+    Version: "1"
+    Value: umbilical cord blood specimen
+    Definition: "A specimen that is derived from some umbilical cord blood"
+  upper respiratory tract specimen:
+    Origin: OBIB
+    Code: "2000006"
+    Version: "1"
+    Value: upper respiratory tract specimen
+    Definition: "A specimen that is derived from some upper respiratory tract"
+  urethra specimen:
+    Origin: OBIB
+    Code: "2000001"
+    Version: "1"
+    Value: urethra specimen
+    Definition: "A specimen that is derived from some urethra"
+  urinary bladder specimen:
+    Origin: OBIB
+    Code: "0002524"
+    Version: "1"
+    Value: urinary bladder specimen
+    Definition: "A specimen that is derived from urinary bladder."
+  urine specimen:
+    Origin: OBIB
+    Code: "0000651"
+    Version: "1"
+    Value: urine specimen
+    Definition: "a portion of urine collected from an organism"
+  uterine cervix specimen:
+    Origin: OBIB
+    Code: "2000000"
+    Version: "1"
+    Value: uterine cervix specimen
+    Definition: "A specimen that is derived from some uterine cervix"
+  uterus specimen:
+    Origin: OBIB
+    Code: "0002553"
+    Version: "1"
+    Value: uterus specimen
+    Definition: "A specimen that is derived from uterus."
+  vagina specimen:
+    Origin: OBIB
+    Code: "0002554"
+    Version: "1"
+    Value: vagina specimen
+    Definition: "A specimen that is derived from vagina."
+  vagina swab specimen:
+    Origin: OBIB
+    Code: "0002611"
+    Version: "1"
+    Value: vagina swab specimen
+    Definition: "A specimen that is collected with a swab from the surface of a vagina."
+  venous blood specimen:
+    Origin: OBIB
+    Code: "2000014"
+    Version: "1"
+    Value: venous blood specimen
+    Definition: "A specimen that is derived from some venous blood"
+  vitreous humor specimen:
+    Origin: OBIB
+    Code: "0002511"
+    Version: "1"
+    Value: vitreous humor specimen
+    Definition: "A specimen that is derived from vireous humor."

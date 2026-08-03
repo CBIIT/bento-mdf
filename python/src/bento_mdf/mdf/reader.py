@@ -28,7 +28,7 @@ from bento_mdf.config import settings
 
 from pdb import set_trace
 Node.pvt_attr.append("composite_key_props")
-
+Property.pvt_attr.append("edp_term")
 
 def make_nano() -> str:
     """Generate a 6-character alphanumeric string."""
@@ -203,6 +203,7 @@ class MDFReader:
         self.create_edges()
         self.create_props()
         self.resolve_composite_key_props()
+        self.add_edp_definitions_accessor()
 
         if raise_error and not self.create_model_success:
             msg = "MDF errors found; see log output."
@@ -403,11 +404,33 @@ class MDFReader:
 
         # remaining props in defns_for do not have a parent Node or
         # Edge. Check for EDPs in this group.
+
         for pname in list(defns_for):
             spec = propdefs[pname]
             if spec.get("Ext"):
+                defns_for.discard(pname)
+                # create or retrieve special node for edps (kludge for now)
+                edp_node = self.model.nodes.get("_edp") or self.model.add_node(
+                    Node({"model": self.handle,
+                          "version": self.version,
+                          "handle": "_edp",
+                          "_commit": self._commit}))
                 prop = self.create_or_merge_prop_from_mdf(
                     spec, pname, force_create=True)
+                if not prop.annotations:
+                    msg = f"Property '{prop.handle}' is an EDP, but has no Term: annotation"
+                    self.logger.error(msg)
+                    if self.raise_error:
+                        raise RuntimeError(msg)
+                if not prop.value_set:
+                    msg = f"Property '{prop.handle}' is an EDP, but has no value set (enum list) defined"
+                    self.logger.error(msg)
+                    if self.raise_error:
+                        raise RuntimeError(msg)
+                k, v = list(prop.annotations.items())[0]
+                prop.value_set.edp_terms[k] = v
+                self.model.add_prop(edp_node, prop)
+                edp_node.props[prop.handle] = prop
                 
 
         if defns_for:
@@ -738,6 +761,12 @@ class MDFReader:
                         )
                 nd.composite_key_props = key_props
 
+    def add_edp_definitions_accessor(self):
+        if self.model.nodes.get("_edp"):
+            self.model.edp_definitions = self.model.nodes["_edp"].props
+            for pr in self.model.edp_definitions.values():
+                pr.edp_term = list(pr.concept.terms.values())[0]
+        
 def convert_github_url(url: str) -> str:
     """Convert a GitHub blob URL to a raw URL."""
     parsed_url = urlparse(url)
