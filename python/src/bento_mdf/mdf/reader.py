@@ -466,9 +466,16 @@ class MDFReader:
                 prop.value_set.url is not None or
                 len(prop.value_set.edp_terms) > 0
             ):  # enum as reference
+                is_edp_reference = len(prop.value_set.edp_terms) > 0
+
                 if self.ignore_enum_by_reference:
                     self.logger.info(
                         "Ignoring enums by reference in property '%s'",
+                        prop.handle,
+                    )
+                elif is_edp_reference:
+                    self.logger.info(
+                        "Preserving EDP enum reference in property '%s' without resolving terms",
                         prop.handle,
                     )
                 else:

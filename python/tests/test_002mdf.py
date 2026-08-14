@@ -1,10 +1,8 @@
 """Tests for bento_mdf.mdf."""
 
-import json
 from pathlib import Path
 
 import pytest
-import responses
 from bento_mdf.mdf import MDF, convert_github_url
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
@@ -307,39 +305,19 @@ class TestEDPFeatures:
 
     def test_object_creation_for_edp(self) -> None:
         """
-        Test that property, value_set, terms created correctly for CDE/EDP
-        (both enum - term specification, reading an EDP definition)
+        Test that model properties preserve EDP enum references without resolving
+        EDP terms during MDF parsing.
         """
-        if self._sts_is_up():
-            m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", raise_error=True)
-        else:
-            with open(TDIR / "samples" / "edp-terms-response.json") as f:
-                sex_at_birth_terms = json.load(f)
-            with open(TDIR / "samples" / "edp-race-terms-response.json") as f:
-                race_terms = json.load(f)
-            with responses.RequestsMock() as rsps:
-                rsps.add_passthru("https://")
-                rsps.add(
-                    responses.GET,
-                    "http://localhost:8000/v2/edp/caDSR/7572817/2.0/terms",
-                    json=sex_at_birth_terms,
-                    status=200,
-                )
-                rsps.add(
-                    responses.GET,
-                    "http://localhost:8000/v2/edp/caDSR/2192199/1.00/terms",
-                    json=race_terms,
-                    status=200,
-                )
+        m = MDF(
+            TDIR / "samples" / "test-model-edp-enum.yml",
+            handle="test",
+            raise_error=True,
+        )
 
-                m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test",
-                        raise_error=True)
-
-        pr = m.model.nodes['participant'].props['sex_at_birth']
+        pr = m.model.nodes["participant"].props["sex_at_birth"]
         assert pr.value_domain == "value_set"
         assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
-        term_values = set(x.value for x in pr.terms.values())
-        assert {"Female", "Male", "Intersex", "None of these describe me"} <= term_values
+        assert pr.terms == {}
 
     def test_parse_edp_mdf(self) -> None:
         """Test parsing of EDP props and terms yaml."""
