@@ -311,8 +311,9 @@ class TestEDPFeatures:
         (both enum - term specification, reading an EDP definition)
         """
         if self._sts_is_up():
-            m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", raise_error=True)
-        else:
+            m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", resolve_edps=True,
+                    raise_error=True)
+        if not self._sts_is_up():
             with open(TDIR / "samples" / "edp-terms-response.json") as f:
                 sex_at_birth_terms = json.load(f)
             with open(TDIR / "samples" / "edp-race-terms-response.json") as f:
@@ -331,15 +332,25 @@ class TestEDPFeatures:
                     json=race_terms,
                     status=200,
                 )
-
-                m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test",
-                        raise_error=True)
+                m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", resolve_edps=True,
+                raise_error=True)
 
         pr = m.model.nodes['participant'].props['sex_at_birth']
         assert pr.value_domain == "value_set"
         assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
         term_values = set(x.value for x in pr.terms.values())
         assert {"Female", "Male", "Intersex", "None of these describe me"} <= term_values
+
+        # now test MDF read with resolve_edps=False - should simply succeed
+        m = MDF(TDIR / "samples" / "test-model-edp-enum.yml", handle="test", resolve_edps=False,
+                raise_error=True)
+        # EDP metadata should be present
+        pr = m.model.nodes['participant'].props['sex_at_birth']
+        assert pr.value_domain == "value_set"
+        assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
+        # but no term list
+        assert len(pr.terms) == 0
+        
 
     def test_parse_edp_mdf(self) -> None:
         """Test parsing of EDP props and terms yaml."""

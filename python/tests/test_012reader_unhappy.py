@@ -214,7 +214,7 @@ class TestEnumReference:
         assert any("No enum reference" in r.message for r in caplog.records)
 
     def test_load_enum_reference_path_not_exists(self, caplog):
-        m = MDF(handle="test", ignore_enum_by_reference=True)
+        m = MDF(handle="test", ignore_enum_by_reference=False)
         m.files = [TEST_MODEL_FILE]
         m.load_yaml()
         m.create_model()
@@ -235,7 +235,7 @@ class TestLoadEnumByTermFromSts:
     """Tests for STS API paths (lines 551-576)."""
 
     def test_sts_term_missing_origin_fields(self, caplog):
-        m = MDF(handle="test", ignore_enum_by_reference=True)
+        m = MDF(handle="test", ignore_enum_by_reference=True, resolve_edps=True)
         m.files = [TEST_MODEL_FILE]
         m.load_yaml()
         m.create_model()
@@ -256,7 +256,7 @@ class TestLoadEnumByTermFromSts:
         assert any("Cannot load enum from STS" in r.message for r in caplog.records)
 
     def test_sts_term_missing_origin_raises(self):
-        m = MDF(handle="test", raise_error=True, ignore_enum_by_reference=True)
+        m = MDF(handle="test", raise_error=True, ignore_enum_by_reference=True, resolve_edps=True)
         m.files = [TEST_MODEL_FILE]
         m.load_yaml()
         m.create_model()
@@ -275,7 +275,7 @@ class TestLoadEnumByTermFromSts:
             m.load_enum_reference(prop)
 
     def test_sts_api_request_failure(self, caplog):
-        m = MDF(handle="test", ignore_enum_by_reference=True)
+        m = MDF(handle="test", ignore_enum_by_reference=True, resolve_edps=True)
         m.files = [TEST_MODEL_FILE]
         m.load_yaml()
         m.create_model()
