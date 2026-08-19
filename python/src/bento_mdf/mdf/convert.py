@@ -131,6 +131,11 @@ def process_reln(init: dict, spec: dict, edge: Edge) -> None:
 
 def process_term(init: dict, spec: dict, term: Term) -> None:
     """Additional processing for Term entities."""
+    # distinguish explicit null from a missing Value key
+    if "Value" in spec and term.value is None:
+        raise ValueError(
+            f"Term Value cannot be null. MDF term specification: {spec!r}"
+        )
     if not term.handle:
         term.handle = to_snake_case(term.value)
     if spec.get("definition"):
