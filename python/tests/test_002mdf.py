@@ -350,6 +350,35 @@ class TestEDPFeatures:
         assert list(pr.value_set.edp_terms.values())[0].origin_id == "7572817"
         # but no term list
         assert len(pr.terms) == 0
+
+        # Now test combination - ignore_enum_by_reference = True and
+        # resolve_edps = True
+        if self._sts_is_up():
+            m = MDF(TDIR / "samples" / "test-model-edp-enum-plus-yaml-enum.yml",
+                    handle="test",
+                    ignore_enum_by_reference=True,
+                    resolve_edps=True, raise_error=True)
+        if not self._sts_is_up():
+            with open(TDIR / "samples" / "edp-race-terms-response.json") as f:
+                race_terms = json.load(f)
+            with responses.RequestsMock() as rsps:
+                rsps.add_passthru("https://")
+                rsps.add(
+                    responses.GET,
+                    "http://localhost:8000/v2/edp/caDSR/7572817/2.0/terms",
+                    json=sex_at_birth_terms,
+                    status=200,
+                )
+                m = MDF(TDIR / "samples" / "test-model-edp-enum-plus-yaml-enum.yml",
+                    handle="test",
+                    ignore_enum_by_reference=True,
+                    resolve_edps=True, raise_error=True)
+        pr = m.model.nodes['participant'].props['race']
+        assert pr.value_domain == "list"
+        
+        
+        
+        
         
 
     def test_parse_edp_mdf(self) -> None:
@@ -368,7 +397,6 @@ class TestEDPFeatures:
         assert term.origin_definition == "A specimen that is derived from some venous blood"
         assert m.model.edp_definitions == m.model.nodes["_edp"].props
         assert m.model.edp_definitions["obib_terms_valueset"]
-        
 
 
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)

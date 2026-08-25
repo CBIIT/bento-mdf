@@ -470,13 +470,13 @@ class MDFReader:
                 prop.value_set.url is not None or
                 len(prop.value_set.edp_terms) > 0
             ):  # enum as reference
-                if self.ignore_enum_by_reference:
+                if not self.ignore_enum_by_reference or self.resolve_edps:
+                    self.merge_enum_reference(prop)
+                else:
                     self.logger.info(
                         "Ignoring enums by reference in property '%s'",
                         prop.handle,
                     )
-                else:
-                    self.merge_enum_reference(prop)
             if prop.value_set and prop.value_set._commit == "dummy":
                 terms = []
                 # merge terms references in enums into terms defined

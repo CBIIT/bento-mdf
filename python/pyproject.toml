@@ -1,11 +1,12 @@
 [project]
 name = "bento-mdf"
-version = "0.13.3"
+version = "0.13.4"
 description = "Python driver/validator for Bento Model Description Format"
 authors = [
   { name = "Mark A. Jensen", email = "mark.jensen@nih.gov" },
   { name = "Nelson W. Moore", email = "nelson.moore@essential-soft.com"},
-  { name = "Qiong Liu", email = "qiong.liu@nih.gov" }
+  { name = "Qiong Liu", email = "qiong.liu@nih.gov" },
+  { name = "Tazeen Shaukat", email = "tazeen.shaukat@essential-soft.com"}
 ]
 requires-python = ">=3.10"
 readme = "README.md"
