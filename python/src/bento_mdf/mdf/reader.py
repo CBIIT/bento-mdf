@@ -52,6 +52,7 @@ class MDFReader:
         raise_error: bool = False,
         verify: bool = True,
         timeout: int = 10,
+        resolve_edps: bool = False,
         ignore_enum_by_reference: bool = False,
         logger: logging.Logger | None = None,
     ) -> None:
@@ -63,6 +64,8 @@ class MDFReader:
         :param str handle: Handle (name) for the resulting Model
         :param :class:`Model` model: Model to convert to MDF
         :param boolean raise_error: raise on error if True
+        :param boolean resolve_edps: pull PV lists from STS if True (default False)
+        :param boolean ignore_enum_by_reference: do not resolve PV lists from external files if True (default False)
         :param :class:`logging.Logger` logger: Python logger (suitable default)
         :attribute model: the :class:`bento_meta.model.Model` created
         """
@@ -75,6 +78,7 @@ class MDFReader:
         self.mdf_schema = mdf_schema
         self._model = model
         self._commit = _commit
+        self.resolve_edps = resolve_edps
         self.ignore_enum_by_reference = ignore_enum_by_reference
         self._annotations = {}
         self._terms = {}
@@ -466,13 +470,13 @@ class MDFReader:
                 prop.value_set.url is not None or
                 len(prop.value_set.edp_terms) > 0
             ):  # enum as reference
-                if self.ignore_enum_by_reference:
+                if not self.ignore_enum_by_reference or self.resolve_edps:
+                    self.merge_enum_reference(prop)
+                else:
                     self.logger.info(
                         "Ignoring enums by reference in property '%s'",
                         prop.handle,
                     )
-                else:
-                    self.merge_enum_reference(prop)
             if prop.value_set and prop.value_set._commit == "dummy":
                 terms = []
                 # merge terms references in enums into terms defined
@@ -508,19 +512,26 @@ class MDFReader:
             self.logger.error("No enum reference in property '%s'", prop.handle)
             return
         terms = self.load_enum_reference(prop)
-        if not terms:
+        if terms is None:
+            # ignored due to ignore_enum_by_reference or resolve_edps setting
+            # no error
+            return
+        elif not terms:
+            # error; resolution attempted but failed
             self.logger.error(f"Unable to resolve enum reference in property '{prop.handle}'")
             return
-        self.add_terms_to_model_prop(prop, terms)
+        else:
+            self.add_terms_to_model_prop(prop, terms)
 
     def load_enum_reference(
         self,
         prop: Property,
-    ) -> list[Term]:
+    ) -> list[Term] | None:
         """
         Load enum from a reference (path or url, yaml file or list of strings).
         Return a list of Term objects.
-         """
+        Respects `ignore_enum_by_reference` and `resolve_edps` attributes
+        """
 
         def process_yaml_for_enum(fh: TextIO, prop: Property) -> list[Term]:
             v = MDFValidator(None, fh)
@@ -598,6 +609,7 @@ class MDFReader:
                     raise(e)
                 return []
 
+        # load_enum_reference continues...
         enum_ref = (prop.value_set.path or
                     prop.value_set.url or
                     list(prop.value_set.edp_terms.values())[0])
@@ -607,6 +619,8 @@ class MDFReader:
             return []
 
         if isinstance(enum_ref, str):
+            if self.ignore_enum_by_reference:
+                return None
             # process MDF yaml
             fh = None
             if re.match("^/", enum_ref):  # looks like a path
@@ -622,6 +636,8 @@ class MDFReader:
                 fh = self.load_yaml_from_url(enum_ref)
                 return process_yaml_for_enum(fh, prop)
         elif isinstance(enum_ref, Term):
+            if not self.resolve_edps:
+                return None
             # edp term
             # resolve term to value set here with MDB #
             return load_enum_by_term_from_sts(enum_ref)
