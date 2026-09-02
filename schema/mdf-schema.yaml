@@ -226,6 +226,8 @@ defs:
             $ref: "#/defs/enumType"
           -
             $ref: "#/defs/numberWithUnits"
+          -
+            $ref: "#/defs/regex"
       Enum:
         $ref: "#/defs/enumType"
       Tags:
