@@ -453,6 +453,7 @@ def test_multiple_properties_shared_enum_ref() -> None:
 
     expected_terms = [
         "Abdomen",
+        "ABDomen",
         "Bone",
         "Brain",
         "Breast",
@@ -476,8 +477,9 @@ def test_multiple_properties_shared_enum_ref() -> None:
         assert term in submitted_anatomic_site_terms, (
             f"Missing term '{term}' in submitted_anatomic_site"
         )
-    assert ("brain", "caDSR", "12345", "1.0") in m.model.terms
-    assert ("lung", "caDSR", "54321", "1.0") in m.model.terms
+    assert ("Brain", "caDSR", "12345", "1.0") in m.model.terms
+    assert ("Lung", "caDSR", "54321", "1.0") in m.model.terms
+
     assert len(anatomic_site_terms) == len(submitted_anatomic_site_terms)
 
 

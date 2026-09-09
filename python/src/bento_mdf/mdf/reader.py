@@ -574,7 +574,7 @@ class MDFReader:
                     continue
                 spec["Origin"] = prop.model
             return [
-                spec_to_entity(None, spec, {"_commit": "dummy"}, Term)
+                spec_to_entity(spec["Value"], spec, {"_commit": "dummy"}, Term)
                 for spec in specs.values()
             ]
 
