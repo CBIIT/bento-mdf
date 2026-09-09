@@ -529,6 +529,21 @@ def test_term_collision_bug_fix() -> None:
     assert m.model.terms[instrument_key] is instrument_term
     assert design_desc_term is not instrument_term
 
+def test_distinct_terms_with_same_normalized_value_are_present() -> None:
+    """
+    Test that terms with distinct values (e.g. 'Pa' and 'pa') with
+    same normalized values (both 'pa') are correctly parsed and stored
+    """
+    m = MDF(TDIR / "samples" / "test-model-term-value-normalized-not-unique.yml",
+            handle="test_versions", ignore_enum_by_reference=True)
+    assert m.model.nodes['sample'].props['pressure']
+    assert len(m.model.nodes['sample'].props['pressure'].terms) == 4
+    cp = m.model.nodes['pressures'].props['pascal'].concept
+    cP = m.model.nodes['pressures'].props['PAscal'].concept
+    assert list(cp.terms.values())[0] != list(cP.terms.values())[0]
+
+
+    
 
 def test_terms_with_different_versions_are_distinct() -> None:
     """

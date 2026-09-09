@@ -711,7 +711,7 @@ class MDFReader:
             term = spec_to_entity(None, spec, {"_commit": self._commit}, Term)
             # merge or record term
             term_key = (
-                term.handle,
+                term.value,
                 term.origin_name,
                 term.origin_id,
                 term.origin_version,
