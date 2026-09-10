@@ -418,30 +418,30 @@ def test_load_separate_enums_yaml_from_file_path() -> None:
     """Test loading model where enum list in separate yaml file referenced by path."""
     m = MDF(TEST_SEP_ENUM_MODEL_FILE_PATH, handle="CCDI")
     # sex_at_birth
-    assert "female" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("male", "caDSR", "2567171", "1") in m.model.terms
-    assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("none_of_these_describe_me", "CCDI", None, None) in m.model.terms
+    assert "Female" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("Male", "caDSR", "2567171", "1") in m.model.terms
+    assert "Intersex" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("None of These Describe Me", "CCDI", None, None) in m.model.terms
     # race
-    assert "asian" in list(m.model.props[("participant", "race")].terms)
-    assert ("white", "caDSR", "2572236", "1") in m.model.terms
-    assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
-    assert ("middle_eastern_or_north_african", "CCDI", None, None) in m.model.terms
+    assert "Asian" in list(m.model.props[("participant", "race")].terms)
+    assert ("White", "caDSR", "2572236", "1") in m.model.terms
+    assert "Hispanic or Latino" in m.model.props[("participant", "race")].terms
+    assert ("Middle Eastern or North African", "CCDI", None, None) in m.model.terms
 
 
 def test_load_separate_enums_yaml_from_url() -> None:
     """Test loading model where enum list in separate yaml file referenced by url."""
     m = MDF(TEST_SEP_ENUM_MODEL_FILE_URL, handle="CCDI")
     # sex_at_birth
-    assert "female" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("male", "caDSR", "2567171", "1") in m.model.terms
-    assert "intersex" in m.model.props[("participant", "sex_at_birth")].terms
-    assert ("none_of_these_describe_me", "CCDI", None, None) in m.model.terms
+    assert "Female" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("Male", "caDSR", "2567171", "1") in m.model.terms
+    assert "Intersex" in m.model.props[("participant", "sex_at_birth")].terms
+    assert ("None of These Describe Me", "CCDI", None, None) in m.model.terms
     # race
-    assert "asian" in m.model.props[("participant", "race")].terms
-    assert ("white", "caDSR", "2572236", "1") in m.model.terms
-    assert "hispanic_or_latino" in m.model.props[("participant", "race")].terms
-    assert ("middle_eastern_or_north_african", "CCDI", None, None) in m.model.terms
+    assert "Asian" in m.model.props[("participant", "race")].terms
+    assert ("White", "caDSR", "2572236", "1") in m.model.terms
+    assert "Hispanic or Latino" in m.model.props[("participant", "race")].terms
+    assert ("Middle Eastern or North African", "CCDI", None, None) in m.model.terms
 
 
 def test_multiple_properties_shared_enum_ref() -> None:
