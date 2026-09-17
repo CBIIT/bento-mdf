@@ -348,13 +348,15 @@ def entity_to_spec(ent: Entity, spec: dict = None) -> dict:
     return spec
 
 
-def domain_spec_to_typespec(prop: Property) -> str | dict:
+def domain_spec_to_typespec(prop: Property) -> str | dict | list:
     ret = {}
     if prop.value_domain == "value_set":
         if prop.value_set.url:
             ret = [prop.value_set.url]
         elif prop.value_set.path:
             ret = [prop.value_set.path]
+        elif len(prop.value_set.edp_terms) > 0:
+            ret = [entity_to_spec(x) for x in prop.value_set.edp_terms.values()]
         else:
             ret = [x for x in prop.terms]
     elif prop.value_domain == "list":
@@ -364,6 +366,8 @@ def domain_spec_to_typespec(prop: Property) -> str | dict:
                 ret["Enum"] = [prop.value_set.url]
             elif prop.value_set.path:
                 ret["Enum"] = [prop.value_set.path]
+            elif len(prop.value_set.edp_terms) > 0:
+                ret["Enum"] = [entity_to_spec(x) for x in prop.value_set.edp_terms.values()]
             else:
                 ret["Enum"] = [x for x in prop.terms]
         elif prop.units:

@@ -14,17 +14,22 @@ from bento_mdf.diff import (
 from bento_meta.model import Model
 from bento_meta.objects import Concept, Edge, Node, Property, Tag, Term, ValueSet
 
+from pdb import set_trace
 # constants
 TEST_HANDLE = "test"
 NODES = "nodes"
 EDGES = "edges"
 PROPS = "props"
 TERMS = "terms"
+VALUESETS = "value_sets"
+CONCEPTS = "concepts"
 
 NODE_ATTS = get_ent_atts(ent_type=NODES, diff=Diff())
 EDGE_ATTS = get_ent_atts(ent_type=EDGES, diff=Diff())
 PROP_ATTS = get_ent_atts(ent_type=PROPS, diff=Diff())
 TERM_ATTS = get_ent_atts(ent_type=TERMS, diff=Diff())
+VALUESET_ATTS = get_ent_atts(ent_type=VALUESETS, diff=Diff())
+CONCEPT_ATTS = get_ent_atts(ent_type=CONCEPTS, diff=Diff())
 
 NODE_HANDLE_1 = "subject"
 NODE_HANDLE_2 = "diagnosis"
@@ -39,7 +44,20 @@ TERM_KEY_1 = (TERM_VALUE_1, TERM_ORIGIN_1, None, None)
 TERM_VALUE_2 = "Kidney"
 TERM_ORIGIN_2 = "NCIm"
 TERM_KEY_2 = (TERM_VALUE_2, TERM_ORIGIN_2, None, None)
-
+VS_HANDLE_1 = "value_set_1"
+VS_HANDLE_2 = "value_set_2"
+EDP_HANDLE_1 = "race_category_text"
+EDP_HANDLE_2 = "person_sex_at_birth_category"
+EDP1 = {"handle":"race_category_text",
+        "value": "Race Category Text",
+        "origin_name": "caDSR",
+        "origin_id": "2192199",
+        "origin_version": "1.00"}
+EDP2 = {"handle":"person_sex_at_birth_category",
+        "value": "Person Sex at Birth Category",
+        "origin_name": "caDSR",
+        "origin_id": "7572817",
+        "origin_version": "2.0"}
 
 class TestDiffEntities:
     """Unit tests for added/removed entities"""
@@ -834,12 +852,17 @@ class TestDiffCollectionAtts:
     EDGE_COLL_ATTS = get_collection_atts(ent_atts=EDGE_ATTS)
     PROP_COLL_ATTS = get_collection_atts(ent_atts=PROP_ATTS)
     TERM_COLL_ATTS = get_collection_atts(ent_atts=TERM_ATTS)
+    VALUESET_COLL_ATTS = get_collection_atts(ent_atts=VALUESET_ATTS)
     COLL_ATT_P = "props"
     COLL_ATT_P1 = Property({"handle": PROP_HANDLE_1})
     COLL_ATT_P2 = Property({"handle": PROP_HANDLE_2})
     COLL_ATT_T = "tags"
     COLL_ATT_T1 = Tag({"key": "class", "value": "primary"})
     COLL_ATT_T2 = Tag({"key": "class", "value": "secondary"})
+    COLL_ATT_EDP = "edp_terms"
+    COLL_ATT_EDP1 = Term(EDP1)
+    COLL_ATT_EDP2 = Term(EDP2)
+    
 
     def test_add_prop_to_node(self):
         diff = Diff()
@@ -1257,3 +1280,109 @@ class TestDiffCollectionAtts:
             },
         }
         assert actual == expected
+
+    def test_add_edp_to_value_set(self):
+        diff = Diff()
+        a_ent = ValueSet({"handle": VS_HANDLE_1})
+        b_ent = ValueSet(
+            {
+                "handle": VS_HANDLE_1,
+                self.COLL_ATT_EDP: {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+            },
+        )
+ 
+        diff_collection_atts(
+            a_ent=a_ent,
+            b_ent=b_ent,
+            coll_atts=self.VALUESET_COLL_ATTS,
+            ent_type=VALUESETS,
+            entk=VS_HANDLE_1,
+            diff=diff,
+        )
+        actual = diff.result
+        expected = {
+            VALUESETS: {
+                "changed": {
+                    VS_HANDLE_1: {
+                        self.COLL_ATT_EDP: {
+                            "added": {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+                            "removed": None,
+                        },
+                    },
+                },
+            },
+        }
+        assert actual == expected
+
+    def test_remove_edp_from_value_set(self):
+        diff = Diff()
+        a_ent = ValueSet(
+            {
+                "handle": VS_HANDLE_1,
+                self.COLL_ATT_EDP: {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+            },
+        )
+        b_ent = ValueSet({"handle": VS_HANDLE_1})
+
+        diff_collection_atts(
+            a_ent=a_ent,
+            b_ent=b_ent,
+            coll_atts=self.VALUESET_COLL_ATTS,
+            ent_type=VALUESETS,
+            entk=VS_HANDLE_1,
+            diff=diff,
+        )
+        actual = diff.result
+        expected = {
+            VALUESETS: {
+                "changed": {
+                    VS_HANDLE_1: {
+                        self.COLL_ATT_EDP: {
+                            "added": None,
+                            "removed": {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+                        },
+                    },
+                },
+            },
+        }
+        assert actual == expected
+
+    def test_change_edp_of_value_set(self):
+        diff = Diff()
+        a_ent = ValueSet(
+            {
+                "handle": VS_HANDLE_1,
+                self.COLL_ATT_EDP: {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+            },
+        )
+        b_ent = ValueSet(
+            {
+                "handle": VS_HANDLE_1,
+                self.COLL_ATT_EDP: {EDP_HANDLE_2: self.COLL_ATT_EDP2},
+            },
+        )
+
+        diff_collection_atts(
+            a_ent=a_ent,
+            b_ent=b_ent,
+            coll_atts=self.VALUESET_COLL_ATTS,
+            ent_type=VALUESETS,
+            entk=VS_HANDLE_1,
+            diff=diff,
+        )
+        actual = diff.result
+        expected = {
+            VALUESETS: {
+                "changed": {
+                    VS_HANDLE_1: {
+                        self.COLL_ATT_EDP: {
+                            "added": {EDP_HANDLE_2: self.COLL_ATT_EDP2},
+                            "removed": {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+                        },
+                    },
+                },
+            },
+        }
+        assert actual == expected
+
+        

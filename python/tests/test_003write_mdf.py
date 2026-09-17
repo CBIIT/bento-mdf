@@ -317,3 +317,29 @@ def test_write_req_on_ends_uniform():
     # Individual Ends should NOT have Req (stripped as redundant)
     for end in of_sample["Ends"]:
         assert "Req" not in end
+
+def test_write_edp_enums():
+    """
+    Test that model properties with PVs defined by EDPS are written out in Enum: [<EDP>] format
+    """
+    edp_yml = yaml.load(open(TDIR / "samples" / "test-model-edp-enum.yml"), Loader=yloader)
+    m = MDFReader(TDIR / "samples" / "test-model-edp-enum.yml", handle="edpTest")
+    wr_m = MDFWriter(model=m.model)
+    with NamedTemporaryFile(mode="w+", suffix=".yaml", delete=False) as mdf_w:
+        wr_m.write_mdf(file=mdf_w)
+        mdf_w.close()
+        assert m.model.nodes['participant'].props['sex_at_birth'].value_set.edp_terms['person_sex_at_birth_category']
+        # check that generated model is equivalent to input model
+        rd_wr_m = MDFReader(mdf_w.name)
+        # roundtrip check
+        result = diff_models(rd_wr_m.model, m.model, include_summary=True)
+        assert result["summary"] is None
+
+        # positive control on diff function...
+        del rd_wr_m.model.nodes['participant'].props['sex_at_birth'].value_set.edp_terms['person_sex_at_birth_category']
+        result = diff_models(rd_wr_m.model, m.model, include_summary=True)
+        assert result["summary"] is not None
+
+
+
+
