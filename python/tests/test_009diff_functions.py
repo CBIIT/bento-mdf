@@ -1,5 +1,6 @@
 """Tests for bento_mdf.diff."""
 
+import pytest
 from bento_mdf.diff import (
     Diff,
     diff_collection_atts,
@@ -58,6 +59,12 @@ EDP2 = {"handle":"person_sex_at_birth_category",
         "origin_name": "caDSR",
         "origin_id": "7572817",
         "origin_version": "2.0"}
+
+EDP1_1 = {"handle":"race_category_text",
+          "value": "Race Category Text",
+          "origin_name": "caDSR",
+          "origin_id": "2192199",
+          "origin_version": "2"}
 
 class TestDiffEntities:
     """Unit tests for added/removed entities"""
@@ -862,6 +869,7 @@ class TestDiffCollectionAtts:
     COLL_ATT_EDP = "edp_terms"
     COLL_ATT_EDP1 = Term(EDP1)
     COLL_ATT_EDP2 = Term(EDP2)
+    COLL_ATT_EDP1_1 = Term(EDP1_1)
     
 
     def test_add_prop_to_node(self):
@@ -1355,6 +1363,12 @@ class TestDiffCollectionAtts:
                 self.COLL_ATT_EDP: {EDP_HANDLE_1: self.COLL_ATT_EDP1},
             },
         )
+        a1_ent = ValueSet(
+            {
+                "handle": VS_HANDLE_1,
+                self.COLL_ATT_EDP: {EDP_HANDLE_1: self.COLL_ATT_EDP1_1},
+            },
+        )
         b_ent = ValueSet(
             {
                 "handle": VS_HANDLE_1,
@@ -1385,4 +1399,29 @@ class TestDiffCollectionAtts:
         }
         assert actual == expected
 
-        
+    @pytest.mark.skip()
+    def test_change_edp_attributes_of_value_set(self):
+        """ Test that a change of attributes, but not the name, of an edp term is detected and reported."""
+        diff = Diff()
+        diff_collection_atts(
+            a_ent=a_ent,
+            b_ent=a1_ent,
+            coll_atts=self.VALUESET_COLL_ATTS,
+            ent_type=VALUESETS,
+            entk=VS_HANDLE_1,
+            diff=diff,
+        )
+        actual = diff.result
+        expected = {
+            VALUESETS: {
+                "changed": {
+                    VS_HANDLE_1: {
+                        self.COLL_ATT_EDP: {
+                            "added": {EDP_HANDLE_2: self.COLL_ATT_EDP2},
+                            "removed": {EDP_HANDLE_1: self.COLL_ATT_EDP1},
+                        },
+                    },
+                },
+            },
+        }
+        assert actual==expected

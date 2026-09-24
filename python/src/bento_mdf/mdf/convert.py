@@ -13,6 +13,7 @@ from urllib.parse import unquote
 
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from bento_meta.tf_objects import Transform, TfStep
+from pdb import set_trace
 
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
@@ -137,7 +138,7 @@ def process_term(init: dict, spec: dict, term: Term) -> None:
             f"Term Value cannot be null. MDF term specification: {spec!r}"
         )
     if not term.handle:
-        term.handle = to_snake_case(term.value)
+        term.handle = to_snake_case(term.value or term.origin_id)
     if spec.get("definition"):
         term.definition = unquote(term, spec["definition"])
 

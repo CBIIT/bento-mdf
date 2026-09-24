@@ -85,7 +85,7 @@ class Diff:
     ) -> bool:
         """See if the group of terms in each value set is different."""
         if set(vs_a.terms) == set(vs_b.terms):
-            if isinstance(vs_a, Concept) and isinstance(vs_a, Concept):
+            if isinstance(vs_a, Concept) and isinstance(vs_b, Concept):
                 return False
             elif isinstance(vs_a, ValueSet) and isinstance(vs_b, ValueSet):
                 if set(vs_a.edp_terms) == set(vs_b.edp_terms):

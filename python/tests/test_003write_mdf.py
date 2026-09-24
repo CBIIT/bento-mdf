@@ -322,7 +322,6 @@ def test_write_edp_enums():
     """
     Test that model properties with PVs defined by EDPS are written out in Enum: [<EDP>] format
     """
-    edp_yml = yaml.load(open(TDIR / "samples" / "test-model-edp-enum.yml"), Loader=yloader)
     m = MDFReader(TDIR / "samples" / "test-model-edp-enum.yml", handle="edpTest")
     wr_m = MDFWriter(model=m.model)
     with NamedTemporaryFile(mode="w+", suffix=".yaml", delete=False) as mdf_w:
