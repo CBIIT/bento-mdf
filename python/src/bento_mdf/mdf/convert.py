@@ -13,6 +13,7 @@ from urllib.parse import unquote
 
 from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
 from bento_meta.tf_objects import Transform, TfStep
+from pdb import set_trace
 
 if TYPE_CHECKING:
     from bento_meta.entity import Entity
@@ -137,7 +138,7 @@ def process_term(init: dict, spec: dict, term: Term) -> None:
             f"Term Value cannot be null. MDF term specification: {spec!r}"
         )
     if not term.handle:
-        term.handle = to_snake_case(term.value)
+        term.handle = to_snake_case(term.value or term.origin_id)
     if spec.get("definition"):
         term.definition = unquote(term, spec["definition"])
 
@@ -348,13 +349,15 @@ def entity_to_spec(ent: Entity, spec: dict = None) -> dict:
     return spec
 
 
-def domain_spec_to_typespec(prop: Property) -> str | dict:
+def domain_spec_to_typespec(prop: Property) -> str | dict | list:
     ret = {}
     if prop.value_domain == "value_set":
         if prop.value_set.url:
             ret = [prop.value_set.url]
         elif prop.value_set.path:
             ret = [prop.value_set.path]
+        elif len(prop.value_set.edp_terms) > 0:
+            ret = [entity_to_spec(x) for x in prop.value_set.edp_terms.values()]
         else:
             ret = [x for x in prop.terms]
     elif prop.value_domain == "list":
@@ -364,6 +367,8 @@ def domain_spec_to_typespec(prop: Property) -> str | dict:
                 ret["Enum"] = [prop.value_set.url]
             elif prop.value_set.path:
                 ret["Enum"] = [prop.value_set.path]
+            elif len(prop.value_set.edp_terms) > 0:
+                ret["Enum"] = [entity_to_spec(x) for x in prop.value_set.edp_terms.values()]
             else:
                 ret["Enum"] = [x for x in prop.terms]
         elif prop.units:

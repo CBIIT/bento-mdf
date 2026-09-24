@@ -20,7 +20,12 @@ class Diff:
     def __init__(self) -> None:
         """Initialize the diff object. Sets hold tree of model as it is parsed."""
         self.sets = {"nodes": {}, "edges": {}, "props": {}, "terms": {}}
-        self.clss = {"nodes": Node, "edges": Edge, "props": Property, "terms": Term}
+        self.clss = {"nodes": Node,
+                     "edges": Edge,
+                     "props": Property,
+                     "terms": Term,
+                     "value_sets": ValueSet,
+                     "concepts": Concept}
         self.result = {}  # This will eventually hold the diff results
         self.annotations = {"nodes": {}, "edges": {}, "props": {}, "terms": {}}
 
@@ -80,8 +85,17 @@ class Diff:
     ) -> bool:
         """See if the group of terms in each value set is different."""
         if set(vs_a.terms) == set(vs_b.terms):
-            return False
-        return True
+            if isinstance(vs_a, Concept) and isinstance(vs_b, Concept):
+                return False
+            elif isinstance(vs_a, ValueSet) and isinstance(vs_b, ValueSet):
+                if set(vs_a.edp_terms) == set(vs_b.edp_terms):
+                    return False
+                else:
+                    return True
+            else:
+                return True
+        else:
+            return True
 
     def clean_no_diff(self) -> None:
         """Clean up the result dict by removing empty diffs."""
@@ -193,14 +207,14 @@ def diff_object_atts(
             }
         if not a_att and isinstance(b_att, (ValueSet, Concept)):
             a_att = Concept() if att == "concept" else ValueSet()
-            diff_collection_atts(a_att, b_att, ["terms"], ent_type, entk, diff)
+            diff_collection_atts(a_att, b_att, ["terms", "edp_terms"], ent_type, entk, diff)
         if not b_att and isinstance(a_att, (ValueSet, Concept)):
             b_att = Concept() if att == "concept" else ValueSet()
-            diff_collection_atts(a_att, b_att, ["terms"], ent_type, entk, diff)
+            diff_collection_atts(a_att, b_att, ["terms", "edp_terms"], ent_type, entk, diff)
         if type(a_att) is type(b_att) and isinstance(a_att, (ValueSet, Concept)):
             if not diff.valuesets_are_different(a_att, b_att):
                 continue
-            diff_collection_atts(a_att, b_att, ["terms"], ent_type, entk, diff)
+            diff_collection_atts(a_att, b_att, ["terms", "edp_terms"], ent_type, entk, diff)
         elif getattr(a_att, "handle", None):
             if a_att.handle == b_att.handle:
                 continue
@@ -222,8 +236,8 @@ def diff_collection_atts(
     """Check if the "collection" attributes (e.g. props, tags, terms) are the same."""
     logging.info("...collection")
     for att in coll_atts:
-        a_coll = getattr(a_ent, att)
-        b_coll = getattr(b_ent, att)
+        a_coll = getattr(a_ent, att, {})
+        b_coll = getattr(b_ent, att, {})
         if set(a_coll) == set(b_coll):
             # compare simple atts for coll atts that don't already (e.g. tags)
             if att == "tags":
@@ -236,6 +250,11 @@ def diff_collection_atts(
                 att = "value_set"
             elif isinstance(a_ent, Concept):
                 att = "concept"
+        if att == "edp_terms":
+            if isinstance(a_ent, ValueSet):
+                att = "edp_terms"
+            else:
+                continue
         diff.update_result(ent_type, entk, att, removed_coll, added_coll)
 
 
