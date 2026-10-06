@@ -1,6 +1,7 @@
 PropDefinitions:
   anatomic_site:
     - "Abdomen"
+    - "ABDomen"
     - "Bone"
     - "Brain"
     - "Breast"
