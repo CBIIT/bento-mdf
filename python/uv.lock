@@ -184,7 +184,7 @@ wheels = [
 
 [[package]]
 name = "bento-mdf"
-version = "0.13.3b1"
+version = "0.13.5"
 source = { editable = "." }
 dependencies = [
     { name = "annotated-types" },
@@ -223,7 +223,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "annotated-types", specifier = ">=0.7.0,<1.0.0" },
-    { name = "bento-meta", specifier = ">=0.3.2" },
+    { name = "bento-meta", specifier = ">=0.3.3" },
     { name = "certifi", specifier = ">=2025.4.26" },
     { name = "cryptography", specifier = ">=46.0.5" },
     { name = "delfick-project", specifier = "==0.7.9" },
@@ -253,7 +253,7 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "bento-meta"
-version = "0.3.2"
+version = "0.3.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -272,9 +272,9 @@ dependencies = [
     { name = "typing-extensions" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/96/e4/bf751ee813d7b8b948165ada1687e120ab647371fa4a153899580ca8d267/bento_meta-0.3.2.tar.gz", hash = "sha256:dda93f461e11c0f6761d761f846a93c5b7ccca03e24967367b348bf7b6086b61", size = 45374, upload-time = "2026-06-16T21:03:45.462Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8e/e7/e242b971844f7aa013338cb60c5c11eb5c4a59ae851b766447bd40f680de/bento_meta-0.3.3.tar.gz", hash = "sha256:436e16cf3e862b09b4cd98cafadd61a88a3ac9135868ac2b327113a16367029a", size = 46048, upload-time = "2026-10-08T17:25:43.829Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/99/a4/3f68cb8634be8935ef0e829ecb512d8dd6fd7703e972dfe971f565dee673/bento_meta-0.3.2-py3-none-any.whl", hash = "sha256:053a70d534bf07e0517877995470deab22d9fdc3e5f1850f9391e7fb83d74eb2", size = 52315, upload-time = "2026-06-16T21:03:44.393Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/8c/97d7706a08408a1f6c82e88c4e0d2ca58a4b3fe339af802b85c10effc630/bento_meta-0.3.3-py3-none-any.whl", hash = "sha256:c6f1500ba52c5c4edb39b223e4ecb8f825f6f6383cca04a88afa46873a7c3827", size = 52887, upload-time = "2026-10-08T17:25:42.712Z" },
 ]
 
 [[package]]
