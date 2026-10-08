@@ -23,7 +23,7 @@ try:
     settings = Settings()
 except ValidationError as e:
     if re.findall("STS_URL", str(e)):
-        logger.warn("STS_URL env not set: use .env or explicitly set; setting to 'http://localhost:8000/v2'")
+        logger.warning("STS_URL env not set: use .env or explicitly set; setting to 'http://localhost:8000/v2'")
         os.environ['STS_URL'] = 'http://localhost:8000/v2'
         settings = Settings()
     else:
