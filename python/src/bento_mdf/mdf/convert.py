@@ -308,6 +308,8 @@ def entity_to_spec(ent: Entity, spec: dict = None) -> dict:
             spec["Key"] = ent.is_key
         if ent.is_deprecated is not None:
             spec["Deprecated"] = ent.is_deprecated
+        if ent.is_extended is not None:
+            spec["Ext"] = ent.is_extended
         if ent.value_domain == "value_set":
             spec["Enum"] = domain_spec_to_typespec(ent)
         else:
