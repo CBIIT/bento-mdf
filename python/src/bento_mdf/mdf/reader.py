@@ -37,6 +37,7 @@ def make_nano() -> str:
         alphabet="abcdefghijkmnopqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ0123456789",
     )
 
+Edge.defaults['is_required'] = False
 
 class MDFReader:
     """MDF class for reading MDF files into a bento-meta Model."""
@@ -277,7 +278,7 @@ class MDFReader:
                         ends["Src"],
                         ends["Dst"],
                     )
-                if spec.get("Mul") not in (
+                elif spec.get("Mul") not in (
                     "one_to_one",
                     "one_to_many",
                     "many_to_one",
@@ -294,21 +295,30 @@ class MDFReader:
                 # if tags are set in the Ends entry, these will be attached
                 # to the Edge, _rather than_ tags set in the "edge key" or spec
                 # level
-                spec["Tags"] = ends.get("Tags") or spec.get("Tags")
+                ends["Tags"] = ends.get("Tags") or spec.get("Tags")
+                # if Mul is set in the Ends entry, it overrides the spec level
+                if spec.get("Mul") is None:
+                    spec["Mul"] = Edge.defaults["multiplicity"]
+                if ends.get("Mul") is None:
+                    ends["Mul"] = spec["Mul"]
+                    
                 # if Req is set in the Ends entry, it overrides the spec level
-                spec["Req"] = ends.get("Req") if ends.get("Req") is not None else spec.get("Req")
+                if spec.get("Req") is None:
+                    spec["Req"] = Edge.defaults["is_required"]
+                if ends.get("Req") is None:
+                    ends["Req"] = spec["Req"]
+                    
                 edge = self.model.add_edge(
                     spec_to_entity(
                         e,
-                        spec,
+                        {"Tags": ends["Tags"]},
                         {
                             "model": self.handle,
                             "_commit": self._commit,
                             "src": self.model.nodes[ends["Src"]],
                             "dst": self.model.nodes[ends["Dst"]],
-                            "multiplicity": ends.get("Mul")
-                            or spec.get("Mul")
-                            or Edge.default("multiplicity"),
+                            "multiplicity": ends["Mul"],
+                            "is_required": ends["Req"]
                         },
                         Edge,
                     ),

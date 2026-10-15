@@ -32,6 +32,22 @@ Relationships:
         Dst: sample
       - Src: diagnosis
         Dst: sample
+  of_self:
+    Props: ~
+    Ends:
+      - Src: file
+        Dst: file
+      - Src: sample
+        Dst: sample
+
+  from_case:
+    Ends:
+      - Src: case
+        Dst: diagnosis
+        Req: true
+      - Src: case
+        Dst: sample
+        
 PropDefinitions:
   case_id:
     Type: string

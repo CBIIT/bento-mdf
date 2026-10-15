@@ -684,8 +684,13 @@ def test_edge_req_from_ends_mixed() -> None:
     diag_case = m.model.edges[("of_case", "diagnosis", "case")]
     assert sample_case.is_required is True
     assert diag_case.is_required is False
-
-
+    # from_case: case->diagnosis has Req: true, case->sample Req: is not set
+    # (should default to False)
+    case_diag = m.model.edges[("from_case", "case", "diagnosis")]
+    case_samp = m.model.edges[("from_case", "case", "sample")]
+    assert case_diag.is_required is True
+    assert case_samp.is_required is False
+    
 def test_edge_req_from_ends_toplevel() -> None:
     """Test that uniform Edge-level Req values are applied to all edges."""
     m = MDF(TDIR / "samples" / "test-model-req-ends.yml",
@@ -695,6 +700,11 @@ def test_edge_req_from_ends_toplevel() -> None:
     diag_sample = m.model.edges[("of_sample", "diagnosis", "sample")]
     assert file_sample.is_required is True
     assert diag_sample.is_required is True
+    # of_self: Req: is not explicitly set anywhere
+    file_file = m.model.edges[("of_self", "file", "file")]
+    samp_samp  = m.model.edges[("of_self", "sample", "sample")]
+    assert file_file.is_required is False
+    assert samp_samp.is_required is False
 
 
 def test_edge_req_inherited_from_relationship_level() -> None:

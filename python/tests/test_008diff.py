@@ -218,6 +218,7 @@ class TestDiffs:
                     ("end_result", "diagnosis", "outcome"): {
                         "handle": "end_result",
                         "model": "test",
+                        "is_required": "False",
                         "multiplicity": "many_to_one",
                     },
                 },
@@ -277,6 +278,7 @@ class TestDiffs:
                     ("of_case", "diagnosis", "case"): {
                         "handle": "of_case",
                         "model": "test",
+                        "is_required": "False",
                         "multiplicity": "one_to_one",
                     },
                 },
@@ -613,6 +615,7 @@ class TestDiffs:
                     ("end_result", "diagnosis", "outcome"): {
                         "handle": "end_result",
                         "model": "test",
+                        "is_required": "False",
                         "multiplicity": "many_to_one",
                     },
                 },
