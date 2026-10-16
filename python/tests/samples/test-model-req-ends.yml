@@ -96,7 +96,16 @@ Relationships:
       - Src: generic_file
         Dst: sample
         Mul: one_to_many
-        
+  of_generic_file_4: # should warn for all three edges
+    Props: null
+    Ends:
+      - Src: generic_file
+        Dst: study
+      - Src: generic_file
+        Dst: case
+      - Src: generic_file
+        Dst: sample        
+
 PropDefinitions:
   case_id:
     Type: string

@@ -702,6 +702,7 @@ def test_edge_req_from_ends_toplevel(caplog) -> None:
         assert re.match(".*from_case.*case.*diagnosis.*",caplog.text,re.S)
         assert re.match(".*edge.*of_generic_file_1.*generic_file.*study.*",caplog.text,re.S)
         assert not re.match(".*of_generic_file_2.*",caplog.text,re.S)
+        assert len(re.findall("of_generic_file_4", caplog.text, re.S)) == 3
         
     # of_sample: both Ends have Req: true
     file_sample = m.model.edges[("of_sample", "file", "sample")]

@@ -306,10 +306,9 @@ class MDFReader:
                 # level
                 ends["Tags"] = ends.get("Tags") or spec.get("Tags")
                 # if Mul is set in the Ends entry, it overrides the spec level
-                if spec.get("Mul") is None:
-                    spec["Mul"] = Edge.defaults["multiplicity"]
+
                 if ends.get("Mul") is None:
-                    ends["Mul"] = spec["Mul"]
+                    ends["Mul"] = spec.get("Mul") or Edge.defaults["multiplicity"]
                     
                 # if Req is set in the Ends entry, it overrides the spec level
                 if spec.get("Req") is None:
