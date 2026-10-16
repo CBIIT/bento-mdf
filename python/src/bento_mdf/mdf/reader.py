@@ -271,19 +271,26 @@ class MDFReader:
                             ends["Dst"],
                         )
                         continue
-                if not spec.get("Mul"):
-                    self.logger.warning(
-                        "edge '%s' from '%s' to '%s' does not specify a multiplicity",
-                        e,
-                        ends["Src"],
-                        ends["Dst"],
-                    )
-                elif spec.get("Mul") not in (
-                    "one_to_one",
-                    "one_to_many",
-                    "many_to_one",
-                    "many_to_many",
-                ):
+                if spec.get("Mul") is None:
+                    if ends.get("Mul") is None:
+                        self.logger.warning(
+                            "edge '%s' from '%s' to '%s' does not specify a multiplicity",
+                            e,
+                            ends["Src"],
+                            ends["Dst"],
+                        )
+                    elif ends.get("Mul") not in ("one_to_one", "one_to_many", "many_to_one","many_to_many"):
+                        self.logger.warning(
+                            "edge '%s' from '%s' to '%s'"
+                            " has non-standard multiplicity '%s'",
+                            e,
+                            ends["Src"],
+                            ends["Dst"],
+                            spec.get("Mul"),
+                        )
+                    else:
+                        pass
+                elif spec.get("Mul") not in ("one_to_one", "one_to_many", "many_to_one","many_to_many"):
                     self.logger.warning(
                         "edge '%s' from '%s' to '%s'"
                         " has non-standard multiplicity '%s'",
@@ -292,6 +299,8 @@ class MDFReader:
                         ends["Dst"],
                         spec.get("Mul"),
                     )
+                else:
+                    pass
                 # if tags are set in the Ends entry, these will be attached
                 # to the Edge, _rather than_ tags set in the "edge key" or spec
                 # level

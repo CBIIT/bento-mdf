@@ -1,5 +1,8 @@
 Handle: test_req_ends
 Nodes:
+  study:
+    Props:
+      - study_name
   case:
     Props:
       - case_id
@@ -12,6 +15,10 @@ Nodes:
   file:
     Props:
       - file_name
+  generic_file:
+    Props:
+      - file_name
+      
 Relationships:
   of_case:
     Props: ~
@@ -47,6 +54,48 @@ Relationships:
         Req: true
       - Src: case
         Dst: sample
+
+  of_generic_file_1: #should warn
+    Props: null
+    #Mul: many_to_one <-- commented out
+    Ends:
+      - Src: generic_file
+        Dst: study
+        # Mul: many_to_one <-- commented out
+      - Src: generic_file
+        Dst: case
+        Mul: many_to_one
+      - Src: generic_file
+        Dst: sample
+        Mul: one_to_many
+
+  of_generic_file_2: # shouldn't warn
+    Props: null
+    #Mul: many_to_one <-- commented out
+    Ends:
+      - Src: generic_file
+        Dst: study
+        Mul: many_to_one
+      - Src: generic_file
+        Dst: case
+        Mul: many_to_one
+      - Src: generic_file
+        Dst: sample
+        Mul: one_to_many
+          
+  of_generic_file_3: # shouldn't warn
+    Props: null
+    Mul: many_to_one
+    Ends:
+      - Src: generic_file
+        Dst: study
+        Mul: many_to_one 
+      - Src: generic_file
+        Dst: case
+        Mul: many_to_one
+      - Src: generic_file
+        Dst: sample
+        Mul: one_to_many
         
 PropDefinitions:
   case_id:
@@ -57,3 +106,6 @@ PropDefinitions:
     Type: string
   file_name:
     Type: string
+  study_name:
+    Type: string
+    

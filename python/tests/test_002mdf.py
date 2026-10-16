@@ -1,6 +1,8 @@
 """Tests for bento_mdf.mdf."""
 
 import json
+import logging
+import re
 from pathlib import Path
 
 import pytest
@@ -691,10 +693,16 @@ def test_edge_req_from_ends_mixed() -> None:
     assert case_diag.is_required is True
     assert case_samp.is_required is False
     
-def test_edge_req_from_ends_toplevel() -> None:
+def test_edge_req_from_ends_toplevel(caplog) -> None:
     """Test that uniform Edge-level Req values are applied to all edges."""
-    m = MDF(TDIR / "samples" / "test-model-req-ends.yml",
-            handle="test_req_ends", ignore_enum_by_reference=True)
+    with caplog.at_level(logging.WARN):
+        m = MDF(TDIR / "samples" / "test-model-req-ends.yml",
+                handle="test_req_ends", ignore_enum_by_reference=True)
+        assert re.match(".*edge.*of_self.*file.*file.*",caplog.text,re.S)
+        assert re.match(".*from_case.*case.*diagnosis.*",caplog.text,re.S)
+        assert re.match(".*edge.*of_generic_file_1.*generic_file.*study.*",caplog.text,re.S)
+        assert not re.match(".*of_generic_file_2.*",caplog.text,re.S)
+        
     # of_sample: both Ends have Req: true
     file_sample = m.model.edges[("of_sample", "file", "sample")]
     diag_sample = m.model.edges[("of_sample", "diagnosis", "sample")]
