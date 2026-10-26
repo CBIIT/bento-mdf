@@ -41,6 +41,8 @@ test_model_file_bad_type_value = tdir / "samples" / "test-model-bad-type-value-1
 test_model_file_bad_list_type = tdir / "samples" / "test-model-bad-list-type.yml"
 test_model_null_cde = tdir / "samples" / "test-model-null-cde.yml"
 test_model_edp_enum = tdir / "samples" / "test-model-edp-enum.yml"
+test_model_edp_union_composition = tdir / "samples" / "test-model-edp-union-composition.yml"
+
 
 def test_with_all_file_args():
     sch = test_schema_file.open()
@@ -195,4 +197,52 @@ def test_enum_by_edp_term_validates():
     assert v.load_and_validate_schema()
     assert v.load_and_validate_yaml()
     assert v.validate_instance_with_schema()
-    
+
+def test_edp_union_composition_validates():
+    validator = MDFValidator(
+        test_latest_schema,
+        test_model_edp_union_composition,
+    )
+
+    assert validator.load_and_validate_schema()
+    assert validator.load_and_validate_yaml()
+    assert validator.validate_instance_with_schema()
+
+
+def test_edp_difference_composition_does_not_validate(tmp_path: Path):
+    model = tmp_path / "difference-composition.yml"
+    model.write_text(
+        """
+Handle: TEST
+Version: "1.0"
+Nodes: {}
+Relationships: {}
+PropDefinitions:
+  combined_values:
+    Enum:
+      Composition:
+        - Operator: union
+          EDP:
+            Origin: CRDC
+            Code: CRDC0001
+            Version: "1"
+        - Operator: difference
+          EDP:
+            Origin: CRDC
+            Code: CRDC0002
+            Version: "1"
+""",
+        encoding="utf-8",
+    )
+
+    validator = MDFValidator(
+        test_latest_schema,
+        model,
+        raise_error=True,
+    )
+
+    assert validator.load_and_validate_schema()
+    assert validator.load_and_validate_yaml()
+
+    with pytest.raises(ValidationError):
+        validator.validate_instance_with_schema()

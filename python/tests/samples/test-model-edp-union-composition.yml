@@ -1,0 +1,26 @@
+Handle: TEST
+Version: "1.0"
+
+Nodes:
+  test_node:
+    Props:
+      - combined_values
+
+Relationships: {}
+
+PropDefinitions:
+  combined_values:
+    Desc: Test union of two exact EDP versions
+    Enum:
+      Composition:
+        - Operator: union
+          EDP:
+            Origin: CRDC
+            Code: CRDC0001
+            Version: "1"
+
+        - Operator: union
+          EDP:
+            Origin: CRDC
+            Code: CRDC0002
+            Version: "2"

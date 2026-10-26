@@ -152,6 +152,48 @@ defs:
       - url
       - boolean
       - TBD
+  edpCompositionReference:
+    type: object
+    additionalProperties: false
+    properties:
+      Origin:
+        type: string
+        minLength: 1
+      Code:
+        type:
+          - string
+          - number
+      Version:
+        type:
+          - string
+          - number
+    required:
+      - Origin
+      - Code
+      - Version
+  unionCompositionOperand:
+    type: object
+    additionalProperties: false
+    properties:
+      Operator:
+        type: string
+        const: union
+      EDP:
+        $ref: "#/defs/edpCompositionReference"
+    required:
+      - Operator
+      - EDP
+  compositionType:
+    type: object
+    additionalProperties: false
+    properties:
+      Composition:
+        type: array
+        minItems: 2
+        items:
+          $ref: "#/defs/unionCompositionOperand"
+    required:
+      - Composition
   enumType:
     type:
       array
@@ -424,10 +466,9 @@ defs:
           True if the property defined is an "extended definition property",
           which is a property that (1) is not necessarily part of a model,
           (2) has an associated Term that specifies its Origin, Code, Version
-          and Definitions (this is the "extension"), and (3) has an explicitly
-          enumerated list of acceptable values (i.e., has an Enum: type, with
-          an explicit list of strings). Default value (when key Ext: is not
-          present) = false.
+          and Definition, and (3) has an Enum that either explicitly lists
+          acceptable values or defines how its value set is composed.
+          Default value (when key Ext: is not present) = false.
         type: boolean
       Deprecated:
         description: |
@@ -470,7 +511,9 @@ defs:
               Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
               readability. Either one of Type or Enum may be present in a property definition,
               but not both.
-        $ref: "#/defs/enumType" 
+        oneOf:
+          - $ref: "#/defs/enumType"
+          - $ref: "#/defs/compositionType"
       Tags:
         $ref: "#/defs/tagsSpec"
       Term:

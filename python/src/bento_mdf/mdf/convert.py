@@ -11,7 +11,17 @@ import re
 from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
-from bento_meta.objects import Edge, Node, Property, Tag, Term, ValueSet
+from bento_meta.objects import (
+    CompositionOperator,
+    Edge,
+    EDPCompositionOperand,
+    Node,
+    Property,
+    Tag,
+    Term,
+    ValueSet,
+    ValueSetComposition,
+)
 from bento_meta.tf_objects import Transform, TfStep
 from pdb import set_trace
 
@@ -147,6 +157,46 @@ def process_tag(init: dict, spec: dict, tag: Tag):
     """Additional processing for tag entities."""
 
 
+def composition_from_spec(operands: list[dict]) -> ValueSetComposition:
+    """Convert an MDF union composition to bento-meta objects."""
+    composition_operands: list[EDPCompositionOperand] = []
+    seen: set[tuple[str, str, str]] = set()
+
+    for operand in operands:
+        edp = operand["EDP"]
+
+        identity = (
+            str(edp["Origin"]),
+            str(edp["Code"]),
+            str(edp["Version"]),
+        )
+
+        if identity in seen:
+            raise ValueError(
+                "Composition contains duplicate EDP reference "
+                f"{identity[0]}/{identity[1]}/{identity[2]}"
+            )
+
+        seen.add(identity)
+
+        edp_term = Term(
+            {
+                "origin_name": identity[0],
+                "origin_id": identity[1],
+                "origin_version": identity[2],
+            }
+        )
+
+        composition_operands.append(
+            EDPCompositionOperand(
+                operator=CompositionOperator(operand["Operator"]),
+                edp=edp_term,
+            )
+        )
+
+    return ValueSetComposition(operands=composition_operands)
+
+
 def process_prop(init: dict, spec: dict, prop: Property) -> None:
     """Additional processing for Property entities."""
     ty_spec = init.get("Enum") or init.get("Type")
@@ -167,7 +217,12 @@ def process_prop(init: dict, spec: dict, prop: Property) -> None:
             prop.units = domain_spec["units"]
         if domain_spec.get("pattern"):
             prop.pattern = domain_spec["pattern"]
-        if domain_spec.get("url"):
+        if domain_spec.get("composition") is not None:
+            prop.value_set = ValueSet({"_commit": prop._commit})
+            prop.value_set.composition = composition_from_spec(
+                domain_spec["composition"]
+            )
+        elif domain_spec.get("url"):
             prop.value_set = ValueSet(
                 {"url": domain_spec["url"], "_commit": prop._commit},
             )
@@ -230,6 +285,11 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
     if isinstance(spec, str):
         return {"value_domain": spec}
     if isinstance(spec, dict):
+        if "Composition" in spec:
+            return {
+                "value_domain": "value_set",
+                "composition": spec["Composition"],
+            }
         # list type
         if spec.get("value_type") == "list":
             domain_spec = {"value_domain": "list"}

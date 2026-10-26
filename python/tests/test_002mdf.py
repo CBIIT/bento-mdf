@@ -10,7 +10,8 @@ import responses
 from bento_mdf.mdf import MDF, convert_github_url
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
-from bento_meta.objects import ValueSet
+from bento_meta.objects import CompositionOperator, ValueSet
+from bento_mdf.mdf.convert import composition_from_spec
 
 from tests.samples.test_urls import TEST_CONVERT_URLS
 
@@ -36,6 +37,8 @@ CCDI_PROPS_URL = (
 TEST_SEP_ENUM_MODEL_FILE_PATH = TDIR / "samples" / "test-model-sep-enum.yml"
 TEST_SEP_ENUM_MODEL_FILE_URL = TDIR / "samples" / "test-model-sep-enum-url.yml"
 TEST_SHARED_ENUM_REF_MODEL_FILE = TDIR / "samples" / "test-model-shared-enum-ref.yml"
+TEST_EDP_UNION_COMPOSITION_FILE = TDIR / "samples" / "test-model-edp-union-composition.yml"
+MDF_SCHEMA_FILE = TDIR.parents[1] / "schema" / "mdf-schema.yaml"
 
 
 def test_class() -> None:
@@ -400,6 +403,59 @@ class TestEDPFeatures:
         assert m.model.edp_definitions == m.model.nodes["_edp"].props
         assert m.model.edp_definitions["obib_terms_valueset"]
 
+    def test_parse_edp_union_composition(self) -> None:
+        mdf = MDF(
+            TEST_EDP_UNION_COMPOSITION_FILE,
+            handle="TEST",
+            mdf_schema=MDF_SCHEMA_FILE,
+            raise_error=True,
+        )
+
+        prop = mdf.model.nodes["test_node"].props["combined_values"]
+
+        assert prop.value_domain == "value_set"
+        assert prop.value_set.composition is not None
+        assert len(prop.value_set.terms) == 0
+
+        operands = prop.value_set.composition.operands
+
+        assert len(operands) == 2
+
+        assert operands[0].operator is CompositionOperator.UNION
+        assert operands[0].edp.origin_name == "CRDC"
+        assert operands[0].edp.origin_id == "CRDC0001"
+        assert operands[0].edp.origin_version == "1"
+
+        assert operands[1].operator is CompositionOperator.UNION
+        assert operands[1].edp.origin_name == "CRDC"
+        assert operands[1].edp.origin_id == "CRDC0002"
+        assert operands[1].edp.origin_version == "2"
+
+    def test_duplicate_edp_union_operand_fails(self) -> None:
+        operands = [
+            {
+                "Operator": "union",
+                "EDP": {
+                    "Origin": "CRDC",
+                    "Code": 123,
+                    "Version": 1,
+                },
+            },
+            {
+                "Operator": "union",
+                "EDP": {
+                    "Origin": "CRDC",
+                    "Code": "123",
+                    "Version": "1",
+                },
+            },
+        ]
+
+        with pytest.raises(
+            ValueError,
+            match="duplicate EDP reference CRDC/123/1",
+        ):
+            composition_from_spec(operands)
 
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)
 def test_convert_github_url(input_url: str, expected_url: str) -> None:
