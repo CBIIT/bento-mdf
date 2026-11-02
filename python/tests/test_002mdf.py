@@ -10,8 +10,8 @@ import responses
 from bento_mdf.mdf import MDF, convert_github_url
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
-from bento_meta.objects import CompositionOperator, ValueSet
-from bento_mdf.mdf.convert import composition_from_spec
+from bento_meta.objects import CompositionOp, ValueSet
+from bento_mdf.mdf.convert import enum_set_from_spec
 
 from tests.samples.test_urls import TEST_CONVERT_URLS
 
@@ -403,7 +403,7 @@ class TestEDPFeatures:
         assert m.model.edp_definitions == m.model.nodes["_edp"].props
         assert m.model.edp_definitions["obib_terms_valueset"]
 
-    def test_parse_edp_union_composition(self) -> None:
+    def test_parse_enum_set_union_composition(self) -> None:
         mdf = MDF(
             TEST_EDP_UNION_COMPOSITION_FILE,
             handle="TEST",
@@ -417,37 +417,44 @@ class TestEDPFeatures:
         assert prop.value_set.composition is not None
         assert len(prop.value_set.terms) == 0
 
-        operands = prop.value_set.composition.operands
+        steps = prop.value_set.composition.steps
 
-        assert len(operands) == 2
+        assert len(steps) == 2
 
-        assert operands[0].operator is CompositionOperator.UNION
-        assert operands[0].edp.origin_name == "CRDC"
-        assert operands[0].edp.origin_id == "CRDC0001"
-        assert operands[0].edp.origin_version == "1"
+        first_term = next(iter(steps[0].value_set.edp_terms.values()))
+        second_term = next(iter(steps[1].value_set.edp_terms.values()))
 
-        assert operands[1].operator is CompositionOperator.UNION
-        assert operands[1].edp.origin_name == "CRDC"
-        assert operands[1].edp.origin_id == "CRDC0002"
-        assert operands[1].edp.origin_version == "2"
+        assert steps[0].op is CompositionOp.UNION
+        assert first_term.origin_name == "CRDC"
+        assert first_term.origin_id == "CRDC0001"
+        assert first_term.origin_version == "1"
+
+        assert steps[1].op is CompositionOp.UNION
+        assert second_term.origin_name == "CRDC"
+        assert second_term.origin_id == "CRDC0002"
+        assert second_term.origin_version == "2"
+
+        assert [first_term.origin_id, second_term.origin_id] == [
+            "CRDC0001",
+            "CRDC0002",
+        ]
 
     def test_duplicate_edp_union_operand_fails(self) -> None:
-        operands = [
+        items = [
             {
-                "Operator": "union",
-                "EDP": {
-                    "Origin": "CRDC",
-                    "Code": 123,
-                    "Version": 1,
-                },
+                "Origin": "CRDC",
+                "Code": "123",
+                "Version": "1",
             },
             {
-                "Operator": "union",
-                "EDP": {
-                    "Origin": "CRDC",
-                    "Code": "123",
-                    "Version": "1",
-                },
+                "Op": "Union",
+                "Enum": [
+                    {
+                        "Origin": "CRDC",
+                        "Code": 123,
+                        "Version": 1,
+                    }
+                ],
             },
         ]
 
@@ -455,7 +462,12 @@ class TestEDPFeatures:
             ValueError,
             match="duplicate EDP reference CRDC/123/1",
         ):
-            composition_from_spec(operands)
+            enum_set_from_spec(
+                items,
+                commit=None,
+                model="TEST",
+            )
+
 
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)
 def test_convert_github_url(input_url: str, expected_url: str) -> None:

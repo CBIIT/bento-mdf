@@ -12,15 +12,15 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 from bento_meta.objects import (
-    CompositionOperator,
+    CompositionOp,
     Edge,
-    EDPCompositionOperand,
     Node,
     Property,
     Tag,
     Term,
     ValueSet,
-    ValueSetComposition,
+    VSComposition,
+    VSCompositionStep,
 )
 from bento_meta.tf_objects import Transform, TfStep
 from pdb import set_trace
@@ -47,6 +47,7 @@ mdf_to_meta = {
     "Desc": "desc",
     "Dst": "dst",
     "Enum": "Enum",
+    "EnumSet": None,
     "Ext": "is_extended",
     "Handle": "handle",
     "Identities": None,
@@ -157,101 +158,158 @@ def process_tag(init: dict, spec: dict, tag: Tag):
     """Additional processing for tag entities."""
 
 
-def composition_from_spec(operands: list[dict]) -> ValueSetComposition:
-    """Convert an MDF union composition to bento-meta objects."""
-    composition_operands: list[EDPCompositionOperand] = []
-    seen: set[tuple[str, str, str]] = set()
-
-    for operand in operands:
-        edp = operand["EDP"]
-
-        identity = (
-            str(edp["Origin"]),
-            str(edp["Code"]),
-            str(edp["Version"]),
-        )
-
-        if identity in seen:
-            raise ValueError(
-                "Composition contains duplicate EDP reference "
-                f"{identity[0]}/{identity[1]}/{identity[2]}"
-            )
-
-        seen.add(identity)
-
-        edp_term = Term(
+def value_set_from_domain_spec(
+    domain_spec: dict,
+    *,
+    commit: str | None,
+    model: str | None,
+) -> ValueSet:
+    """Create a ValueSet from a parsed Enum domain specification."""
+    if domain_spec.get("url"):
+        return ValueSet(
             {
-                "origin_name": identity[0],
-                "origin_id": identity[1],
-                "origin_version": identity[2],
+                "url": domain_spec["url"],
+                "_commit": commit,
             }
         )
 
-        composition_operands.append(
-            EDPCompositionOperand(
-                operator=CompositionOperator(operand["Operator"]),
-                edp=edp_term,
+    if domain_spec.get("path"):
+        return ValueSet(
+            {
+                "path": domain_spec["path"],
+                "_commit": commit,
+            }
+        )
+
+    if domain_spec.get("edp_term"):
+        term_spec = dict(domain_spec["edp_term"])
+
+        for key in ("Origin", "Code", "Version"):
+            if key in term_spec and term_spec[key] is not None:
+                term_spec[key] = str(term_spec[key])
+
+        term = spec_to_entity(
+            None,
+            term_spec,
+            {"_commit": commit},
+            Term,
+        )
+        value_set = ValueSet({"_commit": commit})
+        value_set.edp_terms[term.handle] = term
+        return value_set
+
+    if domain_spec.get("value_set"):
+        value_set = ValueSet({"_commit": "dummy"})
+
+        for term_init in domain_spec["value_set"]:
+            term_init = dict(term_init)
+            term_init["origin_name"] = model
+
+            term = spec_to_entity(
+                None,
+                {"_commit": commit},
+                term_init,
+                Term,
+            )
+            value_set.terms[term.handle] = term
+
+        return value_set
+
+    raise RuntimeError(f"Can't evaluate value_set spec {domain_spec}")
+
+
+def enum_set_from_spec(
+    items: list,
+    *,
+    commit: str | None,
+    model: str | None,
+) -> VSComposition:
+    """Convert an ordered MDF EnumSet to a value-set composition."""
+    if not items:
+        raise ValueError("EnumSet must contain at least one item")
+
+    steps: list[VSCompositionStep] = []
+    seen_edps: set[tuple[str, str, str]] = set()
+
+    for item in items:
+        if isinstance(item, dict) and "Enum" in item:
+            operation = CompositionOp(item.get("Op", "Union"))
+            enum_spec = item["Enum"]
+        else:
+            operation = CompositionOp.UNION
+            enum_spec = [item]
+
+        domain_spec = typespec_to_domain_spec(enum_spec)
+        operand = value_set_from_domain_spec(
+            domain_spec,
+            commit=commit,
+            model=model,
+        )
+
+        for term in operand.edp_terms.values():
+            identity = (
+                str(term.origin_name),
+                str(term.origin_id),
+                str(term.origin_version),
+            )
+
+            if identity in seen_edps:
+                raise ValueError(
+                    "EnumSet contains duplicate EDP reference "
+                    f"{identity[0]}/{identity[1]}/{identity[2]}"
+                )
+
+            seen_edps.add(identity)
+
+        steps.append(
+            VSCompositionStep(
+                value_set=operand,
+                op=operation,
             )
         )
 
-    return ValueSetComposition(operands=composition_operands)
+    return VSComposition(steps=steps)
 
 
 def process_prop(init: dict, spec: dict, prop: Property) -> None:
     """Additional processing for Property entities."""
-    ty_spec = init.get("Enum") or init.get("Type")
-    domain_spec = typespec_to_domain_spec(ty_spec)
-    if (
-        domain_spec["value_domain"] != "value_set"
-        and domain_spec.get("item_domain") != "value_set"
-    ):
-        for attr in domain_spec:
-            prop.__setattr__(attr, domain_spec[attr])
-    else:  # is "value_set" or "list" with item_domain "value_set"
-        if domain_spec["value_domain"] == "list":
-            prop.value_domain = "list"
-            prop.item_domain = "value_set"
+    if "EnumSet" in spec:
+        prop.value_domain = "value_set"
+        prop.value_set = ValueSet({"_commit": prop._commit})
+        prop.value_set.composition = enum_set_from_spec(
+            spec["EnumSet"],
+            commit=prop._commit,
+            model=prop.model,
+        )
+    else:
+        ty_spec = init.get("Enum") or init.get("Type")
+        domain_spec = typespec_to_domain_spec(ty_spec)
+
+        if (
+            domain_spec["value_domain"] != "value_set"
+            and domain_spec.get("item_domain") != "value_set"
+        ):
+            for attr in domain_spec:
+                setattr(prop, attr, domain_spec[attr])
         else:
-            prop.value_domain = "value_set"
-        if domain_spec.get("units"):
-            prop.units = domain_spec["units"]
-        if domain_spec.get("pattern"):
-            prop.pattern = domain_spec["pattern"]
-        if domain_spec.get("composition") is not None:
-            prop.value_set = ValueSet({"_commit": prop._commit})
-            prop.value_set.composition = composition_from_spec(
-                domain_spec["composition"]
+            if domain_spec["value_domain"] == "list":
+                prop.value_domain = "list"
+                prop.item_domain = "value_set"
+            else:
+                prop.value_domain = "value_set"
+
+            if domain_spec.get("units"):
+                prop.units = domain_spec["units"]
+
+            if domain_spec.get("pattern"):
+                prop.pattern = domain_spec["pattern"]
+
+            prop.value_set = value_set_from_domain_spec(
+                domain_spec,
+                commit=prop._commit,
+                model=prop.model,
             )
-        elif domain_spec.get("url"):
-            prop.value_set = ValueSet(
-                {"url": domain_spec["url"], "_commit": prop._commit},
-            )
-        elif domain_spec.get("path"):
-            prop.value_set = ValueSet(
-                {"path": domain_spec["path"], "_commit": prop._commit},
-            )
-        elif domain_spec.get("edp_term"):
-            tm = spec_to_entity(
-                    None,
-                    domain_spec["edp_term"],
-                    {},
-                    Term)
-            prop.value_set = ValueSet(
-                {"_commit":prop._commit}
-            )
-            prop.value_set.edp_terms[tm.handle] = tm
-        elif domain_spec.get("value_set"):
-            # create 'dummy' ValueSet to hold Enum terms,
-            # but merge them with any Terms section terms in mdf.py
-            prop.value_set = ValueSet({"_commit": "dummy"})
-            for tm_init in domain_spec["value_set"]:
-                tm_init["origin_name"] = prop.model
-                term = spec_to_entity(None, {"_commit": prop._commit}, tm_init, Term)
-                prop.value_set.terms[term.handle] = term
-        else:
-            msg = f"Can't evaluate value_set spec {domain_spec}"
-            raise RuntimeError(msg)
-    # set default values for unprovided attrs
+
     prop_attrs_with_defaults = {
         "is_extended": False,
         "is_strict": True,
@@ -259,6 +317,7 @@ def process_prop(init: dict, spec: dict, prop: Property) -> None:
         "is_nullable": False,
         "is_required": False,
     }
+
     for attr, default in prop_attrs_with_defaults.items():
         if getattr(prop, attr) is None:
             setattr(prop, attr, default)
@@ -285,11 +344,6 @@ def typespec_to_domain_spec(spec: str | dict | list) -> dict:
     if isinstance(spec, str):
         return {"value_domain": spec}
     if isinstance(spec, dict):
-        if "Composition" in spec:
-            return {
-                "value_domain": "value_set",
-                "composition": spec["Composition"],
-            }
         # list type
         if spec.get("value_type") == "list":
             domain_spec = {"value_domain": "list"}

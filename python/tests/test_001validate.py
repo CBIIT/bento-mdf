@@ -198,7 +198,7 @@ def test_enum_by_edp_term_validates():
     assert v.load_and_validate_yaml()
     assert v.validate_instance_with_schema()
 
-def test_edp_union_composition_validates():
+def test_enum_set_union_composition_validates():
     validator = MDFValidator(
         test_latest_schema,
         test_model_edp_union_composition,
@@ -209,7 +209,7 @@ def test_edp_union_composition_validates():
     assert validator.validate_instance_with_schema()
 
 
-def test_edp_difference_composition_does_not_validate(tmp_path: Path):
+def test_enum_set_difference_does_not_validate(tmp_path: Path):
     model = tmp_path / "difference-composition.yml"
     model.write_text(
         """
@@ -219,17 +219,11 @@ Nodes: {}
 Relationships: {}
 PropDefinitions:
   combined_values:
-    Enum:
-      Composition:
-        - Operator: union
-          EDP:
-            Origin: CRDC
+    EnumSet:
+      - Op: Difference
+        Enum:
+          - Origin: CRDC
             Code: CRDC0001
-            Version: "1"
-        - Operator: difference
-          EDP:
-            Origin: CRDC
-            Code: CRDC0002
             Version: "1"
 """,
         encoding="utf-8",
@@ -246,3 +240,35 @@ PropDefinitions:
 
     with pytest.raises(ValidationError):
         validator.validate_instance_with_schema()
+
+
+def test_enum_set_union_shorthand_validates(tmp_path: Path) -> None:
+    model = tmp_path / "enum-set-shorthand.yml"
+    model.write_text(
+        """
+Handle: TEST
+Version: "1.0"
+Nodes: {}
+Relationships: {}
+PropDefinitions:
+  combined_values:
+    EnumSet:
+      - Origin: CRDC
+        Code: CRDC0001
+        Version: "1"
+      - Origin: CRDC
+        Code: CRDC0002
+        Version: "1"
+""",
+        encoding="utf-8",
+    )
+
+    validator = MDFValidator(
+        test_latest_schema,
+        model,
+        raise_error=True,
+    )
+
+    assert validator.load_and_validate_schema()
+    assert validator.load_and_validate_yaml()
+    assert validator.validate_instance_with_schema()

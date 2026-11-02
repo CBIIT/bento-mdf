@@ -10,17 +10,15 @@ Relationships: {}
 
 PropDefinitions:
   combined_values:
-    Desc: Test union of two exact EDP versions
-    Enum:
-      Composition:
-        - Operator: union
-          EDP:
-            Origin: CRDC
+    Desc: Test ordered union of two exact EDP versions
+    EnumSet:
+      - Enum:
+          - Origin: CRDC
             Code: CRDC0001
             Version: "1"
 
-        - Operator: union
-          EDP:
-            Origin: CRDC
+      - Op: Union
+        Enum:
+          - Origin: CRDC
             Code: CRDC0002
             Version: "2"
