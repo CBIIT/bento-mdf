@@ -12,16 +12,19 @@ from typing import TYPE_CHECKING
 from urllib.parse import unquote
 
 from bento_meta.objects import (
-    CompositionOp,
     Edge,
     Node,
     Property,
     Tag,
     Term,
     ValueSet,
+)
+from bento_meta.cmp_objects import (
+    CompositionOp,
     VSComposition,
     VSCompositionStep,
 )
+
 from bento_meta.tf_objects import Transform, TfStep
 from pdb import set_trace
 
@@ -236,8 +239,7 @@ def enum_set_from_spec(
             operation = CompositionOp(item.get("Op", "Union"))
             enum_spec = item["Enum"]
         else:
-            operation = CompositionOp.UNION
-            enum_spec = [item]
+            raise ValueError("Every member of an EnumSet list must specify an Enum")
 
         domain_spec = typespec_to_domain_spec(enum_spec)
         operand = value_set_from_domain_spec(
@@ -264,7 +266,7 @@ def enum_set_from_spec(
         steps.append(
             VSCompositionStep(
                 value_set=operand,
-                op=operation,
+                operator=operation,
             )
         )
 

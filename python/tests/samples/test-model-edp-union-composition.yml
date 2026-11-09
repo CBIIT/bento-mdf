@@ -22,3 +22,8 @@ PropDefinitions:
           - Origin: CRDC
             Code: CRDC0002
             Version: "2"
+      - Enum:
+          - this
+          - that
+          - other
+          
