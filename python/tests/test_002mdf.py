@@ -11,6 +11,8 @@ from bento_mdf.mdf import MDF, convert_github_url
 from bento_meta.entity import ArgError
 from bento_meta.model import Model
 from bento_meta.objects import ValueSet
+from bento_meta.cmp_objects import CompositionOp
+from bento_mdf.mdf.convert import enum_set_from_spec
 
 from tests.samples.test_urls import TEST_CONVERT_URLS
 
@@ -36,6 +38,8 @@ CCDI_PROPS_URL = (
 TEST_SEP_ENUM_MODEL_FILE_PATH = TDIR / "samples" / "test-model-sep-enum.yml"
 TEST_SEP_ENUM_MODEL_FILE_URL = TDIR / "samples" / "test-model-sep-enum-url.yml"
 TEST_SHARED_ENUM_REF_MODEL_FILE = TDIR / "samples" / "test-model-shared-enum-ref.yml"
+
+MDF_SCHEMA_FILE = TDIR.parents[1] / "schema" / "mdf-schema.yaml"
 
 
 def test_class() -> None:
@@ -291,13 +295,85 @@ class TestDataHubModel:
         assert spec["Req"] == "Yes"
         assert isinstance(pr.is_required, bool)
         assert pr.is_required
+
+
+class TestCompositionFeatures:
+    """Tests for EDP/CDE composition (union/difference) functionality"""
+    TEST_EDP_UNION_COMPOSITION_FILE = TDIR / "samples" / "test-model-edp-union-composition.yml"
+
+    def test_parse_enum_set_union_composition(self) -> None:
+        mdf = MDF(
+            self.TEST_EDP_UNION_COMPOSITION_FILE,
+            handle="TEST",
+            mdf_schema=MDF_SCHEMA_FILE,
+            raise_error=True,
+        )
+
+        prop = mdf.model.nodes["test_node"].props["combined_values"]
+
+        assert prop.value_domain == "value_set"
+        assert prop.value_set.composition is not None
+        assert len(prop.value_set.terms) == 0
+
+        steps = prop.value_set.composition.steps
+
+        assert len(steps) == 3
+
+        first_term = next(iter(steps[0].value_set.edp_terms.values()))
+        second_term = next(iter(steps[1].value_set.edp_terms.values()))
+        pvlist = steps[2].value_set
+
+        assert steps[0].operator is CompositionOp.UNION
+        assert first_term.origin_name == "CRDC"
+        assert first_term.origin_id == "CRDC0001"
+        assert first_term.origin_version == "1"
+
+        assert steps[1].operator is CompositionOp.UNION
+        assert second_term.origin_name == "CRDC"
+        assert second_term.origin_id == "CRDC0002"
+        assert second_term.origin_version == "2"
+
+        assert steps[2].operator is CompositionOp.UNION
+        assert set(pvlist.terms.keys()) == {"this", "that", "other"}
         
+    def test_duplicate_edp_union_operand_fails(self) -> None:
+        items = [
+            {
+                "Enum": [
+                    {
+                        "Origin": "CRDC",
+                        "Code": "123",
+                        "Version": "1",
+                    },
+                ]
+            },
+            {
+                "Op": "Union",
+                "Enum": [
+                    {
+                        "Origin": "CRDC",
+                        "Code": 123,
+                        "Version": 1,
+                    }
+                ],
+            },
+        ]
+
+        with pytest.raises(
+            ValueError,
+            match="duplicate EDP reference CRDC/123/1",
+        ):
+            enum_set_from_spec(
+                items,
+                commit=None,
+                model="TEST",
+            )
 
 class TestEDPFeatures:
     """Tests for EDP-specific functionality."""
     TEST_EDP_PROPS_FILE = TDIR / "samples" / "test-edp-props.yml"
     TEST_EDP_TERMS_FILE = TDIR / "samples" / "test-obib-terms.yml"
-    
+
     def _sts_is_up(self) -> bool:
         """Check if the local STS server is reachable."""
         try:
@@ -377,11 +453,6 @@ class TestEDPFeatures:
                     resolve_edps=True, raise_error=True)
         pr = m.model.nodes['participant'].props['race']
         assert pr.value_domain == "list"
-        
-        
-        
-        
-        
 
     def test_parse_edp_mdf(self) -> None:
         """Test parsing of EDP props and terms yaml."""
@@ -399,6 +470,7 @@ class TestEDPFeatures:
         assert term.origin_definition == "A specimen that is derived from some venous blood"
         assert m.model.edp_definitions == m.model.nodes["_edp"].props
         assert m.model.edp_definitions["obib_terms_valueset"]
+
 
 
 @pytest.mark.parametrize(("input_url", "expected_url"), TEST_CONVERT_URLS)

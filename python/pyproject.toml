@@ -15,7 +15,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    "bento-meta>=0.3.3",
+    "bento-meta @ git+https://github.com/CBIIT/bento-meta.git@master#subdirectory=python",
     "jsonschema>=4.17.3,<5.0.0",
     "Jinja2==3.1.6",
     "PyYAML>=6.0.1",
@@ -64,6 +64,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build]
 include = ["src","templates/pymodel.py.jinja2"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/bento_mdf"]
 sources = ["src"]
@@ -83,4 +86,7 @@ version_source = "tag"                      # temp?
 
 [tool.pytest.ini_options]
 filterwarnings = ["ignore::UserWarning"]
+
+#[tool.uv.sources]
+#bento-meta = { path = "../../bento-meta/python", editable = true }
 

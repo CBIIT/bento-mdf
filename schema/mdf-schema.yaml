@@ -175,6 +175,31 @@ defs:
           $ref:
             "#/defs/termRefSpec"
     uniqueItems: true
+  enumSetStep:
+    description: |
+      One ordered step in a value-set composition. Op defaults to Union.
+    type: object
+    additionalProperties: false
+    properties:
+      Op:
+        type: string
+        const: Union
+        default: Union
+      Enum:
+        $ref: "#/defs/enumType"
+    required:
+      - Enum
+  enumSetType:
+    description: |
+      An ordered value-set composition. Each item is either a composition
+      step or shorthand for a Union step containing one enum term reference.
+    type: array
+    minItems: 1
+    items:
+      oneOf:
+        - $ref: "#/defs/enumSetStep"
+        - type: string
+        - $ref: "#/defs/termRefSpec"
   numberWithUnits:
     $id: "#numberWithUnits"
     type: object
@@ -424,10 +449,8 @@ defs:
           True if the property defined is an "extended definition property",
           which is a property that (1) is not necessarily part of a model,
           (2) has an associated Term that specifies its Origin, Code, Version
-          and Definitions (this is the "extension"), and (3) has an explicitly
-          enumerated list of acceptable values (i.e., has an Enum: type, with
-          an explicit list of strings). Default value (when key Ext: is not
-          present) = false.
+          and Definition, and (3) has an Enum that explicitly lists acceptable values or an EnumSet that defines how its value set is composed.
+          Default value (when key Ext: is not present) = false.
         type: boolean
       Deprecated:
         description: |
@@ -467,10 +490,16 @@ defs:
             $ref: "#/defs/enumType"
       Enum:
         description: |
-              Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
-              readability. Either one of Type or Enum may be present in a property definition,
-              but not both.
-        $ref: "#/defs/enumType" 
+          Same as Type:[<strings>], defines an enumeration. This keyword is meant to assist
+          readability. Either one of Type, Enum, or EnumSet may be present in a property
+          definition, but not more than one.
+        $ref: "#/defs/enumType"
+      EnumSet:
+        description: |
+          Defines an ordered value-set composition. Operations are applied in
+          list order. Op defaults to Union when omitted. A bare enum term
+          reference is shorthand for a Union step containing that reference.
+        $ref: "#/defs/enumSetType"
       Tags:
         $ref: "#/defs/tagsSpec"
       Term:
@@ -486,12 +515,12 @@ defs:
       NanoID: 
         $ref: "#/defs/nanoid"
     oneOf:
-      -
-        required:
+      - required:
           - Type
-      -
-        required:
+      - required:
           - Enum
+      - required:
+          - EnumSet
   termSpec:
     $id: "#termSpec"
     type: object
