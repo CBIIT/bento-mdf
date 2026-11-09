@@ -15,7 +15,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
 ]
 dependencies = [
-    "bento-meta @ git+https://github.com/CBIIT/bento-meta.git@datateam-762-union-types#subdirectory=python",
+    "bento-meta @ git+https://github.com/CBIIT/bento-meta.git@master#subdirectory=python",
     "jsonschema>=4.17.3,<5.0.0",
     "Jinja2==3.1.6",
     "PyYAML>=6.0.1",
